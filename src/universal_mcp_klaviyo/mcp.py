@@ -6,7 +6,7 @@ from universal_mcp.stores.store import EnvironmentStore
 from universal_mcp_klaviyo.app import KlaviyoApp
 
 env_store = EnvironmentStore()
-integration_instance = AgentRIntegration(name="klaviyo", store=env_store)
+integration_instance = AgentRIntegration(name="klaviyo-oauth", store=env_store)
 app_instance = KlaviyoApp(integration=integration_instance)
 
 mcp = SingleMCPServer(

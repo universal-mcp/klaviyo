@@ -7,6 +7,19 @@ class KlaviyoApp(APIApplication):
         super().__init__(name='klaviyo', integration=integration, **kwargs)
         self.base_url = "https://a.klaviyo.com"
 
+    def _get_headers(self):
+        if not self.integration:
+            raise ValueError("Integration not configured for KlaviyoApp")
+        credentials = self.integration.get_credentials()
+        if "headers" in credentials:
+            return credentials["headers"]
+        if "access_token" not in credentials:
+            raise ValueError("Access token not found in KlaviyoApp credentials")
+        return {
+            "Authorization": f"Bearer {credentials['access_token']}",
+            "Accept": "application/json",
+            "revision": "2024-07-15",
+        }
     def get_accounts(self, fields_account=None) -> dict[str, Any]:
         """
         Retrieves account data via API request, returning parsed JSON response.
