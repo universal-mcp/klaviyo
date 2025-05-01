@@ -89,7 +89,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: If API request fails (4xx/5xx status code)
         
         Tags:
-            campaign-retrieval, api-wrapper, filter, pagination, include-related, important
+            campaign-retrieval, api-wrapper, filter, pagination, include-related
         """
         if filter is None:
             raise ValueError("Missing required parameter 'filter'")
@@ -113,7 +113,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'data' parameter is None.
         
         Tags:
-            create, campaign, important, management
+            create, campaign, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -145,7 +145,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'id' parameter is missing.
         
         Tags:
-            fetch, campaign, management, important
+            fetch, campaign, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -171,7 +171,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the HTTP request returns an unsuccessful status code.
         
         Tags:
-            update, campaign, management, important
+            update, campaign, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -202,7 +202,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised if the HTTP request encounters an error or the response status code indicates failure.
         
         Tags:
-            delete, campaign, management, important
+            delete, campaign, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -230,7 +230,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'id' parameter is missing.
         
         Tags:
-            retrieve, campaign-message, important
+            retrieve, campaign-message
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -255,7 +255,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if either 'id' or 'data' is None.
         
         Tags:
-            update, campaign, management, important
+            update, campaign, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -286,7 +286,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'id' parameter is missing or null.
         
         Tags:
-            get, job, management, important
+            get, job, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -311,7 +311,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when either 'id' or 'data' is missing.
         
         Tags:
-            update, campaign, management, important
+            update, campaign, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -343,7 +343,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised if the API request fails (e.g., invalid ID or server error).
         
         Tags:
-            retrieve, api, campaign, estimation-job, important
+            retrieve, api, campaign, estimation-job
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -369,7 +369,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for failed HTTP requests (4xx/5xx status codes)
         
         Tags:
-            retrieve, campaign, recipient-estimation, api, management, important
+            retrieve, campaign, recipient-estimation, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -393,7 +393,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'data' parameter is missing.
         
         Tags:
-            clone, campaign, management, important
+            clone, campaign, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -421,7 +421,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'data' parameter is missing.
         
         Tags:
-            assign, campaign, message, important
+            assign, campaign, message
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -450,7 +450,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised when the API request fails (status code ≥ 400).
         
         Tags:
-            create, async-job, campaign, management, important
+            create, async-job, campaign, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -479,7 +479,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised for 4XX/5XX status codes from the API.
         
         Tags:
-            campaign, async_job, recipient-estimation, api, important
+            campaign, async_job, recipient-estimation, api
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -508,7 +508,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised for unsuccessful API responses (4xx/5xx status codes)
         
         Tags:
-            retrieve, campaign, relationships, api, important
+            retrieve, campaign, relationships, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -534,7 +534,7 @@ class KlaviyoApp(APIApplication):
             Exception: Raised when the HTTP request fails (via response.raise_for_status)
         
         Tags:
-            get, campaign, api, retrieve, important
+            get, campaign, api, retrieve
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -559,7 +559,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for unsuccessful HTTP requests (e.g., 4xx/5xx status codes)
         
         Tags:
-            campaign, template, relationships, retrieve, api, management, important
+            campaign, template, relationships, retrieve, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -584,7 +584,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'id' parameter is missing or None.
         
         Tags:
-            fetch, campaign, management, important
+            fetch, campaign, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -609,7 +609,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: If the API request fails (e.g., non-2xx status code)
         
         Tags:
-            campaign-tags, api, get, relationships, management, important
+            campaign-tags, api, get, relationships, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -634,7 +634,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'id' parameter is missing or set to None.
         
         Tags:
-            retrieve, campaign, tag-management, api-call, important
+            retrieve, campaign, tag-management, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -658,7 +658,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'id' parameter is missing.
         
         Tags:
-            fetch, campaign, management, important
+            fetch, campaign, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -686,7 +686,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'id' parameter is missing.
         
         Tags:
-            fetch, campaign, messages, management, important
+            fetch, campaign, messages, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -738,7 +738,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for unsuccessful HTTP responses (4xx/5xx status codes)
         
         Tags:
-            create, catalog-item, post, api, management, important
+            create, catalog-item, post, api, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -770,7 +770,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised when the API request fails (e.g., invalid ID or server error)
         
         Tags:
-            retrieve, catalog, api, data, management, important
+            retrieve, catalog, api, data, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -796,7 +796,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised by response.raise_for_status() for unsuccessful HTTP responses (4XX/5XX status codes).
         
         Tags:
-            update, catalog-management, api-call, async_job, important
+            update, catalog-management, api-call, async_job
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -826,7 +826,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'id' parameter is missing.
         
         Tags:
-            delete, catalog-management, important
+            delete, catalog-management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -853,7 +853,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: If the HTTP request fails due to a server error or invalid response.
         
         Tags:
-            fetch, catalog, management, important
+            fetch, catalog, management
         """
         url = f"{self.base_url}/api/catalog-variants/"
         query_params = {k: v for k, v in [('fields[catalog-variant]', fields_catalog_variant), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -875,7 +875,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'data' parameter is missing or None.
         
         Tags:
-            create, catalog-management, variant, important
+            create, catalog-management, variant
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -904,7 +904,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required parameter 'id' is missing.
         
         Tags:
-            fetch, catalog, api-call, important
+            fetch, catalog, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -930,7 +930,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised when the PATCH request fails (e.g., invalid ID or malformed data).
         
         Tags:
-            update, catalog-variant, patch, api, important, management
+            update, catalog-variant, patch, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -961,7 +961,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the HTTP request fails or returns an unsuccessful status code.
         
         Tags:
-            delete, catalog-management, important
+            delete, catalog-management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -988,7 +988,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: If the API request fails (e.g., invalid URL, network errors, server errors)
         
         Tags:
-            list, management, catalog, api-call, important
+            list, management, catalog, api-call
         """
         url = f"{self.base_url}/api/catalog-categories/"
         query_params = {k: v for k, v in [('fields[catalog-category]', fields_catalog_category), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -1010,7 +1010,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required parameter 'data' is missing.
         
         Tags:
-            create, catalog, management, important
+            create, catalog, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -1039,7 +1039,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'id' parameter is missing.
         
         Tags:
-            fetch, catalog, management, important
+            fetch, catalog, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1065,7 +1065,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: If the API request fails (non-2xx status code).
         
         Tags:
-            update, catalog, category, api, patch, management, important
+            update, catalog, category, api, patch, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1096,7 +1096,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised if the API request fails (e.g., 404 Not Found, 500 Internal Server Error).
         
         Tags:
-            delete, catalog, management, api-call, important
+            delete, catalog, management, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1122,7 +1122,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised if the HTTP request returns an unsuccessful status code.
         
         Tags:
-            list, api, catalog, async_job, management, important
+            list, api, catalog, async_job, management
         """
         url = f"{self.base_url}/api/catalog-item-bulk-create-jobs/"
         query_params = {k: v for k, v in [('fields[catalog-item-bulk-create-job]', fields_catalog_item_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1144,7 +1144,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'data' parameter is missing.
         
         Tags:
-            create, bulk, job, catalog, management, important
+            create, bulk, job, catalog, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -1175,7 +1175,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'job_id' is None.
         
         Tags:
-            fetch, retrieve, management, important
+            fetch, retrieve, management
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1201,7 +1201,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: When API request fails with HTTP error status code
         
         Tags:
-            list, management, api, bulk-operations, pagination, important
+            list, management, api, bulk-operations, pagination
         """
         url = f"{self.base_url}/api/catalog-item-bulk-update-jobs/"
         query_params = {k: v for k, v in [('fields[catalog-item-bulk-update-job]', fields_catalog_item_bulk_update_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1223,7 +1223,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'data' parameter is missing or null.
         
         Tags:
-            update, bulk-job, async_job, management, important
+            update, bulk-job, async_job, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -1254,7 +1254,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'job_id' parameter is missing.
         
         Tags:
-            retrieve, job, api, important
+            retrieve, job, api
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1280,7 +1280,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised when the HTTP request returns an unsuccessful status code.
         
         Tags:
-            list, catalog, management, important
+            list, catalog, management
         """
         url = f"{self.base_url}/api/catalog-item-bulk-delete-jobs/"
         query_params = {k: v for k, v in [('fields[catalog-item-bulk-delete-job]', fields_catalog_item_bulk_delete_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1302,7 +1302,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'data' parameter is missing
         
         Tags:
-            bulk, delete, async_job, management, important
+            bulk, delete, async_job, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -1331,7 +1331,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'job_id' parameter is missing or None.
         
         Tags:
-            get, job, catalog, api, management, important
+            get, job, catalog, api, management
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1357,7 +1357,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised when an HTTP error occurs in the request.
         
         Tags:
-            retrieve, batch, catalog, important
+            retrieve, batch, catalog
         """
         url = f"{self.base_url}/api/catalog-variant-bulk-create-jobs/"
         query_params = {k: v for k, v in [('fields[catalog-variant-bulk-create-job]', fields_catalog_variant_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1380,7 +1380,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised when the API request fails with a non-2xx status code
         
         Tags:
-            async-job, catalog, bulk-operations, create, variant-management, important
+            async-job, catalog, bulk-operations, create, variant-management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -1411,7 +1411,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'job_id' parameter is missing.
         
         Tags:
-            fetch, job, catalog, management, important
+            fetch, job, catalog, management
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1437,7 +1437,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: On invalid API request or server errors (4XX/5XX status codes)
         
         Tags:
-            retrieve, list, catalog, bulk-job, pagination, api, important
+            retrieve, list, catalog, bulk-job, pagination, api
         """
         url = f"{self.base_url}/api/catalog-variant-bulk-update-jobs/"
         query_params = {k: v for k, v in [('fields[catalog-variant-bulk-update-job]', fields_catalog_variant_bulk_update_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1459,7 +1459,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'data' parameter is missing or None.
         
         Tags:
-            update, job, bulk, api-request, management, important
+            update, job, bulk, api-request, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -1491,7 +1491,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: When the API request fails (e.g., invalid job ID or server error).
         
         Tags:
-            get, async-job, catalog, variant, management, important
+            get, async-job, catalog, variant, management
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1517,7 +1517,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised if the HTTP request returns an unsuccessful status code.
         
         Tags:
-            retrieve, bulk, delete, management, important
+            retrieve, bulk, delete, management
         """
         url = f"{self.base_url}/api/catalog-variant-bulk-delete-jobs/"
         query_params = {k: v for k, v in [('fields[catalog-variant-bulk-delete-job]', fields_catalog_variant_bulk_delete_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1540,7 +1540,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised when the API request fails (handled via response.raise_for_status()).
         
         Tags:
-            async_job, bulk-delete, catalog, variants, management, important
+            async_job, bulk-delete, catalog, variants, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -1570,7 +1570,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised for invalid/expired job IDs or API request failures.
         
         Tags:
-            catalog, variant, management, async_job, status, important
+            catalog, variant, management, async_job, status
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1596,7 +1596,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the HTTP request returns an unsuccessful status code.
         
         Tags:
-            list, management, catalog, async_job, important
+            list, management, catalog, async_job
         """
         url = f"{self.base_url}/api/catalog-category-bulk-create-jobs/"
         query_params = {k: v for k, v in [('fields[catalog-category-bulk-create-job]', fields_catalog_category_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1619,7 +1619,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: If the API request fails (e.g., 4XX/5XX status codes)
         
         Tags:
-            create, async_job, catalog, management, important
+            create, async_job, catalog, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -1650,7 +1650,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'job_id' parameter is missing.
         
         Tags:
-            retrieve, job, catalog-management, important
+            retrieve, job, catalog-management
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1676,7 +1676,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: When the API returns a non-success status code (4XX/5XX)
         
         Tags:
-            retrieve, list, pagination, api, catalog, category-update, batch, management, important
+            retrieve, list, pagination, api, catalog, category-update, batch, management
         """
         url = f"{self.base_url}/api/catalog-category-bulk-update-jobs/"
         query_params = {k: v for k, v in [('fields[catalog-category-bulk-update-job]', fields_catalog_category_bulk_update_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1699,7 +1699,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised when the API request fails (non-2xx response).
         
         Tags:
-            update, async_job, bulk, catalog, important
+            update, async_job, bulk, catalog
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -1731,7 +1731,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised for unsuccessful HTTP responses (4xx/5xx status codes).
         
         Tags:
-            category-management, async-job, status, api, important
+            category-management, async-job, status, api
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1757,7 +1757,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for HTTP request failures, such as unauthorized access or server errors
         
         Tags:
-            retrieve, list, catalog, api, management, async_job, batch, important
+            retrieve, list, catalog, api, management, async_job, batch
         """
         url = f"{self.base_url}/api/catalog-category-bulk-delete-jobs/"
         query_params = {k: v for k, v in [('fields[catalog-category-bulk-delete-job]', fields_catalog_category_bulk_delete_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1779,7 +1779,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'data' parameter is missing.
         
         Tags:
-            delete, categories, bulk, async_job, api, important
+            delete, categories, bulk, async_job, api
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -1809,7 +1809,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised if the HTTP request returns an unsuccessful status code.
         
         Tags:
-            search, management, job-status, important
+            search, management, job-status
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1833,7 +1833,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required parameter 'data' is missing.
         
         Tags:
-            create, subscription, async_job, e-commerce, important
+            create, subscription, async_job, e-commerce
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -1868,7 +1868,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised when the API request fails (e.g., invalid parameters or server error)
         
         Tags:
-            retrieve, catalog, items, pagination, api, filter, sort, category, important
+            retrieve, catalog, items, pagination, api, filter, sort, category
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1896,7 +1896,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'id' parameter is missing.
         
         Tags:
-            fetch, catalog, api, pagination, filtering, important
+            fetch, catalog, api, pagination, filtering
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1925,7 +1925,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: If the API request fails (e.g., invalid ID or server error)
         
         Tags:
-            retrieve, catalog-item, categories, pagination, api-endpoint, filtering, management, important
+            retrieve, catalog-item, categories, pagination, api-endpoint, filtering, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1951,7 +1951,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised for unsuccessful HTTP responses (4xx/5xx status codes)
         
         Tags:
-            fetch, catalog, pagination, api, relationships, important
+            fetch, catalog, pagination, api, relationships
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1977,7 +1977,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the API request fails.
         
         Tags:
-            create, relationship, management, catalog, important
+            create, relationship, management, catalog
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2009,7 +2009,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the API request fails (handled via response.raise_for_status())
         
         Tags:
-            update, catalog-category, relationships, api-patch, important, data-management
+            update, catalog-category, relationships, api-patch, data-management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2041,7 +2041,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the API request fails (handled by response.raise_for_status()).
         
         Tags:
-            delete, catalog, relationships, items, management, important
+            delete, catalog, relationships, items, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2073,7 +2073,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the HTTP request was unsuccessful.
         
         Tags:
-            fetch, catalog, item-relationships, api-call, important
+            fetch, catalog, item-relationships, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2098,7 +2098,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if either 'id' or 'data' is missing.
         
         Tags:
-            create, relationship, api-call, catalog-management, important
+            create, relationship, api-call, catalog-management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2129,7 +2129,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if either the 'id' or 'data' parameter is missing.
         
         Tags:
-            update, catalog-item, categories, important
+            update, catalog-item, categories
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2161,7 +2161,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised when the API request fails (e.g., 4XX/5XX status code)
         
         Tags:
-            delete, catalog-items, categories, relationships, async, management, important
+            delete, catalog-items, categories, relationships, async, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2192,7 +2192,7 @@ class KlaviyoApp(APIApplication):
             requests.RequestException: When an HTTP request exception occurs, such as network issues or server errors
         
         Tags:
-            fetch, coupons, api, important
+            fetch, coupons, api
         """
         url = f"{self.base_url}/api/coupons/"
         query_params = {k: v for k, v in [('fields[coupon]', fields_coupon), ('page[cursor]', page_cursor)] if v is not None}
@@ -2214,7 +2214,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'data' parameter is missing.
         
         Tags:
-            create, coupon, management, important
+            create, coupon, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -2244,7 +2244,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the API request fails (e.g., 404 Not Found or 500 Internal Error).
         
         Tags:
-            retrieve, coupon, api, management, important
+            retrieve, coupon, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2270,7 +2270,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: If the API request fails (e.g., 4XX client error or 5XX server error).
         
         Tags:
-            update, coupon, management, api, patch, important
+            update, coupon, management, api, patch
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2301,7 +2301,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the API request fails (e.g., invalid permissions, non-existent coupon, or server error).
         
         Tags:
-            delete, coupon, management, important
+            delete, coupon, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2329,7 +2329,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the HTTP request returned an unsuccessful status code.
         
         Tags:
-            fetch, coupon, api-call, important
+            fetch, coupon, api-call
         """
         url = f"{self.base_url}/api/coupon-codes/"
         query_params = {k: v for k, v in [('fields[coupon-code]', fields_coupon_code), ('fields[coupon]', fields_coupon), ('filter', filter), ('include', include), ('page[cursor]', page_cursor)] if v is not None}
@@ -2351,7 +2351,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'data' parameter is missing.
         
         Tags:
-            create, coupon-code, api-post, important
+            create, coupon-code, api-post
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -2382,7 +2382,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'id' parameter is missing.
         
         Tags:
-            fetch, coupon-management, api-call, optional-params, important
+            fetch, coupon-management, api-call, optional-params
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2407,7 +2407,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if either 'id' or 'data' is missing.
         
         Tags:
-            update, coupon, management, important
+            update, coupon, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2438,7 +2438,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the API request fails (e.g., invalid ID or server error).
         
         Tags:
-            delete, coupon-code, management, api, important
+            delete, coupon-code, management, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2464,7 +2464,7 @@ class KlaviyoApp(APIApplication):
             Exception: When HTTP request fails or server returns error status
         
         Tags:
-            list, fetch, async_job, coupon, management, important
+            list, fetch, async_job, coupon, management
         """
         url = f"{self.base_url}/api/coupon-code-bulk-create-jobs/"
         query_params = {k: v for k, v in [('fields[coupon-code-bulk-create-job]', fields_coupon_code_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -2487,7 +2487,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised for failed API requests (status code >= 400).
         
         Tags:
-            coupon-code, bulk-create, async-job, api, management, important
+            coupon-code, bulk-create, async-job, api, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -2519,7 +2519,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the HTTP request fails (e.g., if the API endpoint returns an error).
         
         Tags:
-            get, coupon-code, bulk, job, management, important
+            get, coupon-code, bulk, job, management
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -2545,7 +2545,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised when the API request fails (e.g., invalid ID or server error).
         
         Tags:
-            fetch, coupon, api, management, important
+            fetch, coupon, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2570,7 +2570,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised when the API request fails (e.g., invalid ID or network error).
         
         Tags:
-            fetch, coupon-codes, api, relationships, important
+            fetch, coupon-codes, api, relationships
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2598,7 +2598,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the HTTP request fails.
         
         Tags:
-            fetch, coupon, management, important
+            fetch, coupon, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2623,7 +2623,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'id' parameter is missing.
         
         Tags:
-            retrieve, coupon, relationship, important
+            retrieve, coupon, relationship
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2648,7 +2648,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: When the API request fails, typically due to invalid parameters or server issues.
         
         Tags:
-            request, privacy, deletion, async_job, important
+            request, privacy, deletion, async_job
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -2682,7 +2682,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if there is an HTTP request error or if the response status code indicates failure.
         
         Tags:
-            fetch, events, api, important
+            fetch, events, api
         """
         url = f"{self.base_url}/api/events/"
         query_params = {k: v for k, v in [('fields[event]', fields_event), ('fields[metric]', fields_metric), ('fields[profile]', fields_profile), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -2704,7 +2704,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'data' parameter is missing or None.
         
         Tags:
-            create, event, api-call, data-management, important
+            create, event, api-call, data-management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -2736,7 +2736,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is None.
         
         Tags:
-            fetch, event, api, important
+            fetch, event, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2760,7 +2760,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'data' parameter is missing.
         
         Tags:
-            bulk, create, events, async_job, important
+            bulk, create, events, async_job
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -2790,7 +2790,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for HTTP request failures (e.g., 404 Not Found)
         
         Tags:
-            get, metrics, event, api, important
+            get, metrics, event, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2816,7 +2816,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'id' parameter is missing (None).
         
         Tags:
-            fetch, profile, management, important
+            fetch, profile, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2840,7 +2840,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the `id` parameter is missing.
         
         Tags:
-            search, metric, event, api, important
+            search, metric, event, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2864,7 +2864,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing.
         
         Tags:
-            fetch, profile, relationship, important
+            fetch, profile, relationship
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2895,7 +2895,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised for non-2xx HTTP responses from the API endpoint
         
         Tags:
-            api, retrieve, pagination, filtering, flows, important
+            api, retrieve, pagination, filtering, flows
         """
         url = f"{self.base_url}/api/flows/"
         query_params = {k: v for k, v in [('fields[flow-action]', fields_flow_action), ('fields[flow]', fields_flow), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
@@ -2921,7 +2921,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing.
         
         Tags:
-            retrieve, data-fetch, api-call, important
+            retrieve, data-fetch, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2946,7 +2946,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when either 'id' or 'data' is None, indicating missing required parameters.
         
         Tags:
-            update, patch, api, management, important
+            update, patch, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2976,7 +2976,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'id' parameter is missing
         
         Tags:
-            delete, management, important
+            delete, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3005,7 +3005,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised when the API request fails (e.g., invalid ID or server error).
         
         Tags:
-            retrieve, api, flow-action, details, inclusion, filter, important
+            retrieve, api, flow-action, details, inclusion, filter
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3033,7 +3033,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'id' parameter is missing or None.
         
         Tags:
-            fetch, message, api, flow-management, important
+            fetch, message, api, flow-management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3063,7 +3063,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised for HTTP request failures
         
         Tags:
-            retrieve, flow-actions, api, pagination, filtering, management, important
+            retrieve, flow-actions, api, pagination, filtering, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3090,7 +3090,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'id' parameter is None
         
         Tags:
-            fetch, flow, relationships, important
+            fetch, flow, relationships
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3115,7 +3115,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised for unsuccessful HTTP responses (4xx/5xx status codes).
         
         Tags:
-            fetch, relationships, tags, api-client, important
+            fetch, relationships, tags, api-client
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3140,7 +3140,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'id' parameter is missing.
         
         Tags:
-            fetch, metadata, api, important
+            fetch, metadata, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3165,7 +3165,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing.
         
         Tags:
-            retrieve, flow-action, api, important
+            retrieve, flow-action, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3190,7 +3190,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised when the API request fails (non-2XX status code)
         
         Tags:
-            fetch, relationships, flow-action, api, management, important
+            fetch, relationships, flow-action, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3218,7 +3218,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'id' parameter is missing.
         
         Tags:
-            retrieve, important, management, flow-action
+            retrieve, management, flow-action
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3246,7 +3246,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'id' parameter is missing.
         
         Tags:
-            fetch, relationships, pagination, important, api-call
+            fetch, relationships, pagination, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3272,7 +3272,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: When the HTTP request fails (e.g., 404 Not Found or 500 Internal Server Error).
         
         Tags:
-            retrieve, api, flow-action, async_job, important
+            retrieve, api, flow-action, async_job
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3297,7 +3297,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the API request fails (e.g., invalid ID or server error).
         
         Tags:
-            fetch, relationships, flow-action, api, important
+            fetch, relationships, flow-action, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3322,7 +3322,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised when the API request fails (handled via response.raise_for_status())
         
         Tags:
-            retrieve, flow-messages, api, relationships, template, important
+            retrieve, flow-messages, api, relationships, template
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3348,7 +3348,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: If the API request fails (e.g., 404 for invalid ID or 500 for server errors)
         
         Tags:
-            retrieve, api, flow-messages, template, important
+            retrieve, api, flow-messages, template
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3376,7 +3376,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the HTTP request to the API fails.
         
         Tags:
-            list, forms, api_request, pagination, important
+            list, forms, api_request, pagination
         """
         url = f"{self.base_url}/api/forms/"
         query_params = {k: v for k, v in [('fields[form]', fields_form), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
@@ -3401,7 +3401,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing.
         
         Tags:
-            retrieve, management, api-call, important
+            retrieve, management, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3427,7 +3427,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: If the API request fails (e.g., authentication error, invalid ID, or server error)[1][2].
         
         Tags:
-            get, form-version, api-call, retrieve, important
+            get, form-version, api-call, retrieve
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3457,7 +3457,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: When API request fails (4xx/5xx status codes)
         
         Tags:
-            get, list, form-versions, pagination, api, management, important
+            get, list, form-versions, pagination, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3481,7 +3481,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing.
         
         Tags:
-            fetch, api-call, form-management, important
+            fetch, api-call, form-management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3505,7 +3505,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing.
         
         Tags:
-            fetch, form, management, important
+            fetch, form, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3530,7 +3530,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing.
         
         Tags:
-            fetch, form, management, important
+            fetch, form, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3558,7 +3558,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: When the API request fails (non-2xx status code)
         
         Tags:
-            retrieve, list, pagination, api, images, important
+            retrieve, list, pagination, api, images
         """
         url = f"{self.base_url}/api/images/"
         query_params = {k: v for k, v in [('fields[image]', fields_image), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
@@ -3581,7 +3581,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing.
         
         Tags:
-            retrieve, api-call, image-fetching, important
+            retrieve, api-call, image-fetching
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3607,7 +3607,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the API request fails (handled by response.raise_for_status()).
         
         Tags:
-            update, patch, api, image, management, important
+            update, patch, api, image, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3642,7 +3642,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised when the API request fails (non-2xx status code)
         
         Tags:
-            list, pagination, api-client, filtering, sorting, important
+            list, pagination, api-client, filtering, sorting
         """
         url = f"{self.base_url}/api/lists/"
         query_params = {k: v for k, v in [('fields[list]', fields_list), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -3665,7 +3665,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the API request fails (HTTP status code 4XX/5XX).
         
         Tags:
-            create, api, post, management, important
+            create, api, post, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -3698,7 +3698,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised for HTTP request failures (4XX/5XX status codes)
         
         Tags:
-            list, retrieve, api, details, management, important
+            list, retrieve, api, details, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3723,7 +3723,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if either 'id' or 'data' is missing from the request.
         
         Tags:
-            update, patch, api-call, list-management, important
+            update, patch, api-call, list-management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3753,7 +3753,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'id' parameter is missing.
         
         Tags:
-            delete, list, management, important
+            delete, list, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3778,7 +3778,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised if the API request fails (e.g., invalid ID or server error).
         
         Tags:
-            retrieve, list, relationships, tags, api, important
+            retrieve, list, relationships, tags, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3804,7 +3804,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for 4XX/5XX status codes from the API
         
         Tags:
-            list, retrieve, tags, api, important
+            list, retrieve, tags, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3832,7 +3832,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'id' parameter is missing.
         
         Tags:
-            list, profiles, relationships, async, management, important
+            list, profiles, relationships, async, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3858,7 +3858,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the API request fails (handled by response.raise_for_status()).
         
         Tags:
-            create, relationships, api, management, important
+            create, relationships, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3889,7 +3889,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if either 'id' or 'data' is None, as both are required parameters.
         
         Tags:
-            delete, list-management, relationship, important
+            delete, list-management, relationship
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3925,7 +3925,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'id' parameter is missing or None.
         
         Tags:
-            retrieve, profiles, list, api_call, important
+            retrieve, profiles, list, api_call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3951,7 +3951,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for unsuccessful HTTP responses (4XX/5XX status codes).
         
         Tags:
-            fetch, metrics, pagination, api, data-retrieval, important
+            fetch, metrics, pagination, api, data-retrieval
         """
         url = f"{self.base_url}/api/metrics/"
         query_params = {k: v for k, v in [('fields[metric]', fields_metric), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -3975,7 +3975,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for unsuccessful HTTP responses (4XX/5XX status codes).
         
         Tags:
-            retrieve, metric, api, get, important
+            retrieve, metric, api, get
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4000,7 +4000,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: If the HTTP POST request fails (non-2xx response code).
         
         Tags:
-            query, metrics, aggregates, api, post, important
+            query, metrics, aggregates, api, post
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4033,7 +4033,7 @@ class KlaviyoApp(APIApplication):
             requests.RequestException: Raised if there is an issue with the HTTP request, such as a network error or a non-200 status code.
         
         Tags:
-            fetch, profiles, api, management, important
+            fetch, profiles, api, management
         """
         url = f"{self.base_url}/api/profiles/"
         query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile), ('fields[profile]', fields_profile), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
@@ -4056,7 +4056,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the API request fails (e.g., 4xx/5xx status code).
         
         Tags:
-            create, profile, api, post, management, important
+            create, profile, api, post, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4089,7 +4089,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'id' parameter is missing.
         
         Tags:
-            retrieve, profile, api-call, important
+            retrieve, profile, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4114,7 +4114,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if either 'id' or 'data' is missing.
         
         Tags:
-            update, profile, important, management
+            update, profile, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4148,7 +4148,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the HTTP request encounters an error (non-successful status code).
         
         Tags:
-            list, management, import, important
+            list, management, import
         """
         url = f"{self.base_url}/api/profile-bulk-import-jobs/"
         query_params = {k: v for k, v in [('fields[profile-bulk-import-job]', fields_profile_bulk_import_job), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
@@ -4170,7 +4170,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'data' parameter is missing.
         
         Tags:
-            spawn, bulk, import, async_job, important
+            spawn, bulk, import, async_job
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4202,7 +4202,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: For HTTP request failures (4xx/5xx status codes)
         
         Tags:
-            retrieve, profile-import, management, async-job, http-client, important
+            retrieve, profile-import, management, async-job, http-client
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -4227,7 +4227,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised for unsuccessful HTTP responses (4XX/5XX status codes)
         
         Tags:
-            profile-management, api-client, async_job, important
+            profile-management, api-client, async_job
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4256,7 +4256,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised when the API request fails, based on HTTP status code.
         
         Tags:
-            merge, user-profiles, api, post, important
+            merge, user-profiles, api, post
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4284,7 +4284,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'data' parameter is missing or None.
         
         Tags:
-            bulk, profiles, suppression, create, api, important
+            bulk, profiles, suppression, create, api
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4312,7 +4312,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'data' parameter is missing (i.e., None).
         
         Tags:
-            bulk-delete, profile-management, important
+            bulk-delete, profile-management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4341,7 +4341,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for HTTP request failures, propagated from the '_post' call.
         
         Tags:
-            bulk-subscription, async-job, profile-management, api-call, important
+            bulk-subscription, async-job, profile-management, api-call
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4370,7 +4370,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised for HTTP request failures (4XX/5XX status codes)
         
         Tags:
-            unsubscribe, batch, management, important
+            unsubscribe, batch, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4398,7 +4398,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'data' parameter is missing.
         
         Tags:
-            create, register, push-token, important
+            create, register, push-token
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4428,7 +4428,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised when the HTTP request fails (e.g., invalid profile ID or server error)
         
         Tags:
-            get, retrieve, profile, lists, api, http, important
+            get, retrieve, profile, lists, api, http
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4452,7 +4452,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'id' parameter is missing or None.
         
         Tags:
-            fetch, profile, relationship, api, important
+            fetch, profile, relationship, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4478,7 +4478,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised when the API request returns a non-successful status code.
         
         Tags:
-            retrieve, api, profile, segments, important
+            retrieve, api, profile, segments
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4503,7 +4503,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised if the API request fails (non-2xx status code).
         
         Tags:
-            retrieve, api, profile, relationships, segments, important
+            retrieve, api, profile, relationships, segments
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4528,7 +4528,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'id' parameter is not provided.
         
         Tags:
-            fetch, profiles, bulk-import, management, important
+            fetch, profiles, bulk-import, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4553,7 +4553,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised when the API request fails (e.g., invalid ID or network issues)
         
         Tags:
-            retrieve, profile-import, relationships, lists, api, management, important
+            retrieve, profile-import, relationships, lists, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4582,7 +4582,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: When the API request fails (e.g., invalid ID or server error).
         
         Tags:
-            retrieve, profiles, bulk-import, pagination, api, management, important
+            retrieve, profiles, bulk-import, pagination, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4608,7 +4608,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'id' parameter is missing.
         
         Tags:
-            fetch, import, job, profile, bulk, important
+            fetch, import, job, profile, bulk
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4635,7 +4635,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'id' parameter is missing.
         
         Tags:
-            list, error, profile, import, management, important
+            list, error, profile, import, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4660,7 +4660,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'data' parameter is missing.
         
         Tags:
-            query, campaign, management, important
+            query, campaign, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4689,7 +4689,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'data' parameter is missing
         
         Tags:
-            query, api, pagination, important, batch, report
+            query, api, pagination, batch, report
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4718,7 +4718,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'data' argument is missing.
         
         Tags:
-            query, reports, api, async_job, important
+            query, reports, api, async_job
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4751,7 +4751,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: If the HTTP request returns an unsuccessful status code.
         
         Tags:
-            fetch, api_call, data_retrieval, important
+            fetch, api_call, data_retrieval
         """
         url = f"{self.base_url}/api/segments/"
         query_params = {k: v for k, v in [('fields[segment]', fields_segment), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -4774,7 +4774,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised for bad requests (4XX) or server errors (5XX) from the API.
         
         Tags:
-            create, segment, post, api, management, important
+            create, segment, post, api, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -4807,7 +4807,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: When API request fails (e.g., 4XX/5XX status code)
         
         Tags:
-            retrieve, api, segment, data-fetch, important
+            retrieve, api, segment, data-fetch
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4833,7 +4833,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: When the API returns a failed HTTP status code
         
         Tags:
-            update, segment, async_job, api, management, important
+            update, segment, async_job, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4863,7 +4863,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing or None.
         
         Tags:
-            delete, management, important
+            delete, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4888,7 +4888,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised when the API request fails (e.g., 4xx/5xx status codes).
         
         Tags:
-            retrieve, relationships, tags, api, management, important
+            retrieve, relationships, tags, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4914,7 +4914,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: When the API request fails (from response.raise_for_status())
         
         Tags:
-            retrieve, segment-tags, api, management, important
+            retrieve, segment-tags, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4943,7 +4943,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised when the API request fails (e.g., invalid ID or server error)
         
         Tags:
-            retrieve, profiles, segments, pagination, async_job, important
+            retrieve, profiles, segments, pagination, async_job
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4973,7 +4973,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the required 'id' parameter is missing.
         
         Tags:
-            fetch, profiles, id-based, important, api
+            fetch, profiles, id-based, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5002,7 +5002,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the HTTP request encounters a status error.
         
         Tags:
-            fetch, tags, api, management, important
+            fetch, tags, api, management
         """
         url = f"{self.base_url}/api/tags/"
         query_params = {k: v for k, v in [('fields[tag-group]', fields_tag_group), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -5024,7 +5024,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'data' parameter is missing or None.
         
         Tags:
-            create, tag, important, management
+            create, tag, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -5055,7 +5055,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing.
         
         Tags:
-            fetch, tag-retrieval, api-call, important
+            fetch, tag-retrieval, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5081,7 +5081,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the API request fails (handled via response.raise_for_status()).
         
         Tags:
-            update, patch, api, management, important
+            update, patch, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5111,7 +5111,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is None.
         
         Tags:
-            delete, tags, api-management, important
+            delete, tags, api-management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5138,7 +5138,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: If the API request fails (non-2xx status code).
         
         Tags:
-            list, pagination, api-client, management, important
+            list, pagination, api-client, management
         """
         url = f"{self.base_url}/api/tag-groups/"
         query_params = {k: v for k, v in [('fields[tag-group]', fields_tag_group), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -5161,7 +5161,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the API request fails (4XX/5XX status code).
         
         Tags:
-            create, tag-group, api, management, important
+            create, tag-group, api, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -5191,7 +5191,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised when the API request fails, typically due to invalid ID or network issues.
         
         Tags:
-            fetch, api, tag-group, details, management, important
+            fetch, api, tag-group, details, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5217,7 +5217,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised when the API request fails (handled by response.raise_for_status())
         
         Tags:
-            update, tag-group, patch, api, management, important
+            update, tag-group, patch, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5248,7 +5248,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised for unsuccessful HTTP responses (non-2xx status codes).
         
         Tags:
-            delete, async-job, api, management, important
+            delete, async-job, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5273,7 +5273,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised for failed API responses (non-2xx status codes)
         
         Tags:
-            get, tag, relationships, flows, api, important
+            get, tag, relationships, flows, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5299,7 +5299,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised when the API request fails, typically due to invalid parameters or server errors.
         
         Tags:
-            create, tag, relationships, flows, api, post, management, important
+            create, tag, relationships, flows, api, post, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5330,7 +5330,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when either 'id' or 'data' parameter is missing.
         
         Tags:
-            delete, relationship, management, api-call, important
+            delete, relationship, management, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5361,7 +5361,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for HTTP request failures (e.g., 404 Not Found or 500 Internal Server Error)
         
         Tags:
-            get, relationships, campaigns, api, tags, important
+            get, relationships, campaigns, api, tags
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5387,7 +5387,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised if the API request fails (e.g., 4XX/5XX status codes).
         
         Tags:
-            create, tag-relationships, campaigns, api, async_job, management, important
+            create, tag-relationships, campaigns, api, async_job, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5419,7 +5419,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: If the HTTP request fails (handled by response.raise_for_status()).
         
         Tags:
-            delete, relationships, campaigns, management, important
+            delete, relationships, campaigns, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5449,7 +5449,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing
         
         Tags:
-            fetch, tag-relationships, api-call, important
+            fetch, tag-relationships, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5474,7 +5474,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when either the 'id' or 'data' parameter is missing.
         
         Tags:
-            create, tag-relationship, management, api-call, important
+            create, tag-relationship, management, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5505,7 +5505,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when either 'id' or 'data' is None.
         
         Tags:
-            delete, tag, important, api-call
+            delete, tag, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5536,7 +5536,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised if the API request fails with an unsuccessful status code.
         
         Tags:
-            retrieve, tag-relationships, segments, api, important
+            retrieve, tag-relationships, segments, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5561,7 +5561,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when either 'id' or 'data' is missing. Indicates that a required parameter is absent.
         
         Tags:
-            create, relationship, segment, api, important
+            create, relationship, segment, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5593,7 +5593,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the API request fails (handled via response.raise_for_status()).
         
         Tags:
-            delete, tag-relationships, segments, api, management, important
+            delete, tag-relationships, segments, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5624,7 +5624,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised for HTTP request failures (e.g., 404 Not Found, 500 Internal Server Error).
         
         Tags:
-            tag-relationships, tag-group, api-call, json-response, important
+            tag-relationships, tag-group, api-call, json-response
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5649,7 +5649,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the API request fails with a non-2XX response.
         
         Tags:
-            retrieve, tag-group, relationships, api, important
+            retrieve, tag-group, relationships, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5675,7 +5675,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised when the API request fails (e.g., invalid ID, server error).
         
         Tags:
-            retrieve, tag-group, api, management, important
+            retrieve, tag-group, api, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5700,7 +5700,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing.
         
         Tags:
-            tag, fetch, management, important
+            tag, fetch, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5727,7 +5727,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for non-2xx HTTP status codes during the API request
         
         Tags:
-            list, templates, pagination, api-client, important
+            list, templates, pagination, api-client
         """
         url = f"{self.base_url}/api/templates/"
         query_params = {k: v for k, v in [('fields[template]', fields_template), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -5750,7 +5750,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: When the API request fails (e.g., 4XX/5XX status code).
         
         Tags:
-            create, template, api, management, important
+            create, template, api, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -5779,7 +5779,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing.
         
         Tags:
-            fetch, template, management, important
+            fetch, template, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5804,7 +5804,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if either the 'id' or 'data' parameter is missing.
         
         Tags:
-            update, edit, api-call, important, async
+            update, edit, api-call, async
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5835,7 +5835,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for HTTP request failures (4XX/5XX status codes)
         
         Tags:
-            delete, template, management, api-call, important
+            delete, template, management, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5859,7 +5859,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'data' parameter is None.
         
         Tags:
-            render, template, api-call, important
+            render, template, api-call
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -5888,7 +5888,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised for unsuccessful HTTP responses (status code ≥ 400).
         
         Tags:
-            create, template, clone, post, async_job, api, management, important
+            create, template, clone, post, async_job, api, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -5917,7 +5917,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: When the API request fails with a 4XX/5XX status code
         
         Tags:
-            retrieve, webhook, api, management, important
+            retrieve, webhook, api, management
         """
         url = f"{self.base_url}/api/webhooks/"
         query_params = {k: v for k, v in [('fields[webhook]', fields_webhook), ('include', include)] if v is not None}
@@ -5939,7 +5939,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the required 'data' parameter is missing or None.
         
         Tags:
-            create, webhook, api, management, important
+            create, webhook, api, management
         """
         if data is None:
             raise ValueError("Missing required parameter 'data'")
@@ -5969,7 +5969,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when the 'id' parameter is missing.
         
         Tags:
-            fetch, webhook, api, important
+            fetch, webhook, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5995,7 +5995,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for unsuccessful HTTP responses (4XX/5XX status codes) from the API
         
         Tags:
-            webhook, update, patch-request, management, important
+            webhook, update, patch-request, management
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -6026,7 +6026,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised if the HTTP request returns an unsuccessful status code.
         
         Tags:
-            delete, webhook, api-call, important
+            delete, webhook, api-call
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -6047,7 +6047,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised when the API request fails due to HTTP errors (4xx/5xx status codes).
         
         Tags:
-            webhook, retrieve, api, topics, management, important
+            webhook, retrieve, api, topics, management
         """
         url = f"{self.base_url}/api/webhook-topics/"
         query_params = {}
@@ -6070,7 +6070,7 @@ class KlaviyoApp(APIApplication):
             requests.HTTPError: Raised for HTTP 4XX/5XX errors from the API request.
         
         Tags:
-            retrieve, webhook, api, important
+            retrieve, webhook, api
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -6095,7 +6095,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when either 'company_id' or 'data' is missing.
         
         Tags:
-            create, subscription, client-management, important
+            create, subscription, client-management
         """
         if company_id is None:
             raise ValueError("Missing required parameter 'company_id'")
@@ -6126,7 +6126,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised when either 'company_id' or 'data' is missing.
         
         Tags:
-            create, client, push-token, important
+            create, client, push-token
         """
         if company_id is None:
             raise ValueError("Missing required parameter 'company_id'")
@@ -6157,7 +6157,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if the 'company_id' or 'data' parameter is missing.
         
         Tags:
-            unregister, push-token, management, important
+            unregister, push-token, management
         """
         if company_id is None:
             raise ValueError("Missing required parameter 'company_id'")
@@ -6189,7 +6189,7 @@ class KlaviyoApp(APIApplication):
             requests.exceptions.HTTPError: Raised for non-2xx HTTP responses from the API.
         
         Tags:
-            client, event, post, api, important
+            client, event, post, api
         """
         if company_id is None:
             raise ValueError("Missing required parameter 'company_id'")
@@ -6220,7 +6220,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if either 'company_id' or 'data' is None.
         
         Tags:
-            create, client, profile, important, management
+            create, client, profile, management
         """
         if company_id is None:
             raise ValueError("Missing required parameter 'company_id'")
@@ -6252,7 +6252,7 @@ class KlaviyoApp(APIApplication):
             HTTPError: Raised if the API request fails, typically due to invalid data or server errors.
         
         Tags:
-            client-events, bulk-create, api, async_job, management, important
+            client-events, bulk-create, api, async_job, management
         """
         if company_id is None:
             raise ValueError("Missing required parameter 'company_id'")
@@ -6283,7 +6283,7 @@ class KlaviyoApp(APIApplication):
             ValueError: Raised if either 'company_id' or 'data' is missing.
         
         Tags:
-            subscription, back-in-stock, client, important
+            subscription, back-in-stock, client
         """
         if company_id is None:
             raise ValueError("Missing required parameter 'company_id'")
