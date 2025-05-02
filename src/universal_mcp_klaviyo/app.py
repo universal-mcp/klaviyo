@@ -67,6 +67,9 @@ Create Client Review
                   }
                 }
                 ```
+
+        Tags:
+            Beta APIs
         """
         request_body = {
             'data': data,
@@ -87,6 +90,9 @@ Get Accounts
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Accounts
         """
         url = f"{self.base_url}/api/accounts"
         query_params = {k: v for k, v in [('fields[account]', fields_account)] if v is not None}
@@ -104,6 +110,9 @@ Get Account
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Accounts
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -128,6 +137,9 @@ Get Campaigns
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Campaigns1
         """
         url = f"{self.base_url}/api/campaigns"
         query_params = {k: v for k, v in [('fields[campaign-message]', fields_campaign_message), ('fields[campaign]', fields_campaign), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -248,6 +260,9 @@ Create Campaign
                   }
                 }
                 ```
+
+        Tags:
+            Campaigns, Campaigns1
         """
         request_body = {
             'data': data,
@@ -272,6 +287,9 @@ Get Campaign
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Campaigns1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -290,6 +308,9 @@ Delete Campaign
 
         Returns:
             Any: Success
+
+        Tags:
+            Campaigns, Campaigns1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -358,6 +379,9 @@ Update Campaign
                   }
                 }
                 ```
+
+        Tags:
+            Campaigns, Campaigns1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -381,6 +405,9 @@ Get Campaign Recipient Estimation
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Campaigns1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -412,6 +439,9 @@ Create Campaign Clone
                   }
                 }
                 ```
+
+        Tags:
+            Campaigns, Campaigns1
         """
         request_body = {
             'data': data,
@@ -433,6 +463,9 @@ Get Tags for Campaign
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Campaigns1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -451,6 +484,9 @@ Get Tag IDs for Campaign
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Campaigns1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -474,6 +510,9 @@ Get Messages for Campaign
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Campaigns1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -492,6 +531,9 @@ Get Message IDs for Campaign
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Campaigns1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -515,6 +557,9 @@ Get Campaign Message
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Messages
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -567,6 +612,9 @@ Update Campaign Message
                   }
                 }
                 ```
+
+        Tags:
+            Campaigns, Messages
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -607,6 +655,9 @@ Assign Template to Campaign Message
                   }
                 }
                 ```
+
+        Tags:
+            Campaigns, Messages
         """
         request_body = {
             'data': data,
@@ -628,6 +679,9 @@ Get Campaign for Campaign Message
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Messages
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -646,6 +700,9 @@ Get Campaign ID for Campaign Message
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Messages
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -665,6 +722,9 @@ Get Template for Campaign Message
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Messages
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -683,6 +743,9 @@ Get Template ID for Campaign Message
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Messages
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -702,6 +765,9 @@ Get Image for Campaign Message
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Messages
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -720,6 +786,9 @@ Get Image ID for Campaign Message
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Messages
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -749,6 +818,9 @@ Update Image for Campaign Message
                   }
                 }
                 ```
+
+        Tags:
+            Campaigns, Messages
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -772,6 +844,9 @@ Get Campaign Send Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Jobs
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -804,6 +879,9 @@ Cancel Campaign Send
                   }
                 }
                 ```
+
+        Tags:
+            Campaigns, Jobs
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -827,6 +905,9 @@ Get Campaign Recipient Estimation Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Campaigns, Jobs
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -855,6 +936,9 @@ Send Campaign
                   }
                 }
                 ```
+
+        Tags:
+            Campaigns, Jobs
         """
         request_body = {
             'data': data,
@@ -885,6 +969,9 @@ Refresh Campaign Recipient Estimation
                   }
                 }
                 ```
+
+        Tags:
+            Campaigns, Jobs
         """
         request_body = {
             'data': data,
@@ -910,6 +997,9 @@ Get Catalog Items
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Items
         """
         url = f"{self.base_url}/api/catalog-items"
         query_params = {k: v for k, v in [('fields[catalog-item]', fields_catalog_item), ('fields[catalog-variant]', fields_catalog_variant), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -966,6 +1056,9 @@ Create Catalog Item
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Items
         """
         request_body = {
             'data': data,
@@ -989,6 +1082,9 @@ Get Catalog Item
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Items
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1007,6 +1103,9 @@ Delete Catalog Item
 
         Returns:
             Any: Success
+
+        Tags:
+            Catalogs, Items
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1064,6 +1163,9 @@ Update Catalog Item
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Items
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1088,6 +1190,9 @@ Get Bulk Create Catalog Items Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Items
         """
         url = f"{self.base_url}/api/catalog-item-bulk-create-jobs"
         query_params = {k: v for k, v in [('fields[catalog-item-bulk-create-job]', fields_catalog_item_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1187,6 +1292,9 @@ Bulk Create Catalog Items
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Items
         """
         request_body = {
             'data': data,
@@ -1210,6 +1318,9 @@ Get Bulk Create Catalog Items Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Items
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1230,6 +1341,9 @@ Get Bulk Update Catalog Items Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Items
         """
         url = f"{self.base_url}/api/catalog-item-bulk-update-jobs"
         query_params = {k: v for k, v in [('fields[catalog-item-bulk-update-job]', fields_catalog_item_bulk_update_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1325,6 +1439,9 @@ Bulk Update Catalog Items
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Items
         """
         request_body = {
             'data': data,
@@ -1348,6 +1465,9 @@ Get Bulk Update Catalog Items Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Items
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1368,6 +1488,9 @@ Get Bulk Delete Catalog Items Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Items
         """
         url = f"{self.base_url}/api/catalog-item-bulk-delete-jobs"
         query_params = {k: v for k, v in [('fields[catalog-item-bulk-delete-job]', fields_catalog_item_bulk_delete_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1407,6 +1530,9 @@ Bulk Delete Catalog Items
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Items
         """
         request_body = {
             'data': data,
@@ -1428,6 +1554,9 @@ Get Bulk Delete Catalog Items Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Items
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1452,6 +1581,9 @@ Get Items for Catalog Category
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Items
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1473,6 +1605,9 @@ Get Category IDs for Catalog Item
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Items
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1508,6 +1643,9 @@ Add Categories to Catalog Item
                   ]
                 }
                 ```
+
+        Tags:
+            Catalogs, Items
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1547,6 +1685,9 @@ Remove Categories from Catalog Item
                   ]
                 }
                 ```
+
+        Tags:
+            Catalogs, Items
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1586,6 +1727,9 @@ Update Categories for Catalog Item
                   ]
                 }
                 ```
+
+        Tags:
+            Catalogs, Items
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1611,6 +1755,9 @@ Get Catalog Variants
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Variants
         """
         url = f"{self.base_url}/api/catalog-variants"
         query_params = {k: v for k, v in [('fields[catalog-variant]', fields_catalog_variant), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -1664,6 +1811,9 @@ Create Catalog Variant
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Variants
         """
         request_body = {
             'data': data,
@@ -1685,6 +1835,9 @@ Get Catalog Variant
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Variants
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1703,6 +1856,9 @@ Delete Catalog Variant
 
         Returns:
             Any: Success
+
+        Tags:
+            Catalogs, Variants
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1749,6 +1905,9 @@ Update Catalog Variant
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Variants
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -1773,6 +1932,9 @@ Get Create Variants Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Variants
         """
         url = f"{self.base_url}/api/catalog-variant-bulk-create-jobs"
         query_params = {k: v for k, v in [('fields[catalog-variant-bulk-create-job]', fields_catalog_variant_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1866,6 +2028,9 @@ Bulk Create Catalog Variants
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Variants
         """
         request_body = {
             'data': data,
@@ -1889,6 +2054,9 @@ Get Create Variants Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Variants
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -1909,6 +2077,9 @@ Get Update Variants Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Variants
         """
         url = f"{self.base_url}/api/catalog-variant-bulk-update-jobs"
         query_params = {k: v for k, v in [('fields[catalog-variant-bulk-update-job]', fields_catalog_variant_bulk_update_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -1982,6 +2153,9 @@ Bulk Update Catalog Variants
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Variants
         """
         request_body = {
             'data': data,
@@ -2005,6 +2179,9 @@ Get Update Variants Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Variants
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -2025,6 +2202,9 @@ Get Delete Variants Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Variants
         """
         url = f"{self.base_url}/api/catalog-variant-bulk-delete-jobs"
         query_params = {k: v for k, v in [('fields[catalog-variant-bulk-delete-job]', fields_catalog_variant_bulk_delete_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -2064,6 +2244,9 @@ Bulk Delete Catalog Variants
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Variants
         """
         request_body = {
             'data': data,
@@ -2085,6 +2268,9 @@ Get Delete Variants Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Variants
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -2107,6 +2293,9 @@ Get Variants for Catalog Item
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Variants
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2128,6 +2317,9 @@ Get Variant IDs for Catalog Item
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Variants
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2149,6 +2341,9 @@ Get Catalog Categories
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Categories
         """
         url = f"{self.base_url}/api/catalog-categories"
         query_params = {k: v for k, v in [('fields[catalog-category]', fields_catalog_category), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -2194,6 +2389,9 @@ Create Catalog Category
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Categories
         """
         request_body = {
             'data': data,
@@ -2215,6 +2413,9 @@ Get Catalog Category
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Categories
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2233,6 +2434,9 @@ Delete Catalog Category
 
         Returns:
             Any: Success
+
+        Tags:
+            Catalogs, Categories
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2279,6 +2483,9 @@ Update Catalog Category
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Categories
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2303,6 +2510,9 @@ Get Create Categories Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Categories
         """
         url = f"{self.base_url}/api/catalog-category-bulk-create-jobs"
         query_params = {k: v for k, v in [('fields[catalog-category-bulk-create-job]', fields_catalog_category_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -2380,6 +2590,9 @@ Bulk Create Catalog Categories
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Categories
         """
         request_body = {
             'data': data,
@@ -2403,6 +2616,9 @@ Get Create Categories Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Categories
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -2423,6 +2639,9 @@ Get Update Categories Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Categories
         """
         url = f"{self.base_url}/api/catalog-category-bulk-update-jobs"
         query_params = {k: v for k, v in [('fields[catalog-category-bulk-update-job]', fields_catalog_category_bulk_update_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -2496,6 +2715,9 @@ Bulk Update Catalog Categories
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Categories
         """
         request_body = {
             'data': data,
@@ -2519,6 +2741,9 @@ Get Update Categories Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Categories
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -2539,6 +2764,9 @@ Get Delete Categories Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Categories
         """
         url = f"{self.base_url}/api/catalog-category-bulk-delete-jobs"
         query_params = {k: v for k, v in [('fields[catalog-category-bulk-delete-job]', fields_catalog_category_bulk_delete_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -2578,6 +2806,9 @@ Bulk Delete Catalog Categories
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Categories
         """
         request_body = {
             'data': data,
@@ -2599,6 +2830,9 @@ Get Delete Categories Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Categories
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -2620,6 +2854,9 @@ Get Item IDs for Catalog Category
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Categories
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2655,6 +2892,9 @@ Add Items to Catalog Category
                   ]
                 }
                 ```
+
+        Tags:
+            Catalogs, Categories
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2694,6 +2934,9 @@ Remove Items from Catalog Category
                   ]
                 }
                 ```
+
+        Tags:
+            Catalogs, Categories
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2733,6 +2976,9 @@ Update Items for Catalog Category
                   ]
                 }
                 ```
+
+        Tags:
+            Catalogs, Categories
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2759,6 +3005,9 @@ Get Categories for Catalog Item
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Catalogs, Categories
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -2812,6 +3061,9 @@ Create Back In Stock Subscription
                   }
                 }
                 ```
+
+        Tags:
+            Catalogs, Back In Stock
         """
         request_body = {
             'data': data,
@@ -2910,6 +3162,9 @@ Create Client Subscription
                   }
                 }
                 ```
+
+        Tags:
+            Client
         """
         request_body = {
             'data': data,
@@ -3000,6 +3255,9 @@ Create or Update Client Push Token
                   }
                 }
                 ```
+
+        Tags:
+            Client
         """
         request_body = {
             'data': data,
@@ -3074,6 +3332,9 @@ Unregister Client Push Token
                   }
                 }
                 ```
+
+        Tags:
+            Client
         """
         request_body = {
             'data': data,
@@ -3159,6 +3420,9 @@ Create Client Event
                   }
                 }
                 ```
+
+        Tags:
+            Client
         """
         request_body = {
             'data': data,
@@ -3223,6 +3487,9 @@ Create or Update Client Profile
                   }
                 }
                 ```
+
+        Tags:
+            Client
         """
         request_body = {
             'data': data,
@@ -3336,6 +3603,9 @@ Bulk Create Client Events
                   }
                 }
                 ```
+
+        Tags:
+            Client
         """
         request_body = {
             'data': data,
@@ -3392,6 +3662,9 @@ Create Client Back In Stock Subscription
                   }
                 }
                 ```
+
+        Tags:
+            Client
         """
         request_body = {
             'data': data,
@@ -3413,6 +3686,9 @@ Get Coupons
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Coupons
         """
         url = f"{self.base_url}/api/coupons"
         query_params = {k: v for k, v in [('fields[coupon]', fields_coupon), ('page[cursor]', page_cursor)] if v is not None}
@@ -3442,6 +3718,9 @@ Create Coupon
                   }
                 }
                 ```
+
+        Tags:
+            Coupons
         """
         request_body = {
             'data': data,
@@ -3463,6 +3742,9 @@ Get Coupon
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Coupons
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3481,6 +3763,9 @@ Delete Coupon
 
         Returns:
             Any: Success
+
+        Tags:
+            Coupons
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3513,6 +3798,9 @@ Update Coupon
                   }
                 }
                 ```
+
+        Tags:
+            Coupons
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3539,6 +3827,9 @@ Get Coupon Codes
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Coupons
         """
         url = f"{self.base_url}/api/coupon-codes"
         query_params = {k: v for k, v in [('fields[coupon-code]', fields_coupon_code), ('fields[coupon]', fields_coupon), ('filter', filter), ('include', include), ('page[cursor]', page_cursor)] if v is not None}
@@ -3576,6 +3867,9 @@ Create Coupon Code
                   }
                 }
                 ```
+
+        Tags:
+            Coupons
         """
         request_body = {
             'data': data,
@@ -3599,6 +3893,9 @@ Get Coupon Code
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Coupons
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3617,6 +3914,9 @@ Delete Coupon Code
 
         Returns:
             Any: Success
+
+        Tags:
+            Coupons
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3650,6 +3950,9 @@ Update Coupon Code
                   }
                 }
                 ```
+
+        Tags:
+            Coupons
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3674,6 +3977,9 @@ Get Bulk Create Coupon Code Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Coupons
         """
         url = f"{self.base_url}/api/coupon-code-bulk-create-jobs"
         query_params = {k: v for k, v in [('fields[coupon-code-bulk-create-job]', fields_coupon_code_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
@@ -3735,6 +4041,9 @@ Bulk Create Coupon Codes
                   }
                 }
                 ```
+
+        Tags:
+            Coupons
         """
         request_body = {
             'data': data,
@@ -3758,6 +4067,9 @@ Get Bulk Create Coupon Codes Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Coupons
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -3777,6 +4089,9 @@ Get Coupon For Coupon Code
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Coupons
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3795,6 +4110,9 @@ Get Coupon ID for Coupon Code
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Coupons
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3816,6 +4134,9 @@ Get Coupon Codes for Coupon
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Coupons
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3836,6 +4157,9 @@ Get Coupon Code IDs for Coupon
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Coupons
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -3875,6 +4199,9 @@ Request Profile Deletion
                   }
                 }
                 ```
+
+        Tags:
+            Data Privacy
         """
         request_body = {
             'data': data,
@@ -3901,6 +4228,9 @@ Get Events
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Events
         """
         url = f"{self.base_url}/api/events"
         query_params = {k: v for k, v in [('fields[event]', fields_event), ('fields[metric]', fields_metric), ('fields[profile]', fields_profile), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -3981,6 +4311,9 @@ Create Event
                   }
                 }
                 ```
+
+        Tags:
+            Events
         """
         request_body = {
             'data': data,
@@ -4005,6 +4338,9 @@ Get Event
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Events
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4210,6 +4546,9 @@ Bulk Create Events
                   }
                 }
                 ```
+
+        Tags:
+            Events
         """
         request_body = {
             'data': data,
@@ -4231,6 +4570,9 @@ Get Metric for Event
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Events
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4249,6 +4591,9 @@ Get Metric ID for Event
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Events
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4269,6 +4614,9 @@ Get Profile for Event
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Events
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4287,6 +4635,9 @@ Get Profile ID for Event
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Events
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4312,6 +4663,9 @@ Get Flows
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         url = f"{self.base_url}/api/flows"
         query_params = {k: v for k, v in [('fields[flow-action]', fields_flow_action), ('fields[flow]', fields_flow), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
@@ -4420,6 +4774,9 @@ Create Flow
                   }
                 }
                 ```
+
+        Tags:
+            Flows
         """
         request_body = {
             'data': data,
@@ -4445,6 +4802,9 @@ Get Flow
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4463,6 +4823,9 @@ Delete Flow
 
         Returns:
             Any: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4495,6 +4858,9 @@ Update Flow Status
                   }
                 }
                 ```
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4521,6 +4887,9 @@ Get Flow Action
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4543,6 +4912,9 @@ Get Flow Message
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4566,6 +4938,9 @@ Get Actions for Flow
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4588,6 +4963,9 @@ Get Action IDs for Flow
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4607,6 +4985,9 @@ Get Tags for Flow
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4625,6 +5006,9 @@ Get Tag IDs for Flow
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4644,6 +5028,9 @@ Get Flow for Flow Action
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4662,6 +5049,9 @@ Get Flow ID for Flow Action
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4685,6 +5075,9 @@ Get Messages For Flow Action
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4707,6 +5100,9 @@ Get Message IDs for Flow Action
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4726,6 +5122,9 @@ Get Action for Flow Message
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4744,6 +5143,9 @@ Get Action ID for Flow Message
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4763,6 +5165,9 @@ Get Template for Flow Message
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4781,6 +5186,9 @@ Get Template ID for Flow Message
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Flows
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4803,6 +5211,9 @@ Get Forms
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Forms
         """
         url = f"{self.base_url}/api/forms"
         query_params = {k: v for k, v in [('fields[form]', fields_form), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
@@ -4822,6 +5233,9 @@ Get Form
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Forms
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4841,6 +5255,9 @@ Get Form Version
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Forms
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4864,6 +5281,9 @@ Get Versions for Form
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Forms
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4886,6 +5306,9 @@ Get Version IDs for Form
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Forms
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4905,6 +5328,9 @@ Get Form for Form Version
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Forms
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4923,6 +5349,9 @@ Get Form ID for Form Version
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Forms
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -4945,6 +5374,9 @@ Get Images
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Images
         """
         url = f"{self.base_url}/api/images"
         query_params = {k: v for k, v in [('fields[image]', fields_image), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
@@ -4975,6 +5407,9 @@ Upload Image From URL
                   }
                 }
                 ```
+
+        Tags:
+            Images
         """
         request_body = {
             'data': data,
@@ -4996,6 +5431,9 @@ Get Image
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Images
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5029,6 +5467,9 @@ Update Image
                   }
                 }
                 ```
+
+        Tags:
+            Images
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5042,12 +5483,15 @@ Update Image
         response.raise_for_status()
         return response.json()
 
-  
+    def upload_image_from_file(self) -> dict[str, Any]:
         """
 Upload Image From File
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Images
         """
         url = f"{self.base_url}/api/image-upload"
         query_params = {}
@@ -5070,6 +5514,9 @@ Get Lists
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Lists
         """
         url = f"{self.base_url}/api/lists"
         query_params = {k: v for k, v in [('fields[flow]', fields_flow), ('fields[list]', fields_list), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -5098,6 +5545,9 @@ Create List
                   }
                 }
                 ```
+
+        Tags:
+            Lists
         """
         request_body = {
             'data': data,
@@ -5123,6 +5573,9 @@ Get List
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Lists
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5141,6 +5594,9 @@ Delete List
 
         Returns:
             Any: Success
+
+        Tags:
+            Lists
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5173,6 +5629,9 @@ Update List
                   }
                 }
                 ```
+
+        Tags:
+            Lists
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5196,6 +5655,9 @@ Get Tags for List
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Lists
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5214,6 +5676,9 @@ Get Tag IDs for List
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Lists
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5238,6 +5703,9 @@ Get Profiles for List
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Lists
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5260,6 +5728,9 @@ Get Profile IDs for List
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Lists
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5295,6 +5766,9 @@ Add Profiles to List
                   ]
                 }
                 ```
+
+        Tags:
+            Lists
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5334,6 +5808,9 @@ Remove Profiles from List
                   ]
                 }
                 ```
+
+        Tags:
+            Lists
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5357,6 +5834,9 @@ Get Flows Triggered by List
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Lists
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5375,6 +5855,9 @@ Get IDs for Flows Triggered by List
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Lists
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5397,6 +5880,9 @@ Get Metrics
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Metrics
         """
         url = f"{self.base_url}/api/metrics"
         query_params = {k: v for k, v in [('fields[flow]', fields_flow), ('fields[metric]', fields_metric), ('filter', filter), ('include', include), ('page[cursor]', page_cursor)] if v is not None}
@@ -5416,6 +5902,9 @@ Get Metric
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Metrics
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5438,6 +5927,9 @@ Get Metric Property
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Metrics
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5489,6 +5981,9 @@ Query Metric Aggregates
                   }
                 }
                 ```
+
+        Tags:
+            Metrics
         """
         request_body = {
             'data': data,
@@ -5510,6 +6005,9 @@ Get Flows Triggered by Metric
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Metrics
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5528,6 +6026,9 @@ Get IDs for Flows Triggered by Metric
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Metrics
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5548,6 +6049,9 @@ Get Properties for Metric
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Metrics
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5566,6 +6070,9 @@ Get Property IDs for Metric
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Metrics
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5585,6 +6092,9 @@ Get Metric for Metric Property
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Metrics
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5603,6 +6113,9 @@ Get Metric ID for Metric Property
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Metrics
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5626,6 +6139,9 @@ Get Profiles
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Profiles1
         """
         url = f"{self.base_url}/api/profiles"
         query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile), ('fields[profile]', fields_profile), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
@@ -5676,6 +6192,9 @@ Create Profile
                   }
                 }
                 ```
+
+        Tags:
+            Profiles, Profiles1
         """
         request_body = {
             'data': data,
@@ -5701,6 +6220,9 @@ Get Profile
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Profiles1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5763,6 +6285,9 @@ Update Profile
                   }
                 }
                 ```
+
+        Tags:
+            Profiles, Profiles1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -5788,6 +6313,9 @@ Get Bulk Suppress Profiles Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Profiles1
         """
         url = f"{self.base_url}/api/profile-suppression-bulk-create-jobs"
         query_params = {k: v for k, v in [('fields[profile-suppression-bulk-create-job]', fields_profile_suppression_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -5845,6 +6373,9 @@ Bulk Suppress Profiles
                   }
                 }
                 ```
+
+        Tags:
+            Profiles, Consent
         """
         request_body = {
             'data': data,
@@ -5866,6 +6397,9 @@ Get Bulk Suppress Profiles Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Profiles1
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -5887,6 +6421,9 @@ Get Bulk Unsuppress Profiles Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Profiles1
         """
         url = f"{self.base_url}/api/profile-suppression-bulk-delete-jobs"
         query_params = {k: v for k, v in [('fields[profile-suppression-bulk-delete-job]', fields_profile_suppression_bulk_delete_job), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -5944,6 +6481,9 @@ Bulk Unsuppress Profiles
                   }
                 }
                 ```
+
+        Tags:
+            Profiles, Consent
         """
         request_body = {
             'data': data,
@@ -5965,6 +6505,9 @@ Get Bulk Unsuppress Profiles Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Profiles1
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -6027,6 +6570,9 @@ Create or Update Profile
                   }
                 }
                 ```
+
+        Tags:
+            Profiles, Profiles1
         """
         request_body = {
             'data': data,
@@ -6071,6 +6617,9 @@ Merge Profiles
                   }
                 }
                 ```
+
+        Tags:
+            Profiles, Profiles1
         """
         request_body = {
             'data': data,
@@ -6160,6 +6709,9 @@ Create or Update Push Token
                   }
                 }
                 ```
+
+        Tags:
+            Profiles, Profiles1
         """
         request_body = {
             'data': data,
@@ -6181,6 +6733,9 @@ Get Lists for Profile
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Profiles1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -6199,6 +6754,9 @@ Get List IDs for Profile
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Profiles1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -6218,6 +6776,9 @@ Get Segments for Profile
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Profiles1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -6236,6 +6797,9 @@ Get Segment IDs for Profile
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Profiles1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -6258,6 +6822,9 @@ Get Bulk Import Profiles Jobs
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Bulk Import Profiles
         """
         url = f"{self.base_url}/api/profile-bulk-import-jobs"
         query_params = {k: v for k, v in [('fields[profile-bulk-import-job]', fields_profile_bulk_import_job), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
@@ -6377,6 +6944,9 @@ Bulk Import Profiles
                   }
                 }
                 ```
+
+        Tags:
+            Profiles, Bulk Import Profiles
         """
         request_body = {
             'data': data,
@@ -6400,6 +6970,9 @@ Get Bulk Import Profiles Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Bulk Import Profiles
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
@@ -6419,6 +6992,9 @@ Get List for Bulk Import Profiles Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Bulk Import Profiles
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -6437,6 +7013,9 @@ Get List IDs for Bulk Import Profiles Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Bulk Import Profiles
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -6459,6 +7038,9 @@ Get Profiles for Bulk Import Profiles Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Bulk Import Profiles
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -6479,6 +7061,9 @@ Get Profile IDs for Bulk Import Profiles Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Bulk Import Profiles
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -6500,6 +7085,9 @@ Get Errors for Bulk Import Profiles Job
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Profiles, Bulk Import Profiles
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -6597,6 +7185,9 @@ Bulk Subscribe Profiles
                   }
                 }
                 ```
+
+        Tags:
+            Profiles, Consent
         """
         request_body = {
             'data': data,
@@ -6684,6 +7275,9 @@ Bulk Unsubscribe Profiles
                   }
                 }
                 ```
+
+        Tags:
+            Profiles, Consent
         """
         request_body = {
             'data': data,
@@ -6725,6 +7319,9 @@ Query Campaign Values
                   }
                 }
                 ```
+
+        Tags:
+            Reporting
         """
         request_body = {
             'data': data,
@@ -6766,6 +7363,9 @@ Query Flow Values
                   }
                 }
                 ```
+
+        Tags:
+            Reporting
         """
         request_body = {
             'data': data,
@@ -6808,6 +7408,9 @@ Query Flow Series
                   }
                 }
                 ```
+
+        Tags:
+            Reporting
         """
         request_body = {
             'data': data,
@@ -6851,6 +7454,9 @@ Query Form Values
                   }
                 }
                 ```
+
+        Tags:
+            Reporting
         """
         request_body = {
             'data': data,
@@ -6895,6 +7501,9 @@ Query Form Series
                   }
                 }
                 ```
+
+        Tags:
+            Reporting
         """
         request_body = {
             'data': data,
@@ -6934,6 +7543,9 @@ Query Segment Values
                   }
                 }
                 ```
+
+        Tags:
+            Reporting
         """
         request_body = {
             'data': data,
@@ -6974,6 +7586,9 @@ Query Segment Series
                   }
                 }
                 ```
+
+        Tags:
+            Reporting
         """
         request_body = {
             'data': data,
@@ -7000,6 +7615,9 @@ Get Reviews
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Reviews
         """
         url = f"{self.base_url}/api/reviews"
         query_params = {k: v for k, v in [('fields[event]', fields_event), ('fields[review]', fields_review), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
@@ -7019,6 +7637,9 @@ Get Review
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Reviews
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7057,6 +7678,9 @@ Update Review
                   }
                 }
                 ```
+
+        Tags:
+            Reviews
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7085,6 +7709,9 @@ Get Segments
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Segments
         """
         url = f"{self.base_url}/api/segments"
         query_params = {k: v for k, v in [('fields[flow]', fields_flow), ('fields[segment]', fields_segment), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -7178,6 +7805,9 @@ Create Segment
                   }
                 }
                 ```
+
+        Tags:
+            Segments
         """
         request_body = {
             'data': data,
@@ -7203,6 +7833,9 @@ Get Segment
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Segments
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7221,6 +7854,9 @@ Delete Segment
 
         Returns:
             Any: Success
+
+        Tags:
+            Segments
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7318,6 +7954,9 @@ Update Segment
                   }
                 }
                 ```
+
+        Tags:
+            Segments
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7341,6 +7980,9 @@ Get Tags for Segment
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Segments
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7359,6 +8001,9 @@ Get Tag IDs for Segment
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Segments
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7383,6 +8028,9 @@ Get Profiles for Segment
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Segments
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7405,6 +8053,9 @@ Get Profile IDs for Segment
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Segments
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7424,6 +8075,9 @@ Get Flows Triggered by Segment
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Segments
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7442,6 +8096,9 @@ Get IDs for Flows Triggered by Segment
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Segments
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7465,6 +8122,9 @@ Get Tags
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tags1
         """
         url = f"{self.base_url}/api/tags"
         query_params = {k: v for k, v in [('fields[tag-group]', fields_tag_group), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -7501,6 +8161,9 @@ Create Tag
                   }
                 }
                 ```
+
+        Tags:
+            Tags, Tags1
         """
         request_body = {
             'data': data,
@@ -7524,6 +8187,9 @@ Get Tag
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7542,6 +8208,9 @@ Delete Tag
 
         Returns:
             Any: Success
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7574,6 +8243,9 @@ Update Tag
                   }
                 }
                 ```
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7596,6 +8268,9 @@ Get Flow IDs for Tag
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7631,6 +8306,9 @@ Tag Flows
                   ]
                 }
                 ```
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7670,6 +8348,9 @@ Remove Tag from Flows
                   ]
                 }
                 ```
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7692,6 +8373,9 @@ Get Campaign IDs for Tag
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7727,6 +8411,9 @@ Tag Campaigns
                   ]
                 }
                 ```
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7766,6 +8453,9 @@ Remove Tag from Campaigns
                   ]
                 }
                 ```
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7788,6 +8478,9 @@ Get List IDs for Tag
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7823,6 +8516,9 @@ Tag Lists
                   ]
                 }
                 ```
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7862,6 +8558,9 @@ Remove Tag from Lists
                   ]
                 }
                 ```
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7884,6 +8583,9 @@ Get Segment IDs for Tag
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7919,6 +8621,9 @@ Tag Segments
                   ]
                 }
                 ```
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7958,6 +8663,9 @@ Remove Tag from Segments
                   ]
                 }
                 ```
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7981,6 +8689,9 @@ Get Tag Group for Tag
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -7999,6 +8710,9 @@ Get Tag Group ID for Tag
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tags1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8020,6 +8734,9 @@ Get Tag Groups
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tag Groups
         """
         url = f"{self.base_url}/api/tag-groups"
         query_params = {k: v for k, v in [('fields[tag-group]', fields_tag_group), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -8049,6 +8766,9 @@ Create Tag Group
                   }
                 }
                 ```
+
+        Tags:
+            Tags, Tag Groups
         """
         request_body = {
             'data': data,
@@ -8070,6 +8790,9 @@ Get Tag Group
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tag Groups
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8088,6 +8811,9 @@ Delete Tag Group
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tag Groups
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8124,6 +8850,9 @@ Update Tag Group
                   }
                 }
                 ```
+
+        Tags:
+            Tags, Tag Groups
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8147,6 +8876,9 @@ Get Tags for Tag Group
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tag Groups
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8165,6 +8897,9 @@ Get Tag IDs for Tag Group
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tags, Tag Groups
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8186,6 +8921,9 @@ Get Templates
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Templates, Templates1
         """
         url = f"{self.base_url}/api/templates"
         query_params = {k: v for k, v in [('fields[template]', fields_template), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
@@ -8217,6 +8955,9 @@ Create Template
                   }
                 }
                 ```
+
+        Tags:
+            Templates, Templates1
         """
         request_body = {
             'data': data,
@@ -8238,6 +8979,9 @@ Get Template
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Templates, Templates1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8256,6 +9000,9 @@ Delete Template
 
         Returns:
             Any: Success
+
+        Tags:
+            Templates, Templates1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8290,6 +9037,9 @@ Update Template
                   }
                 }
                 ```
+
+        Tags:
+            Templates, Templates1
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8325,6 +9075,9 @@ Render Template
                   }
                 }
                 ```
+
+        Tags:
+            Templates, Templates1
         """
         request_body = {
             'data': data,
@@ -8358,6 +9111,9 @@ Clone Template
                   }
                 }
                 ```
+
+        Tags:
+            Templates, Templates1
         """
         request_body = {
             'data': data,
@@ -8382,6 +9138,9 @@ Get All Universal Content
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Templates, Universal Content
         """
         url = f"{self.base_url}/api/template-universal-content"
         query_params = {k: v for k, v in [('fields[template-universal-content]', fields_template_universal_content), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
@@ -8425,6 +9184,9 @@ Create Universal Content
                   }
                 }
                 ```
+
+        Tags:
+            Templates, Universal Content
         """
         request_body = {
             'data': data,
@@ -8446,6 +9208,9 @@ Get Universal Content
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Templates, Universal Content
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8464,6 +9229,9 @@ Delete Universal Content
 
         Returns:
             Any: Success
+
+        Tags:
+            Templates, Universal Content
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8511,6 +9279,9 @@ Update Universal Content
                   }
                 }
                 ```
+
+        Tags:
+            Templates, Universal Content
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8535,6 +9306,9 @@ Get Tracking Settings
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tracking Settings
         """
         url = f"{self.base_url}/api/tracking-settings"
         query_params = {k: v for k, v in [('fields[tracking-setting]', fields_tracking_setting), ('page[cursor]', page_cursor), ('page[size]', page_size)] if v is not None}
@@ -8552,6 +9326,9 @@ Get Tracking Setting
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Tracking Settings
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8658,6 +9435,9 @@ Update Tracking Setting
                   }
                 }
                 ```
+
+        Tags:
+            Tracking Settings
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8681,6 +9461,9 @@ Get Webhooks
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Webhooks
         """
         url = f"{self.base_url}/api/webhooks"
         query_params = {k: v for k, v in [('fields[webhook]', fields_webhook), ('include', include)] if v is not None}
@@ -8726,6 +9509,9 @@ Create Webhook
                   }
                 }
                 ```
+
+        Tags:
+            Webhooks
         """
         request_body = {
             'data': data,
@@ -8748,6 +9534,9 @@ Get Webhook
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Webhooks
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8766,6 +9555,9 @@ Delete Webhook
 
         Returns:
             Any: Success
+
+        Tags:
+            Webhooks
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8816,6 +9608,9 @@ Update Webhook
                   }
                 }
                 ```
+
+        Tags:
+            Webhooks
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
@@ -8835,6 +9630,9 @@ Get Webhook Topics
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Webhooks
         """
         url = f"{self.base_url}/api/webhook-topics"
         query_params = {}
@@ -8851,6 +9649,9 @@ Get Webhook Topic
 
         Returns:
             dict[str, Any]: Success
+
+        Tags:
+            Webhooks
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
