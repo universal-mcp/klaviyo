@@ -4,39 +4,91 @@ from universal_mcp.integrations import Integration
 
 class KlaviyoApp(APIApplication):
     def __init__(self, integration: Integration = None, **kwargs) -> None:
-        super().__init__(name='klaviyo', integration=integration, **kwargs)
+        super().__init__(name='klaviyoapp', integration=integration, **kwargs)
         self.base_url = "https://a.klaviyo.com"
 
-    def _get_headers(self):
-        if not self.integration:
-            raise ValueError("Integration not configured for KlaviyoApp")
-        credentials = self.integration.get_credentials()
-        if "headers" in credentials:
-            return credentials["headers"]
-        if "access_token" not in credentials:
-            raise ValueError("Access token not found in KlaviyoApp credentials")
-        return {
-            "Authorization": f"Bearer {credentials['access_token']}",
-            "Accept": "application/json",
-            "revision": "2024-07-15",
+    def create_client_review(self, company_id=None, data=None) -> Any:
+        """
+Create Client Review
+
+        Args:
+            company_id (string): (Required) Your Public API Key / Site ID. See [this article](https://help.klaviyo.com/hc/en-us/articles/115005062267) for more details. Example: '<string>'.
+            data (object): data
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "author": "<string>",
+                      "content": "<string>",
+                      "custom_questions": [
+                        {
+                          "answers": [
+                            "<string>",
+                            "<string>"
+                          ],
+                          "id": "<string>"
+                        },
+                        {
+                          "answers": [
+                            "<string>",
+                            "<string>"
+                          ],
+                          "id": "<string>"
+                        }
+                      ],
+                      "email": "<string>",
+                      "images": [
+                        "<string>",
+                        "<string>"
+                      ],
+                      "incentive_type": "free_product",
+                      "product": {
+                        "external_id": "<string>",
+                        "integration_key": "woocommerce"
+                      },
+                      "rating": 2,
+                      "review_type": "rating",
+                      "title": "<string>"
+                    },
+                    "relationships": {
+                      "order": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "order"
+                        }
+                      }
+                    },
+                    "type": "review"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
         }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/client/reviews"
+        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
     def get_accounts(self, fields_account=None) -> dict[str, Any]:
         """
-        Retrieves account data via API request, returning parsed JSON response.
-        
+Get Accounts
+
         Args:
-            fields_account: Optional string of fields to include for accounts in API response (None returns all available fields).
-        
+            fields_account (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'contact_information.street_address.address1,contact_information.street_address.city'.
+
         Returns:
-            Dictionary containing account data parsed from API response.
-        
-        Raises:
-            requests.HTTPError: Raised for 4XX/5XX status codes in API responses.
-        
-        Tags:
-            fetch, api, accounts, management, data-retrieval, important
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/accounts/"
+        url = f"{self.base_url}/api/accounts"
         query_params = {k: v for k, v in [('fields[account]', fields_account)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -44,84 +96,164 @@ class KlaviyoApp(APIApplication):
 
     def get_account(self, id, fields_account=None) -> dict[str, Any]:
         """
-        Retrieves account details from the API by ID.
-        
+Get Account
+
         Args:
-            id: Unique identifier of the account to retrieve.
-            fields_account: Optional comma-separated fields to include in the account response (if None, all fields are returned). Defaults to None.
-        
+            id (string): id
+            fields_account (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'contact_information.street_address.address1,contact_information.street_address.city'.
+
         Returns:
-            Dictionary containing the account data as returned by the API.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is not provided.
-            requests.HTTPError: Raised if the API request fails (e.g., 404 Not Found or 503 Service Unavailable).
-        
-        Tags:
-            account, management, get, api, important
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/accounts/{id}/"
+        url = f"{self.base_url}/api/accounts/{id}"
         query_params = {k: v for k, v in [('fields[account]', fields_account)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_campaigns(self, filter, fields_campaign_message=None, fields_campaign=None, fields_tag=None, include=None, page_cursor=None, sort=None) -> dict[str, Any]:
+    def get_campaigns(self, fields_campaign_message=None, fields_campaign=None, fields_tag=None, filter=None, include=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Retrieve campaign data with optional filtering, field selection, pagination, and sorting.
-        
+Get Campaigns
+
         Args:
-            filter: Mandatory filter conditions for selecting campaigns
-            fields_campaign_message: List of campaign-message fields to include in response (comma-separated)
-            fields_campaign: List of campaign fields to include in response (comma-separated)
-            fields_tag: List of tag fields to include in response (comma-separated)
-            include: Related resources to include in response (comma-separated)
-            page_cursor: Pagination cursor for retrieving specific page
-            sort: Sort order for results
-        
+            fields_campaign_message (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'definition.content.subject,created_at'.
+            fields_campaign (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'send_time,send_options.use_smart_sending'.
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+            filter (string): (Required) For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`messages.channel`: `equals`<br>`name`: `contains`<br>`status`: `any`, `equals`<br>`archived`: `equals`<br>`created_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`scheduled_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`updated_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'tags,tags'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-updated_at'.
+
         Returns:
-            Dictionary containing campaign data and metadata from API response
-        
-        Raises:
-            ValueError: If required parameter 'filter' is not provided
-            requests.HTTPError: If API request fails (4xx/5xx status code)
-        
-        Tags:
-            campaign-retrieval, api-wrapper, filter, pagination, include-related
+            dict[str, Any]: Success
         """
-        if filter is None:
-            raise ValueError("Missing required parameter 'filter'")
-        url = f"{self.base_url}/api/campaigns/"
-        query_params = {k: v for k, v in [('filter', filter), ('fields[campaign-message]', fields_campaign_message), ('fields[campaign]', fields_campaign), ('fields[tag]', fields_tag), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
+        url = f"{self.base_url}/api/campaigns"
+        query_params = {k: v for k, v in [('fields[campaign-message]', fields_campaign_message), ('fields[campaign]', fields_campaign), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_campaign(self, data) -> dict[str, Any]:
+    def create_campaign(self, data=None) -> dict[str, Any]:
         """
-        Creates a campaign by sending a POST request to the specified API endpoint with the given data.
-        
+Create Campaign
+
         Args:
-            data: A dictionary containing campaign data required for creation.
-        
+            data (object): data
+
         Returns:
-            A dictionary containing the response from the server as JSON.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is None.
-        
-        Tags:
-            create, campaign, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "audiences": {
+                        "excluded": [
+                          "<string>",
+                          "<string>"
+                        ],
+                        "included": [
+                          "<string>",
+                          "<string>"
+                        ]
+                      },
+                      "campaign-messages": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "definition": {
+                                "channel": "email",
+                                "content": {
+                                  "bcc_email": "<string>",
+                                  "cc_email": "<string>",
+                                  "from_email": "<string>",
+                                  "from_label": "<string>",
+                                  "preview_text": "<string>",
+                                  "reply_to_email": "<string>",
+                                  "subject": "<string>"
+                                },
+                                "label": "<string>"
+                              }
+                            },
+                            "relationships": {
+                              "image": {
+                                "data": {
+                                  "id": "<string>",
+                                  "type": "image"
+                                }
+                              }
+                            },
+                            "type": "campaign-message"
+                          },
+                          {
+                            "attributes": {
+                              "definition": {
+                                "channel": "email",
+                                "content": {
+                                  "bcc_email": "<string>",
+                                  "cc_email": "<string>",
+                                  "from_email": "<string>",
+                                  "from_label": "<string>",
+                                  "preview_text": "<string>",
+                                  "reply_to_email": "<string>",
+                                  "subject": "<string>"
+                                },
+                                "label": "<string>"
+                              }
+                            },
+                            "relationships": {
+                              "image": {
+                                "data": {
+                                  "id": "<string>",
+                                  "type": "image"
+                                }
+                              }
+                            },
+                            "type": "campaign-message"
+                          }
+                        ]
+                      },
+                      "name": "<string>",
+                      "send_options": {
+                        "use_smart_sending": true
+                      },
+                      "send_strategy": {
+                        "datetime": "<dateTime>",
+                        "method": "static",
+                        "options": {
+                          "is_local": true,
+                          "send_past_recipients_immediately": false
+                        }
+                      },
+                      "tracking_options": {
+                        "add_utm": "<boolean>",
+                        "is_tracking_clicks": "<boolean>",
+                        "is_tracking_opens": "<boolean>",
+                        "utm_params": [
+                          {
+                            "name": "<string>",
+                            "value": "<string>"
+                          },
+                          {
+                            "name": "<string>",
+                            "value": "<string>"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "campaign"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/campaigns/"
+        url = f"{self.base_url}/api/campaigns"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -129,143 +261,502 @@ class KlaviyoApp(APIApplication):
 
     def get_campaign(self, id, fields_campaign_message=None, fields_campaign=None, fields_tag=None, include=None) -> dict[str, Any]:
         """
-        Retrieves a campaign by its ID, allowing specification of fields and inclusion of additional data.
-        
+Get Campaign
+
         Args:
-            id: The unique identifier of the campaign to retrieve.
-            fields_campaign_message: Specifies fields related to the campaign message; defaults to None.
-            fields_campaign: Specifies fields related to the campaign; defaults to None.
-            fields_tag: Specifies fields related to tags; defaults to None.
-            include: Additional data to include in the response; defaults to None.
-        
+            id (string): id
+            fields_campaign_message (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'definition.content.subject,created_at'.
+            fields_campaign (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'send_time,send_options.use_smart_sending'.
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'tags,tags'.
+
         Returns:
-            A dictionary containing campaign data.
-        
-        Raises:
-            ValueError: Raised if the required 'id' parameter is missing.
-        
-        Tags:
-            fetch, campaign, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaigns/{id}/"
+        url = f"{self.base_url}/api/campaigns/{id}"
         query_params = {k: v for k, v in [('fields[campaign-message]', fields_campaign_message), ('fields[campaign]', fields_campaign), ('fields[tag]', fields_tag), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_campaign(self, id, data) -> dict[str, Any]:
-        """
-        Updates an existing campaign with the provided data using a PATCH request.
-        
-        Args:
-            id: The unique identifier of the campaign to update.
-            data: The data to update in the campaign.
-        
-        Returns:
-            A dictionary containing the updated campaign data.
-        
-        Raises:
-            ValueError: Raised if either 'id' or 'data' is missing.
-            requests.HTTPError: Raised if the HTTP request returns an unsuccessful status code.
-        
-        Tags:
-            update, campaign, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/campaigns/{id}/"
-        query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
     def delete_campaign(self, id) -> Any:
         """
-        Deletes a campaign by its ID.
-        
+Delete Campaign
+
         Args:
-            id: The ID of the campaign to delete.
-        
+            id (string): id
+
         Returns:
-            The JSON response from the server after deletion.
-        
-        Raises:
-            ValueError: Raised if the required 'id' parameter is missing.
-            requests.exceptions.HTTPError: Raised if the HTTP request encounters an error or the response status code indicates failure.
-        
-        Tags:
-            delete, campaign, management
+            Any: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaigns/{id}/"
+        url = f"{self.base_url}/api/campaigns/{id}"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_campaign_message(self, id, fields_campaign_message=None, fields_campaign=None, fields_template=None, include=None) -> dict[str, Any]:
+    def update_campaign(self, id, data=None) -> dict[str, Any]:
         """
-        Retrieves a campaign message by ID, optionally including specified fields.
-        
-        Args:
-            id: The ID of the campaign message to retrieve.
-            fields_campaign_message: Optional fields to include from the campaign message.
-            fields_campaign: Optional fields to include from the campaign.
-            fields_template: Optional fields to include from the template.
-            include: Optional items to include alongside the message.
-        
-        Returns:
-            A dictionary containing the retrieved campaign message.
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is missing.
-        
-        Tags:
-            retrieve, campaign-message
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaign-messages/{id}/"
-        query_params = {k: v for k, v in [('fields[campaign-message]', fields_campaign_message), ('fields[campaign]', fields_campaign), ('fields[template]', fields_template), ('include', include)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Update Campaign
 
-    def update_campaign_message(self, id, data) -> dict[str, Any]:
-        """
-        Updates a campaign message by sending a patch request to the specified API endpoint.
-        
         Args:
-            id: The ID of the campaign message to be updated.
-            data: The updated data to be applied to the campaign message.
-        
+            id (string): id
+            data (object): data
+
         Returns:
-            A dictionary containing the updated campaign message data.
-        
-        Raises:
-            ValueError: Raised if either 'id' or 'data' is None.
-        
-        Tags:
-            update, campaign, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "audiences": {
+                        "excluded": [
+                          "<string>",
+                          "<string>"
+                        ],
+                        "included": [
+                          "<string>",
+                          "<string>"
+                        ]
+                      },
+                      "name": "<string>",
+                      "send_options": {
+                        "use_smart_sending": true
+                      },
+                      "send_strategy": {
+                        "datetime": "<dateTime>",
+                        "method": "static",
+                        "options": {
+                          "is_local": true,
+                          "send_past_recipients_immediately": false
+                        }
+                      },
+                      "tracking_options": {
+                        "add_utm": "<boolean>",
+                        "is_tracking_clicks": "<boolean>",
+                        "is_tracking_opens": "<boolean>",
+                        "utm_params": [
+                          {
+                            "name": "<string>",
+                            "value": "<string>"
+                          },
+                          {
+                            "name": "<string>",
+                            "value": "<string>"
+                          }
+                        ]
+                      }
+                    },
+                    "id": "<string>",
+                    "type": "campaign"
+                  }
+                }
+                ```
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/campaign-messages/{id}/"
+        url = f"{self.base_url}/api/campaigns/{id}"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_campaign_recipient_estimation(self, id, fields_campaign_recipient_estimation=None) -> dict[str, Any]:
+        """
+Get Campaign Recipient Estimation
+
+        Args:
+            id (string): id
+            fields_campaign_recipient_estimation (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'estimated_recipient_count,estimated_recipient_count'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/campaign-recipient-estimations/{id}"
+        query_params = {k: v for k, v in [('fields[campaign-recipient-estimation]', fields_campaign_recipient_estimation)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def create_campaign_clone(self, data=None) -> dict[str, Any]:
+        """
+Create Campaign Clone
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "new_name": "<string>"
+                    },
+                    "id": "<string>",
+                    "type": "campaign"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/campaign-clone"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_tags_for_campaign(self, id, fields_tag=None) -> dict[str, Any]:
+        """
+Get Tags for Campaign
+
+        Args:
+            id (string): id
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/campaigns/{id}/tags"
+        query_params = {k: v for k, v in [('fields[tag]', fields_tag)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_tag_ids_for_campaign(self, id) -> dict[str, Any]:
+        """
+Get Tag IDs for Campaign
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/campaigns/{id}/relationships/tags"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_messages_for_campaign(self, id, fields_campaign_message=None, fields_campaign=None, fields_image=None, fields_template=None, include=None) -> dict[str, Any]:
+        """
+Get Messages for Campaign
+
+        Args:
+            id (string): id
+            fields_campaign_message (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'definition.content.subject,created_at'.
+            fields_campaign (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'send_time,send_options.use_smart_sending'.
+            fields_image (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'image_url,name'.
+            fields_template (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,text'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'campaign,template'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/campaigns/{id}/campaign-messages"
+        query_params = {k: v for k, v in [('fields[campaign-message]', fields_campaign_message), ('fields[campaign]', fields_campaign), ('fields[image]', fields_image), ('fields[template]', fields_template), ('include', include)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_message_ids_for_campaign(self, id) -> dict[str, Any]:
+        """
+Get Message IDs for Campaign
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/campaigns/{id}/relationships/campaign-messages"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_campaign_message(self, id, fields_campaign_message=None, fields_campaign=None, fields_image=None, fields_template=None, include=None) -> dict[str, Any]:
+        """
+Get Campaign Message
+
+        Args:
+            id (string): id
+            fields_campaign_message (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'definition.content.subject,created_at'.
+            fields_campaign (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'send_time,send_options.use_smart_sending'.
+            fields_image (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'image_url,name'.
+            fields_template (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,text'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'campaign,template'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/campaign-messages/{id}"
+        query_params = {k: v for k, v in [('fields[campaign-message]', fields_campaign_message), ('fields[campaign]', fields_campaign), ('fields[image]', fields_image), ('fields[template]', fields_template), ('include', include)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def update_campaign_message(self, id, data=None) -> dict[str, Any]:
+        """
+Update Campaign Message
+
+        Args:
+            id (string): id
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "definition": {
+                        "channel": "email",
+                        "content": {
+                          "bcc_email": "<string>",
+                          "cc_email": "<string>",
+                          "from_email": "<string>",
+                          "from_label": "<string>",
+                          "preview_text": "<string>",
+                          "reply_to_email": "<string>",
+                          "subject": "<string>"
+                        },
+                        "label": "<string>"
+                      }
+                    },
+                    "id": "<string>",
+                    "relationships": {
+                      "image": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "image"
+                        }
+                      }
+                    },
+                    "type": "campaign-message"
+                  }
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/campaign-messages/{id}"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def assign_template_to_campaign_message(self, data=None) -> dict[str, Any]:
+        """
+Assign Template to Campaign Message
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "id": "<string>",
+                    "relationships": {
+                      "template": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "template"
+                        }
+                      }
+                    },
+                    "type": "campaign-message"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/campaign-message-assign-template"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_campaign_for_campaign_message(self, id, fields_campaign=None) -> dict[str, Any]:
+        """
+Get Campaign for Campaign Message
+
+        Args:
+            id (string): id
+            fields_campaign (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'send_time,send_options.use_smart_sending'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/campaign-messages/{id}/campaign"
+        query_params = {k: v for k, v in [('fields[campaign]', fields_campaign)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_campaign_id_for_campaign_message(self, id) -> dict[str, Any]:
+        """
+Get Campaign ID for Campaign Message
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/campaign-messages/{id}/relationships/campaign"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_template_for_campaign_message(self, id, fields_template=None) -> dict[str, Any]:
+        """
+Get Template for Campaign Message
+
+        Args:
+            id (string): id
+            fields_template (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,text'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/campaign-messages/{id}/template"
+        query_params = {k: v for k, v in [('fields[template]', fields_template)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_template_id_for_campaign_message(self, id) -> dict[str, Any]:
+        """
+Get Template ID for Campaign Message
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/campaign-messages/{id}/relationships/template"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_image_for_campaign_message(self, id, fields_image=None) -> dict[str, Any]:
+        """
+Get Image for Campaign Message
+
+        Args:
+            id (string): id
+            fields_image (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'image_url,name'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/campaign-messages/{id}/image"
+        query_params = {k: v for k, v in [('fields[image]', fields_image)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_image_id_for_campaign_message(self, id) -> dict[str, Any]:
+        """
+Get Image ID for Campaign Message
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/campaign-messages/{id}/relationships/image"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def update_image_for_campaign_message(self, id, data=None) -> Any:
+        """
+Update Image for Campaign Message
+
+        Args:
+            id (string): id
+            data (object): data
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "id": "<string>",
+                    "type": "image"
+                  }
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/campaign-messages/{id}/relationships/image"
         query_params = {}
         response = self._patch(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -273,55 +764,54 @@ class KlaviyoApp(APIApplication):
 
     def get_campaign_send_job(self, id, fields_campaign_send_job=None) -> dict[str, Any]:
         """
-        Retrieves a campaign send job by its ID, optionally specifying fields to include in the response.
-        
+Get Campaign Send Job
+
         Args:
-            id: Unique identifier of the campaign send job.
-            fields_campaign_send_job: Optional list of fields to include in the response.
-        
+            id (string): id
+            fields_campaign_send_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'status,status'.
+
         Returns:
-            A dictionary containing the campaign send job details.
-        
-        Raises:
-            ValueError: Raised if the required 'id' parameter is missing or null.
-        
-        Tags:
-            get, job, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaign-send-jobs/{id}/"
+        url = f"{self.base_url}/api/campaign-send-jobs/{id}"
         query_params = {k: v for k, v in [('fields[campaign-send-job]', fields_campaign_send_job)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_campaign_send_job(self, id, data) -> Any:
+    def cancel_campaign_send(self, id, data=None) -> Any:
         """
-        Updates an existing campaign send job with the provided data.
-        
+Cancel Campaign Send
+
         Args:
-            id: The identifier of the campaign send job to be updated.
-            data: The data used to update the campaign send job.
-        
+            id (string): id
+            data (object): data
+
         Returns:
-            The JSON response from the API after updating the campaign send job.
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' is missing.
-        
-        Tags:
-            update, campaign, management
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "action": "cancel"
+                    },
+                    "id": "<string>",
+                    "type": "campaign-send-job"
+                  }
+                }
+                ```
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/campaign-send-jobs/{id}/"
+        url = f"{self.base_url}/api/campaign-send-jobs/{id}"
         query_params = {}
         response = self._patch(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -329,424 +819,159 @@ class KlaviyoApp(APIApplication):
 
     def get_campaign_recipient_estimation_job(self, id, fields_campaign_recipient_estimation_job=None) -> dict[str, Any]:
         """
-        Retrieve details for a specific campaign recipient estimation job by ID.
-        
+Get Campaign Recipient Estimation Job
+
         Args:
-            id: The unique identifier of the campaign recipient estimation job.
-            fields_campaign_recipient_estimation_job: Optional fields to include in the response (comma-separated string). Omit for all fields.
-        
+            id (string): id
+            fields_campaign_recipient_estimation_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'status,status'.
+
         Returns:
-            A dictionary containing the campaign recipient estimation job's data, including status, metadata, and results.
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is not provided.
-            requests.exceptions.HTTPError: Raised if the API request fails (e.g., invalid ID or server error).
-        
-        Tags:
-            retrieve, api, campaign, estimation-job
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaign-recipient-estimation-jobs/{id}/"
+        url = f"{self.base_url}/api/campaign-recipient-estimation-jobs/{id}"
         query_params = {k: v for k, v in [('fields[campaign-recipient-estimation-job]', fields_campaign_recipient_estimation_job)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_campaign_recipient_estimation(self, id, fields_campaign_recipient_estimation=None) -> dict[str, Any]:
+    def send_campaign(self, data=None) -> dict[str, Any]:
         """
-        Retrieve campaign recipient estimation details for a specific campaign ID.
-        
-        Args:
-            id: Campaign identifier (required) to fetch recipient estimation data
-            fields_campaign_recipient_estimation: Optional fields filter for campaign recipient estimation response
-        
-        Returns:
-            Dictionary containing campaign recipient estimation details and metadata
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is not provided
-            requests.HTTPError: Raised for failed HTTP requests (4xx/5xx status codes)
-        
-        Tags:
-            retrieve, campaign, recipient-estimation, api, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaign-recipient-estimations/{id}/"
-        query_params = {k: v for k, v in [('fields[campaign-recipient-estimation]', fields_campaign_recipient_estimation)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Send Campaign
 
-    def create_campaign_clone(self, data) -> dict[str, Any]:
-        """
-        Creates a clone of a campaign using the provided data.
-        
         Args:
-            data: A dictionary containing the necessary data for creating a campaign clone.
-        
+            data (object): data
+
         Returns:
-            A dictionary containing the JSON response from the campaign cloning request.
-        
-        Raises:
-            ValueError: Raised when the required 'data' parameter is missing.
-        
-        Tags:
-            clone, campaign, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "id": "<string>",
+                    "type": "campaign-send-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/campaign-clone/"
+        url = f"{self.base_url}/api/campaign-send-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_campaign_message_assign_template(self, data) -> dict[str, Any]:
+    def refresh_campaign_recipient_estimation(self, data=None) -> dict[str, Any]:
         """
-        Creates a campaign message by assigning a template with provided data.
-        
+Refresh Campaign Recipient Estimation
+
         Args:
-            data: Dictionary containing data necessary for the campaign message assignment.
-        
+            data (object): data
+
         Returns:
-            A dictionary containing the response from assigning the template to a campaign message.
-        
-        Raises:
-            ValueError: Raised when the required 'data' parameter is missing.
-        
-        Tags:
-            assign, campaign, message
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "id": "<string>",
+                    "type": "campaign-recipient-estimation-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/campaign-message-assign-template/"
+        url = f"{self.base_url}/api/campaign-recipient-estimation-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def create_campaign_send_job(self, data) -> dict[str, Any]:
-        """
-        Creates a campaign send job by sending data to the API endpoint, handling request validation and response parsing.
-        
-        Args:
-            data: Dictionary containing campaign send job configuration data. Must be non-null.
-        
-        Returns:
-            Dictionary containing API response data with details of the created campaign send job.
-        
-        Raises:
-            ValueError: Raised when required parameter 'data' is None.
-            requests.HTTPError: Raised when the API request fails (status code ≥ 400).
-        
-        Tags:
-            create, async-job, campaign, management
-        """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/campaign-send-jobs/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def create_campaign_recipient_estimation_job(self, data) -> dict[str, Any]:
-        """
-        Initiates an asynchronous job to estimate campaign recipients by submitting provided data to the API.
-        
-        Args:
-            data: Payload containing information required for recipient estimation (e.g., campaign parameters or targeting criteria). Must not be None.
-        
-        Returns:
-            Dictionary containing the API response data with details of the created estimation job.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is None.
-            requests.exceptions.HTTPError: Raised for 4XX/5XX status codes from the API.
-        
-        Tags:
-            campaign, async_job, recipient-estimation, api
-        """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/campaign-recipient-estimation-jobs/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_campaign_message_relationships_campaign(self, id) -> dict[str, Any]:
-        """
-        Retrieves campaign relationship data for a specific campaign message from the API.
-        
-        Args:
-            id: The unique identifier of the campaign message for which to fetch relationships (required)
-        
-        Returns:
-            Dictionary containing relationship data between the specified campaign message and its associated campaign.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is not provided
-            HTTPError: Raised for unsuccessful API responses (4xx/5xx status codes)
-        
-        Tags:
-            retrieve, campaign, relationships, api
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaign-messages/{id}/relationships/campaign/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_campaign_message_campaign(self, id, fields_campaign=None) -> dict[str, Any]:
-        """
-        Retrieve campaign details for a specific campaign message using its ID and optional field filtering.
-        
-        Args:
-            id: Unique identifier for the campaign message to fetch associated campaign data
-            fields_campaign: Optional fields to include in the returned campaign data. If None, returns all fields (default: None)
-        
-        Returns:
-            Dictionary containing campaign details as key-value pairs
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is not provided
-            Exception: Raised when the HTTP request fails (via response.raise_for_status)
-        
-        Tags:
-            get, campaign, api, retrieve
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaign-messages/{id}/campaign/"
-        query_params = {k: v for k, v in [('fields[campaign]', fields_campaign)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_campaign_message_relationships_template(self, id) -> dict[str, Any]:
-        """
-        Retrieve the template relationships for a specific campaign message.
-        
-        Args:
-            id: Unique identifier of the campaign message for which to fetch template relationships
-        
-        Returns:
-            Dictionary containing template relationship data retrieved from the API endpoint
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is not provided
-            requests.HTTPError: Raised for unsuccessful HTTP requests (e.g., 4xx/5xx status codes)
-        
-        Tags:
-            campaign, template, relationships, retrieve, api, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaign-messages/{id}/relationships/template/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_campaign_message_template(self, id, fields_template=None) -> dict[str, Any]:
-        """
-        Fetches the message template for a campaign based on the provided ID.
-        
-        Args:
-            id: The unique ID of the campaign.
-            fields_template: Optional fields to include in the template.
-        
-        Returns:
-            A dictionary containing the campaign message template.
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is missing or None.
-        
-        Tags:
-            fetch, campaign, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaign-messages/{id}/template/"
-        query_params = {k: v for k, v in [('fields[template]', fields_template)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_campaign_relationships_tags(self, id) -> dict[str, Any]:
-        """
-        Retrieve tag relationships for a specific campaign via API endpoint.
-        
-        Args:
-            id: Unique identifier of the campaign to fetch tag relationships for
-        
-        Returns:
-            Dictionary containing tag relationship data from the API response
-        
-        Raises:
-            ValueError: When 'id' parameter is None
-            requests.exceptions.HTTPError: If the API request fails (e.g., non-2xx status code)
-        
-        Tags:
-            campaign-tags, api, get, relationships, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaigns/{id}/relationships/tags/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_campaign_tags(self, id, fields_tag=None) -> dict[str, Any]:
-        """
-        Fetches tags associated with a campaign by ID from an API.
-        
-        Args:
-            id: The unique identifier of the campaign.
-            fields_tag: Optional parameter to filter tag fields.
-        
-        Returns:
-            A dictionary containing campaign tags with their associated information.
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is missing or set to None.
-        
-        Tags:
-            retrieve, campaign, tag-management, api-call
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaigns/{id}/tags/"
-        query_params = {k: v for k, v in [('fields[tag]', fields_tag)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_campaign_relationships_campaign_messages(self, id) -> dict[str, Any]:
-        """
-        Fetches campaign relationships for campaign messages by a given campaign ID.
-        
-        Args:
-            id: The ID of the campaign for which relationships are to be retrieved.
-        
-        Returns:
-            A dictionary containing campaign relationship data for messages.
-        
-        Raises:
-            ValueError: Raised if the required 'id' parameter is missing.
-        
-        Tags:
-            fetch, campaign, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaigns/{id}/relationships/campaign-messages/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_campaign_campaign_messages(self, id, fields_campaign_message=None, fields_campaign=None, fields_template=None, include=None) -> dict[str, Any]:
-        """
-        Retrieve campaign messages for a specified campaign ID, allowing for customizable field selection and inclusion.
-        
-        Args:
-            id: The identifier of the campaign to fetch messages from.
-            fields_campaign_message: Optional; fields to include in the campaign message response.
-            fields_campaign: Optional; fields to include in the campaign response.
-            fields_template: Optional; fields to include in the template response.
-            include: Optional; additional data or objects to include in the response.
-        
-        Returns:
-            A dictionary containing campaign messages and other included data.
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is missing.
-        
-        Tags:
-            fetch, campaign, messages, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/campaigns/{id}/campaign-messages/"
-        query_params = {k: v for k, v in [('fields[campaign-message]', fields_campaign_message), ('fields[campaign]', fields_campaign), ('fields[template]', fields_template), ('include', include)] if v is not None}
-        response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def get_catalog_items(self, fields_catalog_item=None, fields_catalog_variant=None, filter=None, include=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Retrieves catalog items from the API, allowing for specification of fields, filters, and sorting.
-        
+Get Catalog Items
+
         Args:
-            fields_catalog_item: Optional list of fields to include for catalog items.
-            fields_catalog_variant: Optional list of fields to include for catalog variants.
-            filter: Optional filter query to apply to the results.
-            include: Optional list of related resources to include.
-            page_cursor: Optional cursor for pagination.
-            sort: Optional sorting criteria.
-        
+            fields_catalog_item (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'images,external_id'.
+            fields_catalog_variant (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'title,price'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`ids`: `any`<br>`category.id`: `equals`<br>`title`: `contains`<br>`published`: `equals` Example: '<string>'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'variants,variants'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'created'.
+
         Returns:
-            A dictionary containing the response data from the API.
-        
-        Raises:
-            requests.HTTPError: Raised when the HTTP request returns an unsuccessful status code.
-        
-        Tags:
-            fetch, api, catalog, important
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/catalog-items/"
+        url = f"{self.base_url}/api/catalog-items"
         query_params = {k: v for k, v in [('fields[catalog-item]', fields_catalog_item), ('fields[catalog-variant]', fields_catalog_variant), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_catalog_item(self, data) -> dict[str, Any]:
+    def create_catalog_item(self, data=None) -> dict[str, Any]:
         """
-        Creates a new catalog item using provided data by sending a POST request to the catalog-items endpoint.
-        
+Create Catalog Item
+
         Args:
-            data: Required data dictionary containing catalog item attributes
-        
+            data (object): data
+
         Returns:
-            Dictionary containing the created catalog item's data from the API response
-        
-        Raises:
-            ValueError: Raised when 'data' parameter is None
-            requests.HTTPError: Raised for unsuccessful HTTP responses (4xx/5xx status codes)
-        
-        Tags:
-            create, catalog-item, post, api, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "catalog_type": "$default",
+                      "custom_metadata": {},
+                      "description": "<string>",
+                      "external_id": "<string>",
+                      "image_full_url": "<string>",
+                      "image_thumbnail_url": "<string>",
+                      "images": [
+                        "<string>",
+                        "<string>"
+                      ],
+                      "integration_type": "$custom",
+                      "price": "<number>",
+                      "published": true,
+                      "title": "<string>",
+                      "url": "<string>"
+                    },
+                    "relationships": {
+                      "categories": {
+                        "data": [
+                          {
+                            "id": "<string>",
+                            "type": "catalog-category"
+                          },
+                          {
+                            "id": "<string>",
+                            "type": "catalog-category"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-item"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-items/"
+        url = f"{self.base_url}/api/catalog-items"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -754,136 +979,697 @@ class KlaviyoApp(APIApplication):
 
     def get_catalog_item(self, id, fields_catalog_item=None, fields_catalog_variant=None, include=None) -> dict[str, Any]:
         """
-        Retrieve a specific catalog item with optional field filtering and related data inclusion
-        
+Get Catalog Item
+
         Args:
-            id: The unique identifier of the catalog item to retrieve
-            fields_catalog_item: Comma-separated fields to include for the catalog item (None returns all fields)
-            fields_catalog_variant: Comma-separated fields to include for associated catalog variants (None returns all fields)
-            include: Related resources to include in the response (comma-separated)
-        
+            id (string): id
+            fields_catalog_item (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'images,external_id'.
+            fields_catalog_variant (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'title,price'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'variants,variants'.
+
         Returns:
-            Dictionary containing the catalog item data and requested associations
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is not provided
-            HTTPError: Raised when the API request fails (e.g., invalid ID or server error)
-        
-        Tags:
-            retrieve, catalog, api, data, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/catalog-items/{id}/"
+        url = f"{self.base_url}/api/catalog-items/{id}"
         query_params = {k: v for k, v in [('fields[catalog-item]', fields_catalog_item), ('fields[catalog-variant]', fields_catalog_variant), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_catalog_item(self, id, data) -> dict[str, Any]:
-        """
-        Updates a catalog item by sending a PATCH request with the provided data to the specified catalog item ID.
-        
-        Args:
-            id: The unique identifier of the catalog item to be updated.
-            data: The updated data payload to be sent in the request body. Must be a valid dictionary with fields matching the catalog item schema.
-        
-        Returns:
-            A dictionary containing the updated catalog item data, including server-generated fields (e.g., timestamps, computed values) where applicable.
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' parameter is None, indicating missing required input.
-            HTTPError: Raised by response.raise_for_status() for unsuccessful HTTP responses (4XX/5XX status codes).
-        
-        Tags:
-            update, catalog-management, api-call, async_job
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-items/{id}/"
-        query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
     def delete_catalog_item(self, id) -> Any:
         """
-        Deletes a catalog item based on the provided ID.
-        
+Delete Catalog Item
+
         Args:
-            id: The ID of the catalog item to delete.
-        
+            id (string): id
+
         Returns:
-            JSON response after successful deletion.
-        
-        Raises:
-            ValueError: Raised if the required 'id' parameter is missing.
-        
-        Tags:
-            delete, catalog-management
+            Any: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/catalog-items/{id}/"
+        url = f"{self.base_url}/api/catalog-items/{id}"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
+    def update_catalog_item(self, id, data=None) -> dict[str, Any]:
+        """
+Update Catalog Item
+
+        Args:
+            id (string): id
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "custom_metadata": {},
+                      "description": "<string>",
+                      "image_full_url": "<string>",
+                      "image_thumbnail_url": "<string>",
+                      "images": [
+                        "<string>",
+                        "<string>"
+                      ],
+                      "price": "<number>",
+                      "published": "<boolean>",
+                      "title": "<string>",
+                      "url": "<string>"
+                    },
+                    "id": "<string>",
+                    "relationships": {
+                      "categories": {
+                        "data": [
+                          {
+                            "id": "<string>",
+                            "type": "catalog-category"
+                          },
+                          {
+                            "id": "<string>",
+                            "type": "catalog-category"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-item"
+                  }
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/catalog-items/{id}"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_bulk_create_catalog_items_jobs(self, fields_catalog_item_bulk_create_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
+        """
+Get Bulk Create Catalog Items Jobs
+
+        Args:
+            fields_catalog_item_bulk_create_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        url = f"{self.base_url}/api/catalog-item-bulk-create-jobs"
+        query_params = {k: v for k, v in [('fields[catalog-item-bulk-create-job]', fields_catalog_item_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def bulk_create_catalog_items(self, data=None) -> dict[str, Any]:
+        """
+Bulk Create Catalog Items
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "items": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "catalog_type": "$default",
+                              "custom_metadata": {},
+                              "description": "<string>",
+                              "external_id": "<string>",
+                              "image_full_url": "<string>",
+                              "image_thumbnail_url": "<string>",
+                              "images": [
+                                "<string>",
+                                "<string>"
+                              ],
+                              "integration_type": "$custom",
+                              "price": "<number>",
+                              "published": true,
+                              "title": "<string>",
+                              "url": "<string>"
+                            },
+                            "relationships": {
+                              "categories": {
+                                "data": [
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-category"
+                                  },
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-category"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "catalog-item"
+                          },
+                          {
+                            "attributes": {
+                              "catalog_type": "$default",
+                              "custom_metadata": {},
+                              "description": "<string>",
+                              "external_id": "<string>",
+                              "image_full_url": "<string>",
+                              "image_thumbnail_url": "<string>",
+                              "images": [
+                                "<string>",
+                                "<string>"
+                              ],
+                              "integration_type": "$custom",
+                              "price": "<number>",
+                              "published": true,
+                              "title": "<string>",
+                              "url": "<string>"
+                            },
+                            "relationships": {
+                              "categories": {
+                                "data": [
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-category"
+                                  },
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-category"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "catalog-item"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-item-bulk-create-job"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/catalog-item-bulk-create-jobs"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_bulk_create_catalog_items_job(self, job_id, fields_catalog_item_bulk_create_job=None, fields_catalog_item=None, include=None) -> dict[str, Any]:
+        """
+Get Bulk Create Catalog Items Job
+
+        Args:
+            job_id (string): job_id
+            fields_catalog_item_bulk_create_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            fields_catalog_item (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'images,external_id'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'items,items'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if job_id is None:
+            raise ValueError("Missing required parameter 'job_id'")
+        url = f"{self.base_url}/api/catalog-item-bulk-create-jobs/{job_id}"
+        query_params = {k: v for k, v in [('fields[catalog-item-bulk-create-job]', fields_catalog_item_bulk_create_job), ('fields[catalog-item]', fields_catalog_item), ('include', include)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_bulk_update_catalog_items_jobs(self, fields_catalog_item_bulk_update_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
+        """
+Get Bulk Update Catalog Items Jobs
+
+        Args:
+            fields_catalog_item_bulk_update_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        url = f"{self.base_url}/api/catalog-item-bulk-update-jobs"
+        query_params = {k: v for k, v in [('fields[catalog-item-bulk-update-job]', fields_catalog_item_bulk_update_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def bulk_update_catalog_items(self, data=None) -> dict[str, Any]:
+        """
+Bulk Update Catalog Items
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "items": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "custom_metadata": {},
+                              "description": "<string>",
+                              "image_full_url": "<string>",
+                              "image_thumbnail_url": "<string>",
+                              "images": [
+                                "<string>",
+                                "<string>"
+                              ],
+                              "price": "<number>",
+                              "published": "<boolean>",
+                              "title": "<string>",
+                              "url": "<string>"
+                            },
+                            "id": "<string>",
+                            "relationships": {
+                              "categories": {
+                                "data": [
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-category"
+                                  },
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-category"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "catalog-item"
+                          },
+                          {
+                            "attributes": {
+                              "custom_metadata": {},
+                              "description": "<string>",
+                              "image_full_url": "<string>",
+                              "image_thumbnail_url": "<string>",
+                              "images": [
+                                "<string>",
+                                "<string>"
+                              ],
+                              "price": "<number>",
+                              "published": "<boolean>",
+                              "title": "<string>",
+                              "url": "<string>"
+                            },
+                            "id": "<string>",
+                            "relationships": {
+                              "categories": {
+                                "data": [
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-category"
+                                  },
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-category"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "catalog-item"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-item-bulk-update-job"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/catalog-item-bulk-update-jobs"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_bulk_update_catalog_items_job(self, job_id, fields_catalog_item_bulk_update_job=None, fields_catalog_item=None, include=None) -> dict[str, Any]:
+        """
+Get Bulk Update Catalog Items Job
+
+        Args:
+            job_id (string): job_id
+            fields_catalog_item_bulk_update_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            fields_catalog_item (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'images,external_id'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'items,items'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if job_id is None:
+            raise ValueError("Missing required parameter 'job_id'")
+        url = f"{self.base_url}/api/catalog-item-bulk-update-jobs/{job_id}"
+        query_params = {k: v for k, v in [('fields[catalog-item-bulk-update-job]', fields_catalog_item_bulk_update_job), ('fields[catalog-item]', fields_catalog_item), ('include', include)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_bulk_delete_catalog_items_jobs(self, fields_catalog_item_bulk_delete_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
+        """
+Get Bulk Delete Catalog Items Jobs
+
+        Args:
+            fields_catalog_item_bulk_delete_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        url = f"{self.base_url}/api/catalog-item-bulk-delete-jobs"
+        query_params = {k: v for k, v in [('fields[catalog-item-bulk-delete-job]', fields_catalog_item_bulk_delete_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def bulk_delete_catalog_items(self, data=None) -> dict[str, Any]:
+        """
+Bulk Delete Catalog Items
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "items": {
+                        "data": [
+                          {
+                            "id": "<string>",
+                            "type": "catalog-item"
+                          },
+                          {
+                            "id": "<string>",
+                            "type": "catalog-item"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-item-bulk-delete-job"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/catalog-item-bulk-delete-jobs"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_bulk_delete_catalog_items_job(self, job_id, fields_catalog_item_bulk_delete_job=None) -> dict[str, Any]:
+        """
+Get Bulk Delete Catalog Items Job
+
+        Args:
+            job_id (string): job_id
+            fields_catalog_item_bulk_delete_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if job_id is None:
+            raise ValueError("Missing required parameter 'job_id'")
+        url = f"{self.base_url}/api/catalog-item-bulk-delete-jobs/{job_id}"
+        query_params = {k: v for k, v in [('fields[catalog-item-bulk-delete-job]', fields_catalog_item_bulk_delete_job)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_items_for_catalog_category(self, id, fields_catalog_item=None, fields_catalog_variant=None, filter=None, include=None, page_cursor=None, sort=None) -> dict[str, Any]:
+        """
+Get Items for Catalog Category
+
+        Args:
+            id (string): id
+            fields_catalog_item (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'images,external_id'.
+            fields_catalog_variant (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'title,price'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`ids`: `any`<br>`category.id`: `equals`<br>`title`: `contains`<br>`published`: `equals` Example: '<string>'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'variants,variants'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'created'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/catalog-categories/{id}/items"
+        query_params = {k: v for k, v in [('fields[catalog-item]', fields_catalog_item), ('fields[catalog-variant]', fields_catalog_variant), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_category_ids_for_catalog_item(self, id, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
+        """
+Get Category IDs for Catalog Item
+
+        Args:
+            id (string): id
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`ids`: `any`<br>`item.id`: `equals`<br>`name`: `contains` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'created'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/catalog-items/{id}/relationships/categories"
+        query_params = {k: v for k, v in [('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def add_categories_to_catalog_item(self, id, data=None) -> Any:
+        """
+Add Categories to Catalog Item
+
+        Args:
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'catalog-category'}, {'id': '<string>', 'type': 'catalog-category'}]".
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "catalog-category"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "catalog-category"
+                    }
+                  ]
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/catalog-items/{id}/relationships/categories"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def remove_categories_from_catalog_item(self, id, data=None) -> Any:
+        """
+Remove Categories from Catalog Item
+
+        Args:
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'catalog-category'}, {'id': '<string>', 'type': 'catalog-category'}]".
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "catalog-category"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "catalog-category"
+                    }
+                  ]
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/catalog-items/{id}/relationships/categories"
+        query_params = {}
+        response = self._delete(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def update_categories_for_catalog_item(self, id, data=None) -> Any:
+        """
+Update Categories for Catalog Item
+
+        Args:
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'catalog-category'}, {'id': '<string>', 'type': 'catalog-category'}]".
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "catalog-category"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "catalog-category"
+                    }
+                  ]
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/catalog-items/{id}/relationships/categories"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
     def get_catalog_variants(self, fields_catalog_variant=None, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Retrieves catalog variants from the API with optional filtering, sorting, and pagination.
-        
+Get Catalog Variants
+
         Args:
-            fields_catalog_variant: Fields to include in the catalog variant response. Defaults to None.
-            filter: Filter criteria for the catalog variants. Defaults to None.
-            page_cursor: Page cursor for pagination. Defaults to None.
-            sort: Sorting criteria for the catalog variants. Defaults to None.
-        
+            fields_catalog_variant (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'title,price'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`ids`: `any`<br>`item.id`: `equals`<br>`sku`: `equals`<br>`title`: `contains`<br>`published`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'created'.
+
         Returns:
-            A dictionary containing the retrieved catalog variants.
-        
-        Raises:
-            requests.exceptions.HTTPError: If the HTTP request fails due to a server error or invalid response.
-        
-        Tags:
-            fetch, catalog, management
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/catalog-variants/"
+        url = f"{self.base_url}/api/catalog-variants"
         query_params = {k: v for k, v in [('fields[catalog-variant]', fields_catalog_variant), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_catalog_variant(self, data) -> dict[str, Any]:
+    def create_catalog_variant(self, data=None) -> dict[str, Any]:
         """
-        Creates a catalog variant using the provided data.
-        
+Create Catalog Variant
+
         Args:
-            data: The data used to create the catalog variant. It must be a dictionary-like object and cannot be None.
-        
+            data (object): data
+
         Returns:
-            A dictionary containing the response from creating the catalog variant.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is missing or None.
-        
-        Tags:
-            create, catalog-management, variant
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "catalog_type": "$default",
+                      "custom_metadata": {},
+                      "description": "<string>",
+                      "external_id": "<string>",
+                      "image_full_url": "<string>",
+                      "image_thumbnail_url": "<string>",
+                      "images": [
+                        "<string>",
+                        "<string>"
+                      ],
+                      "integration_type": "$custom",
+                      "inventory_policy": 0,
+                      "inventory_quantity": "<number>",
+                      "price": "<number>",
+                      "published": true,
+                      "sku": "<string>",
+                      "title": "<string>",
+                      "url": "<string>"
+                    },
+                    "relationships": {
+                      "item": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "catalog-item"
+                        }
+                      }
+                    },
+                    "type": "catalog-variant"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-variants/"
+        url = f"{self.base_url}/api/catalog-variants"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -891,504 +1677,201 @@ class KlaviyoApp(APIApplication):
 
     def get_catalog_variant(self, id, fields_catalog_variant=None) -> dict[str, Any]:
         """
-        Retrieves a catalog variant from the API based on its ID, optionally specifying fields to return.
-        
+Get Catalog Variant
+
         Args:
-            id: The unique identifier of the catalog variant to retrieve.
-            fields_catalog_variant: An optional list of fields to include in the catalog variant response.
-        
+            id (string): id
+            fields_catalog_variant (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'title,price'.
+
         Returns:
-            A dictionary containing the details of the catalog variant.
-        
-        Raises:
-            ValueError: Raised if the required parameter 'id' is missing.
-        
-        Tags:
-            fetch, catalog, api-call
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/catalog-variants/{id}/"
+        url = f"{self.base_url}/api/catalog-variants/{id}"
         query_params = {k: v for k, v in [('fields[catalog-variant]', fields_catalog_variant)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_catalog_variant(self, id, data) -> dict[str, Any]:
-        """
-        Updates a catalog variant by ID with provided data using a PATCH request.
-        
-        Args:
-            id: The unique identifier of the catalog variant to update.
-            data: The data payload containing fields to update for the catalog variant.
-        
-        Returns:
-            A dictionary containing the updated catalog variant data from the JSON response.
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' parameters are None.
-            requests.exceptions.HTTPError: Raised when the PATCH request fails (e.g., invalid ID or malformed data).
-        
-        Tags:
-            update, catalog-variant, patch, api, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-variants/{id}/"
-        query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
     def delete_catalog_variant(self, id) -> Any:
         """
-        Deletes a catalog variant by its ID.
-        
+Delete Catalog Variant
+
         Args:
-            id: The ID of the catalog variant to be deleted.
-        
+            id (string): id
+
         Returns:
-            The JSON response from the server after deletion.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing or None.
-            HTTPError: Raised if the HTTP request fails or returns an unsuccessful status code.
-        
-        Tags:
-            delete, catalog-management
+            Any: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/catalog-variants/{id}/"
+        url = f"{self.base_url}/api/catalog-variants/{id}"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_catalog_categories(self, fields_catalog_category=None, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
+    def update_catalog_variant(self, id, data=None) -> dict[str, Any]:
         """
-        Retrieves catalog categories via API with optional filtering and pagination
-        
-        Args:
-            fields_catalog_category: Optional list of fields to include in the catalog category response
-            filter: Optional filter to apply to the catalog categories
-            page_cursor: Optional page cursor for pagination
-            sort: Optional parameter to sort the catalog categories
-        
-        Returns:
-            A dictionary containing the catalog categories data
-        
-        Raises:
-            HTTPError: If the API request fails (e.g., invalid URL, network errors, server errors)
-        
-        Tags:
-            list, management, catalog, api-call
-        """
-        url = f"{self.base_url}/api/catalog-categories/"
-        query_params = {k: v for k, v in [('fields[catalog-category]', fields_catalog_category), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Update Catalog Variant
 
-    def create_catalog_category(self, data) -> dict[str, Any]:
-        """
-        Creates a new catalog category by sending a POST request with the provided data.
-        
         Args:
-            data: The data used to create the catalog category. Must be a dictionary.
-        
+            id (string): id
+            data (object): data
+
         Returns:
-            A dictionary containing the newly created catalog category's details.
-        
-        Raises:
-            ValueError: Raised when the required parameter 'data' is missing.
-        
-        Tags:
-            create, catalog, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "custom_metadata": {},
+                      "description": "<string>",
+                      "image_full_url": "<string>",
+                      "image_thumbnail_url": "<string>",
+                      "images": [
+                        "<string>",
+                        "<string>"
+                      ],
+                      "inventory_policy": 0,
+                      "inventory_quantity": "<number>",
+                      "price": "<number>",
+                      "published": "<boolean>",
+                      "sku": "<string>",
+                      "title": "<string>",
+                      "url": "<string>"
+                    },
+                    "id": "<string>",
+                    "type": "catalog-variant"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-categories/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_catalog_category(self, id, fields_catalog_category=None) -> dict[str, Any]:
-        """
-        Retrieves a catalog category by its ID, optionally specifying fields to include.
-        
-        Args:
-            id: The ID of the catalog category to fetch.
-            fields_catalog_category: Optional list of fields to include in the response for the catalog category.
-        
-        Returns:
-            A dictionary containing the catalog category details.
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is missing.
-        
-        Tags:
-            fetch, catalog, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/catalog-categories/{id}/"
-        query_params = {k: v for k, v in [('fields[catalog-category]', fields_catalog_category)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def update_catalog_category(self, id, data) -> dict[str, Any]:
-        """
-        Updates a catalog category by making a PATCH request to the API endpoint with provided data.
-        
-        Args:
-            id: Unique identifier of the catalog category to update.
-            data: Dictionary containing updated category details.
-        
-        Returns:
-            Dictionary containing the updated catalog category data from the API response.
-        
-        Raises:
-            ValueError: If either 'id' or 'data' parameter is None.
-            requests.exceptions.HTTPError: If the API request fails (non-2xx status code).
-        
-        Tags:
-            update, catalog, category, api, patch, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-categories/{id}/"
+        url = f"{self.base_url}/api/catalog-variants/{id}"
         query_params = {}
         response = self._patch(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def delete_catalog_category(self, id) -> Any:
-        """
-        Deletes a catalog category by its ID.
-        
-        Args:
-            id: Unique identifier of the catalog category to delete.
-        
-        Returns:
-            Parsed JSON response from the API call, typically containing deletion confirmation or status.
-        
-        Raises:
-            ValueError: Raised if 'id' is None or invalid.
-            requests.exceptions.HTTPError: Raised if the API request fails (e.g., 404 Not Found, 500 Internal Server Error).
-        
-        Tags:
-            delete, catalog, management, api-call
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/catalog-categories/{id}/"
-        query_params = {}
-        response = self._delete(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_create_items_jobs(self, fields_catalog_item_bulk_create_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
-        """
-        Retrieves a list of catalog item bulk create jobs from an API with optional filtering and pagination.
-        
-        Args:
-            fields_catalog_item_bulk_create_job: Optional fields to include in the response for the catalog item bulk create jobs.
-            filter: Optional filter for the query.
-            page_cursor: Optional cursor for pagination.
-        
-        Returns:
-            A dictionary containing the response data.
-        
-        Raises:
-            requests.exceptions.HTTPError: Raised if the HTTP request returns an unsuccessful status code.
-        
-        Tags:
-            list, api, catalog, async_job, management
-        """
-        url = f"{self.base_url}/api/catalog-item-bulk-create-jobs/"
-        query_params = {k: v for k, v in [('fields[catalog-item-bulk-create-job]', fields_catalog_item_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def spawn_create_items_job(self, data) -> dict[str, Any]:
-        """
-        Initiates a job to create items in bulk using the provided data.
-        
-        Args:
-            data: The data used for bulk item creation. Must be a dictionary.
-        
-        Returns:
-            A dictionary containing the response from the server after initiating the creation job.
-        
-        Raises:
-            ValueError: Raised if the required 'data' parameter is missing.
-        
-        Tags:
-            create, bulk, job, catalog, management
-        """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-item-bulk-create-jobs/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_create_items_job(self, job_id, fields_catalog_item_bulk_create_job=None, fields_catalog_item=None, include=None) -> dict[str, Any]:
-        """
-        Retrieves details of a catalog item bulk creation job by its ID, including options for specifying which fields and related data to include.
-        
-        Args:
-            job_id: The ID of the catalog item bulk creation job to retrieve.
-            fields_catalog_item_bulk_create_job: Optional parameter to specify fields for the bulk create job.
-            fields_catalog_item: Optional parameter to specify fields for the catalog items.
-            include: Optional parameter to specify related items to include.
-        
-        Returns:
-            Dictionary with details of the job.
-        
-        Raises:
-            ValueError: Raised if the 'job_id' is None.
-        
-        Tags:
-            fetch, retrieve, management
-        """
-        if job_id is None:
-            raise ValueError("Missing required parameter 'job_id'")
-        url = f"{self.base_url}/api/catalog-item-bulk-create-jobs/{job_id}/"
-        query_params = {k: v for k, v in [('fields[catalog-item-bulk-create-job]', fields_catalog_item_bulk_create_job), ('fields[catalog-item]', fields_catalog_item), ('include', include)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_update_items_jobs(self, fields_catalog_item_bulk_update_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
-        """
-        Retrieve paginated list of catalog item bulk update jobs using REST API endpoint.
-        
-        Args:
-            fields_catalog_item_bulk_update_job: Fields to include for each catalog item bulk update job (comma-delimited string)
-            filter: Query filter to limit results (string)
-            page_cursor: Pagination cursor for fetching subsequent pages (string)
-        
-        Returns:
-            Dictionary containing paginated API response data with job listings
-        
-        Raises:
-            requests.exceptions.HTTPError: When API request fails with HTTP error status code
-        
-        Tags:
-            list, management, api, bulk-operations, pagination
-        """
-        url = f"{self.base_url}/api/catalog-item-bulk-update-jobs/"
-        query_params = {k: v for k, v in [('fields[catalog-item-bulk-update-job]', fields_catalog_item_bulk_update_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def spawn_update_items_job(self, data) -> dict[str, Any]:
-        """
-        Spawns an asynchronous job to update catalog items in bulk.
-        
-        Args:
-            data: Dictionary of data used for updating catalog items.
-        
-        Returns:
-            Dictionary with job details returned as JSON.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is missing or null.
-        
-        Tags:
-            update, bulk-job, async_job, management
-        """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-item-bulk-update-jobs/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_update_items_job(self, job_id, fields_catalog_item_bulk_update_job=None, fields_catalog_item=None, include=None) -> dict[str, Any]:
-        """
-        Retrieves details of a catalog item bulk update job by its ID.
-        
-        Args:
-            job_id: The ID of the catalog item bulk update job.
-            fields_catalog_item_bulk_update_job: Optional fields to include for the catalog item bulk update job.
-            fields_catalog_item: Optional fields to include for the catalog item.
-            include: Optional parameters to include in the response.
-        
-        Returns:
-            A dictionary containing job details.
-        
-        Raises:
-            ValueError: Raised if the required 'job_id' parameter is missing.
-        
-        Tags:
-            retrieve, job, api
-        """
-        if job_id is None:
-            raise ValueError("Missing required parameter 'job_id'")
-        url = f"{self.base_url}/api/catalog-item-bulk-update-jobs/{job_id}/"
-        query_params = {k: v for k, v in [('fields[catalog-item-bulk-update-job]', fields_catalog_item_bulk_update_job), ('fields[catalog-item]', fields_catalog_item), ('include', include)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_delete_items_jobs(self, fields_catalog_item_bulk_delete_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
-        """
-        Retrieves a list of catalog item bulk delete jobs with specified fields and filtering.
-        
-        Args:
-            fields_catalog_item_bulk_delete_job: Optional list of fields to include in the response for catalog item bulk delete jobs.
-            filter: Optional filter to apply to the results.
-            page_cursor: Optional cursor for pagination.
-        
-        Returns:
-            A dictionary containing the catalog item bulk delete jobs.
-        
-        Raises:
-            requests.HTTPError: Raised when the HTTP request returns an unsuccessful status code.
-        
-        Tags:
-            list, catalog, management
-        """
-        url = f"{self.base_url}/api/catalog-item-bulk-delete-jobs/"
-        query_params = {k: v for k, v in [('fields[catalog-item-bulk-delete-job]', fields_catalog_item_bulk_delete_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def spawn_delete_items_job(self, data) -> dict[str, Any]:
-        """
-        Initiates a job to delete items in bulk.
-        
-        Args:
-            data: Data required for the bulk delete operation
-        
-        Returns:
-            A dictionary containing the response from the bulk delete job initiation
-        
-        Raises:
-            ValueError: Raised when the required 'data' parameter is missing
-        
-        Tags:
-            bulk, delete, async_job, management
-        """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-item-bulk-delete-jobs/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_delete_items_job(self, job_id, fields_catalog_item_bulk_delete_job=None) -> dict[str, Any]:
-        """
-        Retrieves a catalog item bulk delete job based on the provided job ID.
-        
-        Args:
-            job_id: The ID of the catalog item bulk delete job to retrieve.
-            fields_catalog_item_bulk_delete_job: Optional fields to include in the response for the catalog item bulk delete job.
-        
-        Returns:
-            A dictionary containing details of the catalog item bulk delete job.
-        
-        Raises:
-            ValueError: Raised when the required 'job_id' parameter is missing or None.
-        
-        Tags:
-            get, job, catalog, api, management
-        """
-        if job_id is None:
-            raise ValueError("Missing required parameter 'job_id'")
-        url = f"{self.base_url}/api/catalog-item-bulk-delete-jobs/{job_id}/"
-        query_params = {k: v for k, v in [('fields[catalog-item-bulk-delete-job]', fields_catalog_item_bulk_delete_job)] if v is not None}
-        response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def get_create_variants_jobs(self, fields_catalog_variant_bulk_create_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
         """
-        Retrieves catalog variant bulk create jobs data from the API.
-        
+Get Create Variants Jobs
+
         Args:
-            fields_catalog_variant_bulk_create_job: Optional list or string specifying fields to include in the response.
-            filter: Optional filter criteria for the results.
-            page_cursor: Optional page cursor for pagination purposes.
-        
+            fields_catalog_variant_bulk_create_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
         Returns:
-            A dictionary containing the API response data.
-        
-        Raises:
-            requests.exceptions.HTTPError: Raised when an HTTP error occurs in the request.
-        
-        Tags:
-            retrieve, batch, catalog
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/catalog-variant-bulk-create-jobs/"
+        url = f"{self.base_url}/api/catalog-variant-bulk-create-jobs"
         query_params = {k: v for k, v in [('fields[catalog-variant-bulk-create-job]', fields_catalog_variant_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def spawn_create_variants_job(self, data) -> dict[str, Any]:
+    def bulk_create_catalog_variants(self, data=None) -> dict[str, Any]:
         """
-        Initiates an asynchronous job to bulk-create catalog variants using the provided data.
-        
+Bulk Create Catalog Variants
+
         Args:
-            data: Required dictionary containing the variant data to be created in bulk. Must not be None.
-        
+            data (object): data
+
         Returns:
-            Dictionary containing the job details as returned by the API, including job identifiers and initial status.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is not provided (None value)
-            requests.HTTPError: Raised when the API request fails with a non-2xx status code
-        
-        Tags:
-            async-job, catalog, bulk-operations, create, variant-management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "variants": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "catalog_type": "$default",
+                              "custom_metadata": {},
+                              "description": "<string>",
+                              "external_id": "<string>",
+                              "image_full_url": "<string>",
+                              "image_thumbnail_url": "<string>",
+                              "images": [
+                                "<string>",
+                                "<string>"
+                              ],
+                              "integration_type": "$custom",
+                              "inventory_policy": 0,
+                              "inventory_quantity": "<number>",
+                              "price": "<number>",
+                              "published": true,
+                              "sku": "<string>",
+                              "title": "<string>",
+                              "url": "<string>"
+                            },
+                            "relationships": {
+                              "item": {
+                                "data": {
+                                  "id": "<string>",
+                                  "type": "catalog-item"
+                                }
+                              }
+                            },
+                            "type": "catalog-variant"
+                          },
+                          {
+                            "attributes": {
+                              "catalog_type": "$default",
+                              "custom_metadata": {},
+                              "description": "<string>",
+                              "external_id": "<string>",
+                              "image_full_url": "<string>",
+                              "image_thumbnail_url": "<string>",
+                              "images": [
+                                "<string>",
+                                "<string>"
+                              ],
+                              "integration_type": "$custom",
+                              "inventory_policy": 0,
+                              "inventory_quantity": "<number>",
+                              "price": "<number>",
+                              "published": true,
+                              "sku": "<string>",
+                              "title": "<string>",
+                              "url": "<string>"
+                            },
+                            "relationships": {
+                              "item": {
+                                "data": {
+                                  "id": "<string>",
+                                  "type": "catalog-item"
+                                }
+                              }
+                            },
+                            "type": "catalog-variant"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-variant-bulk-create-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-variant-bulk-create-jobs/"
+        url = f"{self.base_url}/api/catalog-variant-bulk-create-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -1396,26 +1879,20 @@ class KlaviyoApp(APIApplication):
 
     def get_create_variants_job(self, job_id, fields_catalog_variant_bulk_create_job=None, fields_catalog_variant=None, include=None) -> dict[str, Any]:
         """
-        Retrieves a Catalog Variant Bulk Create Job by its ID, allowing for customizable data fields and inclusions.
-        
+Get Create Variants Job
+
         Args:
-            job_id: The unique identifier for the bulk create job.
-            fields_catalog_variant_bulk_create_job: Optional fields to include for the bulk create job.
-            fields_catalog_variant: Optional fields to include for each catalog variant.
-            include: Optional resources to include in the response.
-        
+            job_id (string): job_id
+            fields_catalog_variant_bulk_create_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            fields_catalog_variant (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'title,price'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'variants,variants'.
+
         Returns:
-            A dictionary containing the job details and any requested inclusions.
-        
-        Raises:
-            ValueError: Raised if the required 'job_id' parameter is missing.
-        
-        Tags:
-            fetch, job, catalog, management
+            dict[str, Any]: Success
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
-        url = f"{self.base_url}/api/catalog-variant-bulk-create-jobs/{job_id}/"
+        url = f"{self.base_url}/api/catalog-variant-bulk-create-jobs/{job_id}"
         query_params = {k: v for k, v in [('fields[catalog-variant-bulk-create-job]', fields_catalog_variant_bulk_create_job), ('fields[catalog-variant]', fields_catalog_variant), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -1423,51 +1900,94 @@ class KlaviyoApp(APIApplication):
 
     def get_update_variants_jobs(self, fields_catalog_variant_bulk_update_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
         """
-        Retrieve paginated catalog variant bulk update jobs via API endpoint with filtering and field selection.
-        
+Get Update Variants Jobs
+
         Args:
-            fields_catalog_variant_bulk_update_job: Comma-separated fields to include in catalog variant job objects
-            filter: Criteria to filter jobs, formatted as API-specific filter expression
-            page_cursor: Pagination cursor for fetching specific results page
-        
+            fields_catalog_variant_bulk_update_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
         Returns:
-            Dictionary containing API response data including jobs list and pagination details
-        
-        Raises:
-            requests.HTTPError: On invalid API request or server errors (4XX/5XX status codes)
-        
-        Tags:
-            retrieve, list, catalog, bulk-job, pagination, api
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/catalog-variant-bulk-update-jobs/"
+        url = f"{self.base_url}/api/catalog-variant-bulk-update-jobs"
         query_params = {k: v for k, v in [('fields[catalog-variant-bulk-update-job]', fields_catalog_variant_bulk_update_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def spawn_update_variants_job(self, data) -> dict[str, Any]:
+    def bulk_update_catalog_variants(self, data=None) -> dict[str, Any]:
         """
-        Spawns a job to update variants in bulk via an API request.
-        
+Bulk Update Catalog Variants
+
         Args:
-            data: Data used for the bulk update job.
-        
+            data (object): data
+
         Returns:
-            A dictionary containing the response from the API.
-        
-        Raises:
-            ValueError: Raised if the required 'data' parameter is missing or None.
-        
-        Tags:
-            update, job, bulk, api-request, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "variants": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "custom_metadata": {},
+                              "description": "<string>",
+                              "image_full_url": "<string>",
+                              "image_thumbnail_url": "<string>",
+                              "images": [
+                                "<string>",
+                                "<string>"
+                              ],
+                              "inventory_policy": 2,
+                              "inventory_quantity": "<number>",
+                              "price": "<number>",
+                              "published": "<boolean>",
+                              "sku": "<string>",
+                              "title": "<string>",
+                              "url": "<string>"
+                            },
+                            "id": "<string>",
+                            "type": "catalog-variant"
+                          },
+                          {
+                            "attributes": {
+                              "custom_metadata": {},
+                              "description": "<string>",
+                              "image_full_url": "<string>",
+                              "image_thumbnail_url": "<string>",
+                              "images": [
+                                "<string>",
+                                "<string>"
+                              ],
+                              "inventory_policy": 0,
+                              "inventory_quantity": "<number>",
+                              "price": "<number>",
+                              "published": "<boolean>",
+                              "sku": "<string>",
+                              "title": "<string>",
+                              "url": "<string>"
+                            },
+                            "id": "<string>",
+                            "type": "catalog-variant"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-variant-bulk-update-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-variant-bulk-update-jobs/"
+        url = f"{self.base_url}/api/catalog-variant-bulk-update-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -1475,27 +1995,20 @@ class KlaviyoApp(APIApplication):
 
     def get_update_variants_job(self, job_id, fields_catalog_variant_bulk_update_job=None, fields_catalog_variant=None, include=None) -> dict[str, Any]:
         """
-        Retrieves details of a specific catalog variant bulk update job using the provided job ID.
-        
+Get Update Variants Job
+
         Args:
-            job_id: The unique identifier of the catalog variant bulk update job to retrieve.
-            fields_catalog_variant_bulk_update_job: Optional fields to include in the catalog-variant-bulk-update-job response (comma-separated string).
-            fields_catalog_variant: Optional fields to include for catalog variants in the response (comma-separated string).
-            include: Optional related resources to include in the response (comma-separated string).
-        
+            job_id (string): job_id
+            fields_catalog_variant_bulk_update_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            fields_catalog_variant (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'title,price'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'variants,variants'.
+
         Returns:
-            A dictionary containing the job details and requested fields/relationships.
-        
-        Raises:
-            ValueError: When the required 'job_id' parameter is not provided.
-            HTTPError: When the API request fails (e.g., invalid job ID or server error).
-        
-        Tags:
-            get, async-job, catalog, variant, management
+            dict[str, Any]: Success
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
-        url = f"{self.base_url}/api/catalog-variant-bulk-update-jobs/{job_id}/"
+        url = f"{self.base_url}/api/catalog-variant-bulk-update-jobs/{job_id}"
         query_params = {k: v for k, v in [('fields[catalog-variant-bulk-update-job]', fields_catalog_variant_bulk_update_job), ('fields[catalog-variant]', fields_catalog_variant), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -1503,52 +2016,60 @@ class KlaviyoApp(APIApplication):
 
     def get_delete_variants_jobs(self, fields_catalog_variant_bulk_delete_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
         """
-        Retrieves catalog variant bulk delete jobs with optional filtering and pagination.
-        
+Get Delete Variants Jobs
+
         Args:
-            fields_catalog_variant_bulk_delete_job: Optional fields to include in the response for catalog variant bulk delete jobs.
-            filter: Optional query filter to narrow down the results.
-            page_cursor: Optional page cursor for pagination.
-        
+            fields_catalog_variant_bulk_delete_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
         Returns:
-            A dictionary containing the response from the API about catalog variant bulk delete jobs.
-        
-        Raises:
-            requests.exceptions.HTTPError: Raised if the HTTP request returns an unsuccessful status code.
-        
-        Tags:
-            retrieve, bulk, delete, management
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/catalog-variant-bulk-delete-jobs/"
+        url = f"{self.base_url}/api/catalog-variant-bulk-delete-jobs"
         query_params = {k: v for k, v in [('fields[catalog-variant-bulk-delete-job]', fields_catalog_variant_bulk_delete_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def spawn_delete_variants_job(self, data) -> dict[str, Any]:
+    def bulk_delete_catalog_variants(self, data=None) -> dict[str, Any]:
         """
-        Initiates an asynchronous job to delete multiple catalog variants using bulk delete operation.
-        
+Bulk Delete Catalog Variants
+
         Args:
-            data: Payload containing the variants to be deleted. Must not be None.
-        
+            data (object): data
+
         Returns:
-            Dictionary containing metadata and status of the spawned bulk-delete job.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is None, indicating missing required input.
-            HTTPError: Raised when the API request fails (handled via response.raise_for_status()).
-        
-        Tags:
-            async_job, bulk-delete, catalog, variants, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "variants": {
+                        "data": [
+                          {
+                            "id": "<string>",
+                            "type": "catalog-variant"
+                          },
+                          {
+                            "id": "<string>",
+                            "type": "catalog-variant"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-variant-bulk-delete-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-variant-bulk-delete-jobs/"
+        url = f"{self.base_url}/api/catalog-variant-bulk-delete-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -1556,78 +2077,315 @@ class KlaviyoApp(APIApplication):
 
     def get_delete_variants_job(self, job_id, fields_catalog_variant_bulk_delete_job=None) -> dict[str, Any]:
         """
-        Retrieves the status and details of a specific catalog variant bulk delete job.
-        
+Get Delete Variants Job
+
         Args:
-            job_id: The unique identifier of the bulk delete job to retrieve (required).
-            fields_catalog_variant_bulk_delete_job: Optional comma-separated string specifying fields to include in the response.
-        
+            job_id (string): job_id
+            fields_catalog_variant_bulk_delete_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+
         Returns:
-            A dictionary containing the job status and details as returned by the API.
-        
-        Raises:
-            ValueError: Raised when the required 'job_id' parameter is not provided.
-            requests.exceptions.HTTPError: Raised for invalid/expired job IDs or API request failures.
-        
-        Tags:
-            catalog, variant, management, async_job, status
+            dict[str, Any]: Success
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
-        url = f"{self.base_url}/api/catalog-variant-bulk-delete-jobs/{job_id}/"
+        url = f"{self.base_url}/api/catalog-variant-bulk-delete-jobs/{job_id}"
         query_params = {k: v for k, v in [('fields[catalog-variant-bulk-delete-job]', fields_catalog_variant_bulk_delete_job)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
+    def get_variants_for_catalog_item(self, id, fields_catalog_variant=None, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
+        """
+Get Variants for Catalog Item
+
+        Args:
+            id (string): id
+            fields_catalog_variant (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'title,price'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`ids`: `any`<br>`item.id`: `equals`<br>`sku`: `equals`<br>`title`: `contains`<br>`published`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'created'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/catalog-items/{id}/variants"
+        query_params = {k: v for k, v in [('fields[catalog-variant]', fields_catalog_variant), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_variant_ids_for_catalog_item(self, id, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
+        """
+Get Variant IDs for Catalog Item
+
+        Args:
+            id (string): id
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`ids`: `any`<br>`item.id`: `equals`<br>`sku`: `equals`<br>`title`: `contains`<br>`published`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'created'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/catalog-items/{id}/relationships/variants"
+        query_params = {k: v for k, v in [('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_catalog_categories(self, fields_catalog_category=None, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
+        """
+Get Catalog Categories
+
+        Args:
+            fields_catalog_category (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'external_id,external_id'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`ids`: `any`<br>`item.id`: `equals`<br>`name`: `contains` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'created'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        url = f"{self.base_url}/api/catalog-categories"
+        query_params = {k: v for k, v in [('fields[catalog-category]', fields_catalog_category), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def create_catalog_category(self, data=None) -> dict[str, Any]:
+        """
+Create Catalog Category
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "catalog_type": "$default",
+                      "external_id": "<string>",
+                      "integration_type": "$custom",
+                      "name": "<string>"
+                    },
+                    "relationships": {
+                      "items": {
+                        "data": [
+                          {
+                            "id": "<string>",
+                            "type": "catalog-item"
+                          },
+                          {
+                            "id": "<string>",
+                            "type": "catalog-item"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-category"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/catalog-categories"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_catalog_category(self, id, fields_catalog_category=None) -> dict[str, Any]:
+        """
+Get Catalog Category
+
+        Args:
+            id (string): id
+            fields_catalog_category (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'external_id,external_id'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/catalog-categories/{id}"
+        query_params = {k: v for k, v in [('fields[catalog-category]', fields_catalog_category)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def delete_catalog_category(self, id) -> Any:
+        """
+Delete Catalog Category
+
+        Args:
+            id (string): id
+
+        Returns:
+            Any: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/catalog-categories/{id}"
+        query_params = {}
+        response = self._delete(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def update_catalog_category(self, id, data=None) -> dict[str, Any]:
+        """
+Update Catalog Category
+
+        Args:
+            id (string): id
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "name": "<string>"
+                    },
+                    "id": "<string>",
+                    "relationships": {
+                      "items": {
+                        "data": [
+                          {
+                            "id": "<string>",
+                            "type": "catalog-item"
+                          },
+                          {
+                            "id": "<string>",
+                            "type": "catalog-item"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-category"
+                  }
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/catalog-categories/{id}"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
     def get_create_categories_jobs(self, fields_catalog_category_bulk_create_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
         """
-        Retrieves a list of catalog category bulk create jobs, optionally filtering by specified criteria or fields.
-        
+Get Create Categories Jobs
+
         Args:
-            fields_catalog_category_bulk_create_job: Fields to include in the response for each catalog category bulk create job.
-            filter: Criteria to filter the jobs by.
-            page_cursor: Cursor for pagination, indicating where to start or resume retrieving jobs.
-        
+            fields_catalog_category_bulk_create_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
         Returns:
-            A dictionary containing the catalog category bulk create jobs with metadata.
-        
-        Raises:
-            requests.HTTPError: Raised if the HTTP request returns an unsuccessful status code.
-        
-        Tags:
-            list, management, catalog, async_job
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/catalog-category-bulk-create-jobs/"
+        url = f"{self.base_url}/api/catalog-category-bulk-create-jobs"
         query_params = {k: v for k, v in [('fields[catalog-category-bulk-create-job]', fields_catalog_category_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def spawn_create_categories_job(self, data) -> dict[str, Any]:
+    def bulk_create_catalog_categories(self, data=None) -> dict[str, Any]:
         """
-        Initiates an asynchronous job to create categories in the catalog by submitting a data payload.
-        
+Bulk Create Catalog Categories
+
         Args:
-            data: Payload containing category data for creation (required)
-        
+            data (object): data
+
         Returns:
-            Dictionary containing the job details and response data from the API after successful submission
-        
-        Raises:
-            ValueError: If 'data' parameter is None or missing
-            requests.HTTPError: If the API request fails (e.g., 4XX/5XX status codes)
-        
-        Tags:
-            create, async_job, catalog, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "categories": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "catalog_type": "$default",
+                              "external_id": "<string>",
+                              "integration_type": "$custom",
+                              "name": "<string>"
+                            },
+                            "relationships": {
+                              "items": {
+                                "data": [
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-item"
+                                  },
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-item"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "catalog-category"
+                          },
+                          {
+                            "attributes": {
+                              "catalog_type": "$default",
+                              "external_id": "<string>",
+                              "integration_type": "$custom",
+                              "name": "<string>"
+                            },
+                            "relationships": {
+                              "items": {
+                                "data": [
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-item"
+                                  },
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-item"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "catalog-category"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-category-bulk-create-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-category-bulk-create-jobs/"
+        url = f"{self.base_url}/api/catalog-category-bulk-create-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -1635,26 +2393,20 @@ class KlaviyoApp(APIApplication):
 
     def get_create_categories_job(self, job_id, fields_catalog_category_bulk_create_job=None, fields_catalog_category=None, include=None) -> dict[str, Any]:
         """
-        Retrieves information about a bulk category creation job based on the provided job ID.
-        
+Get Create Categories Job
+
         Args:
-            job_id: The ID of the job to retrieve information from.
-            fields_catalog_category_bulk_create_job: Optional fields to include in the bulk category creation job response.
-            fields_catalog_category: Optional fields to include for each catalog category in the response.
-            include: Optional parameters to include in the response.
-        
+            job_id (string): job_id
+            fields_catalog_category_bulk_create_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            fields_catalog_category (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'external_id,external_id'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'categories,categories'.
+
         Returns:
-            A dictionary containing the job details.
-        
-        Raises:
-            ValueError: Raised if the required 'job_id' parameter is missing.
-        
-        Tags:
-            retrieve, job, catalog-management
+            dict[str, Any]: Success
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
-        url = f"{self.base_url}/api/catalog-category-bulk-create-jobs/{job_id}/"
+        url = f"{self.base_url}/api/catalog-category-bulk-create-jobs/{job_id}"
         query_params = {k: v for k, v in [('fields[catalog-category-bulk-create-job]', fields_catalog_category_bulk_create_job), ('fields[catalog-category]', fields_catalog_category), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -1662,52 +2414,94 @@ class KlaviyoApp(APIApplication):
 
     def get_update_categories_jobs(self, fields_catalog_category_bulk_update_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
         """
-        Retrieve paginated list of catalog category bulk update jobs from the API endpoint.
-        
+Get Update Categories Jobs
+
         Args:
-            fields_catalog_category_bulk_update_job: Fields to include for each catalog-category-bulk-update-job resource (None returns all fields)
-            filter: Filter criteria for selecting jobs (None returns all jobs)
-            page_cursor: Pagination cursor for accessing subsequent result pages
-        
+            fields_catalog_category_bulk_update_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
         Returns:
-            Dictionary containing API response data with job listings and pagination details
-        
-        Raises:
-            requests.exceptions.HTTPError: When the API returns a non-success status code (4XX/5XX)
-        
-        Tags:
-            retrieve, list, pagination, api, catalog, category-update, batch, management
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/catalog-category-bulk-update-jobs/"
+        url = f"{self.base_url}/api/catalog-category-bulk-update-jobs"
         query_params = {k: v for k, v in [('fields[catalog-category-bulk-update-job]', fields_catalog_category_bulk_update_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def spawn_update_categories_job(self, data) -> dict[str, Any]:
+    def bulk_update_catalog_categories(self, data=None) -> dict[str, Any]:
         """
-        Initiates an asynchronous bulk update job for categories using the provided data.
-        
+Bulk Update Catalog Categories
+
         Args:
-            data: Mandatory payload containing category update information. Must not be None.
-        
+            data (object): data
+
         Returns:
-            Dictionary containing the created bulk update job details and metadata.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is None.
-            HTTPError: Raised when the API request fails (non-2xx response).
-        
-        Tags:
-            update, async_job, bulk, catalog
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "categories": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "name": "<string>"
+                            },
+                            "id": "<string>",
+                            "relationships": {
+                              "items": {
+                                "data": [
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-item"
+                                  },
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-item"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "catalog-category"
+                          },
+                          {
+                            "attributes": {
+                              "name": "<string>"
+                            },
+                            "id": "<string>",
+                            "relationships": {
+                              "items": {
+                                "data": [
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-item"
+                                  },
+                                  {
+                                    "id": "<string>",
+                                    "type": "catalog-item"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "catalog-category"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-category-bulk-update-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-category-bulk-update-jobs/"
+        url = f"{self.base_url}/api/catalog-category-bulk-update-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -1715,27 +2509,20 @@ class KlaviyoApp(APIApplication):
 
     def get_update_categories_job(self, job_id, fields_catalog_category_bulk_update_job=None, fields_catalog_category=None, include=None) -> dict[str, Any]:
         """
-        Retrieves details of a catalog category bulk update job by its ID.
-        
+Get Update Categories Job
+
         Args:
-            job_id: Unique identifier for the bulk category update job.
-            fields_catalog_category_bulk_update_job: Optional fields to include for the bulk update job (comma-separated).
-            fields_catalog_category: Optional fields to include for associated catalog categories (comma-separated).
-            include: Optional related resources to include in the response (comma-separated).
-        
+            job_id (string): job_id
+            fields_catalog_category_bulk_update_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            fields_catalog_category (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'external_id,external_id'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'categories,categories'.
+
         Returns:
-            A dictionary containing the job details and requested fields from the API response.
-        
-        Raises:
-            ValueError: Raised when job_id is not provided.
-            HTTPError: Raised for unsuccessful HTTP responses (4xx/5xx status codes).
-        
-        Tags:
-            category-management, async-job, status, api
+            dict[str, Any]: Success
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
-        url = f"{self.base_url}/api/catalog-category-bulk-update-jobs/{job_id}/"
+        url = f"{self.base_url}/api/catalog-category-bulk-update-jobs/{job_id}"
         query_params = {k: v for k, v in [('fields[catalog-category-bulk-update-job]', fields_catalog_category_bulk_update_job), ('fields[catalog-category]', fields_catalog_category), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -1743,51 +2530,60 @@ class KlaviyoApp(APIApplication):
 
     def get_delete_categories_jobs(self, fields_catalog_category_bulk_delete_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
         """
-        Retrieve paginated results of catalog category bulk deletion jobs from the API.
-        
+Get Delete Categories Jobs
+
         Args:
-            fields_catalog_category_bulk_delete_job: Comma-separated fields to include for each job object
-            filter: Criteria to filter the jobs
-            page_cursor: Pagination cursor for the next set of results
-        
+            fields_catalog_category_bulk_delete_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
         Returns:
-            Dictionary containing the API response with job listings
-        
-        Raises:
-            requests.HTTPError: Raised for HTTP request failures, such as unauthorized access or server errors
-        
-        Tags:
-            retrieve, list, catalog, api, management, async_job, batch
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/catalog-category-bulk-delete-jobs/"
+        url = f"{self.base_url}/api/catalog-category-bulk-delete-jobs"
         query_params = {k: v for k, v in [('fields[catalog-category-bulk-delete-job]', fields_catalog_category_bulk_delete_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def spawn_delete_categories_job(self, data) -> dict[str, Any]:
+    def bulk_delete_catalog_categories(self, data=None) -> dict[str, Any]:
         """
-        Initiates a job to delete categories in bulk by sending a POST request to the API endpoint.
-        
+Bulk Delete Catalog Categories
+
         Args:
-            data: Dictionary containing the data required for deleting categories.
-        
+            data (object): data
+
         Returns:
-            A dictionary containing the JSON response from the API.
-        
-        Raises:
-            ValueError: Raised when the required 'data' parameter is missing.
-        
-        Tags:
-            delete, categories, bulk, async_job, api
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "categories": {
+                        "data": [
+                          {
+                            "id": "<string>",
+                            "type": "catalog-category"
+                          },
+                          {
+                            "id": "<string>",
+                            "type": "catalog-category"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "catalog-category-bulk-delete-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-category-bulk-delete-jobs/"
+        url = f"{self.base_url}/api/catalog-category-bulk-delete-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -1795,434 +2591,863 @@ class KlaviyoApp(APIApplication):
 
     def get_delete_categories_job(self, job_id, fields_catalog_category_bulk_delete_job=None) -> dict[str, Any]:
         """
-        Retrieves the details of a catalog category bulk delete job by ID.
-        
+Get Delete Categories Job
+
         Args:
-            job_id: The ID of the job to retrieve.
-            fields_catalog_category_bulk_delete_job: Optional list of fields to include in the response.
-        
+            job_id (string): job_id
+            fields_catalog_category_bulk_delete_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+
         Returns:
-            A dictionary containing the details of the catalog category bulk delete job.
-        
-        Raises:
-            ValueError: Raised when the required 'job_id' parameter is missing.
-            requests.exceptions.HTTPError: Raised if the HTTP request returns an unsuccessful status code.
-        
-        Tags:
-            search, management, job-status
+            dict[str, Any]: Success
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
-        url = f"{self.base_url}/api/catalog-category-bulk-delete-jobs/{job_id}/"
+        url = f"{self.base_url}/api/catalog-category-bulk-delete-jobs/{job_id}"
         query_params = {k: v for k, v in [('fields[catalog-category-bulk-delete-job]', fields_catalog_category_bulk_delete_job)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_back_in_stock_subscription(self, data) -> Any:
+    def get_item_ids_for_catalog_category(self, id, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Creates a back-in-stock subscription by sending a POST request to the specified API endpoint.
-        
+Get Item IDs for Catalog Category
+
         Args:
-            data: A dictionary containing the necessary data for the subscription.
-        
+            id (string): id
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`ids`: `any`<br>`category.id`: `equals`<br>`title`: `contains`<br>`published`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'created'.
+
         Returns:
-            A JSON response from the server after creating the subscription.
-        
-        Raises:
-            ValueError: Raised when the required parameter 'data' is missing.
-        
-        Tags:
-            create, subscription, async_job, e-commerce
+            dict[str, Any]: Success
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/catalog-categories/{id}/relationships/items"
+        query_params = {k: v for k, v in [('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def add_items_to_catalog_category(self, id, data=None) -> Any:
+        """
+Add Items to Catalog Category
+
+        Args:
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'catalog-item'}, {'id': '<string>', 'type': 'catalog-item'}]".
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "catalog-item"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "catalog-item"
+                    }
+                  ]
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/back-in-stock-subscriptions/"
+        url = f"{self.base_url}/api/catalog-categories/{id}/relationships/items"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_catalog_category_items(self, id, fields_catalog_item=None, fields_catalog_variant=None, filter=None, include=None, page_cursor=None, sort=None) -> dict[str, Any]:
+    def remove_items_from_catalog_category(self, id, data=None) -> Any:
         """
-        Retrieve items belonging to a catalog category with optional filtering, sorting, and field selection.
-        
+Remove Items from Catalog Category
+
         Args:
-            id: Identifier of the catalog category (required)
-            fields_catalog_item: Comma-separated fields to include for catalog items
-            fields_catalog_variant: Comma-separated fields to include for catalog variants
-            filter: Filter criteria for catalog items
-            include: Related resources to include in the response
-            page_cursor: Pagination cursor for paginated results
-            sort: Sort order for returned items
-        
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'catalog-item'}, {'id': '<string>', 'type': 'catalog-item'}]".
+
         Returns:
-            Dictionary containing paginated catalog items and variants from the specified category
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is not provided
-            HTTPError: Raised when the API request fails (e.g., invalid parameters or server error)
-        
-        Tags:
-            retrieve, catalog, items, pagination, api, filter, sort, category
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "catalog-item"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "catalog-item"
+                    }
+                  ]
+                }
+                ```
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/catalog-categories/{id}/items/"
-        query_params = {k: v for k, v in [('fields[catalog-item]', fields_catalog_item), ('fields[catalog-variant]', fields_catalog_variant), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
-        response = self._get(url, params=query_params)
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/catalog-categories/{id}/relationships/items"
+        query_params = {}
+        response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_catalog_item_variants(self, id, fields_catalog_variant=None, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
+    def update_items_for_catalog_category(self, id, data=None) -> Any:
         """
-        Fetches variant items for a catalog item by ID, optionally filtering, sorting, or pagination.
-        
+Update Items for Catalog Category
+
         Args:
-            id: The ID of the catalog item to fetch variants for.
-            fields_catalog_variant: Optional fields to include in the catalog variant response.
-            filter: Optional filter parameter to narrow down variant results.
-            page_cursor: Optional cursor for pagination.
-            sort: Optional sorting parameters.
-        
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'catalog-item'}, {'id': '<string>', 'type': 'catalog-item'}]".
+
         Returns:
-            A dictionary containing the variant items for the specified catalog item.
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is missing.
-        
-        Tags:
-            fetch, catalog, api, pagination, filtering
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "catalog-item"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "catalog-item"
+                    }
+                  ]
+                }
+                ```
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/catalog-items/{id}/variants/"
-        query_params = {k: v for k, v in [('fields[catalog-variant]', fields_catalog_variant), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
-        response = self._get(url, params=query_params)
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/catalog-categories/{id}/relationships/items"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_catalog_item_categories(self, id, fields_catalog_category=None, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
+    def get_categories_for_catalog_item(self, id, fields_catalog_category=None, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Retrieve categories associated with a specific catalog item using filtering, pagination, and sorting parameters.
-        
+Get Categories for Catalog Item
+
         Args:
-            id: Identifier of the catalog item for which to fetch categories
-            fields_catalog_category: (Optional) Fields to include in the catalog category response
-            filter: (Optional) Filter criteria for category selection
-            page_cursor: (Optional) Pagination cursor for iterating through result pages
-            sort: (Optional) Sorting criteria for the returned categories
-        
+            id (string): id
+            fields_catalog_category (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'external_id,external_id'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`ids`: `any`<br>`item.id`: `equals`<br>`name`: `contains` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'created'.
+
         Returns:
-            Dictionary containing the catalog item categories data and response metadata
-        
-        Raises:
-            ValueError: When the required 'id' parameter is not provided
-            requests.HTTPError: If the API request fails (e.g., invalid ID or server error)
-        
-        Tags:
-            retrieve, catalog-item, categories, pagination, api-endpoint, filtering, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/catalog-items/{id}/categories/"
+        url = f"{self.base_url}/api/catalog-items/{id}/categories"
         query_params = {k: v for k, v in [('fields[catalog-category]', fields_catalog_category), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_catalog_category_relationships_items(self, id, page_cursor=None) -> dict[str, Any]:
+    def create_back_in_stock_subscription(self, data=None) -> Any:
         """
-        Fetches catalog category related items through paginated API request.
-        
-        Args:
-            id: Unique identifier of the catalog category (required)
-            page_cursor: Pagination cursor for retrieving subsequent result pages (optional, defaults to None)
-        
-        Returns:
-            Dictionary containing paginated API response data with catalog items
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is not provided
-            requests.exceptions.HTTPError: Raised for unsuccessful HTTP responses (4xx/5xx status codes)
-        
-        Tags:
-            fetch, catalog, pagination, api, relationships
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/catalog-categories/{id}/relationships/items/"
-        query_params = {k: v for k, v in [('page[cursor]', page_cursor)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Create Back In Stock Subscription
 
-    def create_catalog_category_relationships_items(self, id, data) -> Any:
-        """
-        Creates a relationship between a catalog category and items.
-        
         Args:
-            id: The ID of the catalog category.
-            data: Data required to establish the relationship.
-        
+            data (object): data
+
         Returns:
-            JSON response from the API after creating the relationship.
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' is missing.
-            HTTPError: Raised if the API request fails.
-        
-        Tags:
-            create, relationship, management, catalog
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "channels": [
+                        "PUSH",
+                        "SMS"
+                      ],
+                      "profile": {
+                        "data": {
+                          "attributes": {
+                            "anonymous_id": "<string>",
+                            "email": "<string>",
+                            "external_id": "<string>",
+                            "phone_number": "<string>"
+                          },
+                          "id": "<string>",
+                          "type": "profile"
+                        }
+                      }
+                    },
+                    "relationships": {
+                      "variant": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "catalog-variant"
+                        }
+                      }
+                    },
+                    "type": "back-in-stock-subscription"
+                  }
+                }
+                ```
         """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-categories/{id}/relationships/items/"
+        url = f"{self.base_url}/api/back-in-stock-subscriptions"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_catalog_category_relationships_items(self, id, data) -> Any:
+    def create_client_subscription(self, company_id=None, data=None) -> Any:
         """
-        Updates item relationships for a specific catalog category by sending a PATCH request to the API endpoint.
-        
+Create Client Subscription
+
         Args:
-            id: Unique identifier of the catalog category whose item relationships will be updated
-            data: Dictionary containing updated relationship data to be sent in the request body
-        
+            company_id (string): (Required) Your Public API Key / Site ID. See [this article](https://help.klaviyo.com/hc/en-us/articles/115005062267) for more details. Example: '{{companyId}}'.
+            data (object): data
+
         Returns:
-            Parsed JSON response from the API containing updated relationship information
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' parameters are missing
-            HTTPError: Raised if the API request fails (handled via response.raise_for_status())
-        
-        Tags:
-            update, catalog-category, relationships, api-patch, data-management
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "custom_source": "<string>",
+                      "profile": {
+                        "data": {
+                          "attributes": {
+                            "_kx": "<string>",
+                            "anonymous_id": "<string>",
+                            "email": "<string>",
+                            "external_id": "<string>",
+                            "first_name": "<string>",
+                            "image": "<string>",
+                            "last_name": "<string>",
+                            "locale": "<string>",
+                            "location": {
+                              "address1": "<string>",
+                              "address2": "<string>",
+                              "city": "<string>",
+                              "country": "<string>",
+                              "ip": "<string>",
+                              "latitude": "<string>",
+                              "longitude": "<string>",
+                              "region": "<string>",
+                              "timezone": "<string>",
+                              "zip": "<string>"
+                            },
+                            "meta": {
+                              "patch_properties": {
+                                "append": {},
+                                "unappend": {},
+                                "unset": "<string>"
+                              }
+                            },
+                            "organization": "<string>",
+                            "phone_number": "<string>",
+                            "properties": {},
+                            "subscriptions": {
+                              "email": {
+                                "marketing": {
+                                  "consent": "SUBSCRIBED",
+                                  "consented_at": "<dateTime>"
+                                }
+                              },
+                              "sms": {
+                                "marketing": {
+                                  "consent": "SUBSCRIBED",
+                                  "consented_at": "<dateTime>"
+                                },
+                                "transactional": {
+                                  "consent": "SUBSCRIBED",
+                                  "consented_at": "<dateTime>"
+                                }
+                              }
+                            },
+                            "title": "<string>"
+                          },
+                          "id": "<string>",
+                          "type": "profile"
+                        }
+                      }
+                    },
+                    "relationships": {
+                      "list": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "list"
+                        }
+                      }
+                    },
+                    "type": "subscription"
+                  }
+                }
+                ```
         """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-categories/{id}/relationships/items/"
-        query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def delete_catalog_category_relationships_items(self, id, data) -> Any:
-        """
-        Delete items related to a catalog category by ID and relationship data.
-        
-        Args:
-            id: Identifier of the catalog category whose relationships will be modified (required).
-            data: Payload data specifying the items to be removed from the category relationships (required).
-        
-        Returns:
-            Parsed JSON response from the API containing deletion results.
-        
-        Raises:
-            ValueError: Raised if `id` or `data` parameters are None.
-            HTTPError: Raised if the API request fails (handled by response.raise_for_status()).
-        
-        Tags:
-            delete, catalog, relationships, items, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-categories/{id}/relationships/items/"
-        query_params = {}
-        response = self._delete(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_catalog_item_relationships_categories(self, id, page_cursor=None) -> dict[str, Any]:
-        """
-        Fetches the relationship categories for a catalog item using its ID.
-        
-        Args:
-            id: The ID of the catalog item.
-            page_cursor: Optional page cursor for pagination.
-        
-        Returns:
-            A dictionary containing the relationship categories for the catalog item.
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is missing.
-            HTTPError: Raised if the HTTP request was unsuccessful.
-        
-        Tags:
-            fetch, catalog, item-relationships, api-call
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/catalog-items/{id}/relationships/categories/"
-        query_params = {k: v for k, v in [('page[cursor]', page_cursor)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def create_catalog_item_relationships_categories(self, id, data) -> Any:
-        """
-        Creates relationships between a catalog item and categories by sending a POST request to the API.
-        
-        Args:
-            id: The unique identifier of the catalog item.
-            data: The data to be sent in the request body.
-        
-        Returns:
-            The JSON response from the API after establishing the relationships.
-        
-        Raises:
-            ValueError: Raised if either 'id' or 'data' is missing.
-        
-        Tags:
-            create, relationship, api-call, catalog-management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-items/{id}/relationships/categories/"
-        query_params = {}
+        url = f"{self.base_url}/client/subscriptions"
+        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_catalog_item_relationships_categories(self, id, data) -> Any:
+    def create_or_update_client_push_token(self, company_id=None, data=None) -> Any:
         """
-        Updates the categories relationship for a specified catalog item.
-        
+Create or Update Client Push Token
+
         Args:
-            id: The unique identifier of the catalog item to update.
-            data: The data to update in the categories relationship.
-        
+            company_id (string): (Required) Your Public API Key / Site ID. See [this article](https://help.klaviyo.com/hc/en-us/articles/115005062267) for more details. Example: '{{companyId}}'.
+            data (object): data
+
         Returns:
-            A JSON response containing the updated categories relationship data.
-        
-        Raises:
-            ValueError: Raised if either the 'id' or 'data' parameter is missing.
-        
-        Tags:
-            update, catalog-item, categories
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "background": "AVAILABLE",
+                      "device_metadata": {
+                        "app_build": "<string>",
+                        "app_id": "<string>",
+                        "app_name": "<string>",
+                        "app_version": "<string>",
+                        "device_id": "<string>",
+                        "device_model": "<string>",
+                        "environment": "debug",
+                        "klaviyo_sdk": "android",
+                        "manufacturer": "<string>",
+                        "os_name": "ipados",
+                        "os_version": "<string>",
+                        "sdk_version": "<string>"
+                      },
+                      "enablement_status": "AUTHORIZED",
+                      "platform": "android",
+                      "profile": {
+                        "data": {
+                          "attributes": {
+                            "_kx": "<string>",
+                            "anonymous_id": "<string>",
+                            "email": "<string>",
+                            "external_id": "<string>",
+                            "first_name": "<string>",
+                            "image": "<string>",
+                            "last_name": "<string>",
+                            "locale": "<string>",
+                            "location": {
+                              "address1": "<string>",
+                              "address2": "<string>",
+                              "city": "<string>",
+                              "country": "<string>",
+                              "ip": "<string>",
+                              "latitude": "<string>",
+                              "longitude": "<string>",
+                              "region": "<string>",
+                              "timezone": "<string>",
+                              "zip": "<string>"
+                            },
+                            "meta": {
+                              "patch_properties": {
+                                "append": {},
+                                "unappend": {},
+                                "unset": "<string>"
+                              }
+                            },
+                            "organization": "<string>",
+                            "phone_number": "<string>",
+                            "properties": {},
+                            "title": "<string>"
+                          },
+                          "id": "<string>",
+                          "type": "profile"
+                        }
+                      },
+                      "token": "<string>",
+                      "vendor": "apns"
+                    },
+                    "type": "push-token"
+                  }
+                }
+                ```
         """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-items/{id}/relationships/categories/"
-        query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
+        url = f"{self.base_url}/client/push-tokens"
+        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
+        response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def delete_catalog_item_relationships_categories(self, id, data) -> Any:
+    def unregister_client_push_token(self, company_id=None, data=None) -> Any:
         """
-        Deletes category relationships for a catalog item by ID with specified data.
-        
+Unregister Client Push Token
+
         Args:
-            id: ID of the catalog item whose category relationships will be deleted
-            data: Data payload containing the category relationship information to delete
-        
+            company_id (string): (Required) Your Public API Key / Site ID. See [this article](https://help.klaviyo.com/hc/en-us/articles/115005062267) for more details. Example: '{{companyId}}'.
+            data (object): data
+
         Returns:
-            JSON response from the API containing the deletion result
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' parameter is missing
-            HTTPError: Raised when the API request fails (e.g., 4XX/5XX status code)
-        
-        Tags:
-            delete, catalog-items, categories, relationships, async, management
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "platform": "android",
+                      "profile": {
+                        "data": {
+                          "attributes": {
+                            "_kx": "<string>",
+                            "anonymous_id": "<string>",
+                            "email": "<string>",
+                            "external_id": "<string>",
+                            "first_name": "<string>",
+                            "image": "<string>",
+                            "last_name": "<string>",
+                            "locale": "<string>",
+                            "location": {
+                              "address1": "<string>",
+                              "address2": "<string>",
+                              "city": "<string>",
+                              "country": "<string>",
+                              "ip": "<string>",
+                              "latitude": "<string>",
+                              "longitude": "<string>",
+                              "region": "<string>",
+                              "timezone": "<string>",
+                              "zip": "<string>"
+                            },
+                            "organization": "<string>",
+                            "phone_number": "<string>",
+                            "properties": {},
+                            "title": "<string>"
+                          },
+                          "id": "<string>",
+                          "meta": {
+                            "patch_properties": {
+                              "append": {},
+                              "unappend": {},
+                              "unset": "<string>"
+                            }
+                          },
+                          "type": "profile"
+                        }
+                      },
+                      "token": "<string>",
+                      "vendor": "fcm"
+                    },
+                    "type": "push-token-unregister"
+                  }
+                }
+                ```
         """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/catalog-items/{id}/relationships/categories/"
-        query_params = {}
-        response = self._delete(url, params=query_params)
+        url = f"{self.base_url}/client/push-token-unregister"
+        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def create_client_event(self, company_id=None, data=None) -> Any:
+        """
+Create Client Event
+
+        Args:
+            company_id (string): (Required) Your Public API Key / Site ID. See [this article](https://help.klaviyo.com/hc/en-us/articles/115005062267) for more details. Example: '{{companyId}}'.
+            data (object): data
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "metric": {
+                        "data": {
+                          "attributes": {
+                            "name": "<string>",
+                            "service": "<string>"
+                          },
+                          "type": "metric"
+                        }
+                      },
+                      "profile": {
+                        "data": {
+                          "attributes": {
+                            "_kx": "<string>",
+                            "anonymous_id": "<string>",
+                            "email": "<string>",
+                            "external_id": "<string>",
+                            "first_name": "<string>",
+                            "image": "<string>",
+                            "last_name": "<string>",
+                            "locale": "<string>",
+                            "location": {
+                              "address1": "<string>",
+                              "address2": "<string>",
+                              "city": "<string>",
+                              "country": "<string>",
+                              "ip": "<string>",
+                              "latitude": "<string>",
+                              "longitude": "<string>",
+                              "region": "<string>",
+                              "timezone": "<string>",
+                              "zip": "<string>"
+                            },
+                            "meta": {
+                              "patch_properties": {
+                                "append": {},
+                                "unappend": {},
+                                "unset": "<string>"
+                              }
+                            },
+                            "organization": "<string>",
+                            "phone_number": "<string>",
+                            "properties": {},
+                            "title": "<string>"
+                          },
+                          "id": "<string>",
+                          "type": "profile"
+                        }
+                      },
+                      "properties": {},
+                      "time": "<dateTime>",
+                      "unique_id": "<string>",
+                      "value": "<number>",
+                      "value_currency": "<string>"
+                    },
+                    "type": "event"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/client/events"
+        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def create_or_update_client_profile(self, company_id=None, data=None) -> Any:
+        """
+Create or Update Client Profile
+
+        Args:
+            company_id (string): (Required) Your Public API Key / Site ID. See [this article](https://help.klaviyo.com/hc/en-us/articles/115005062267) for more details. Example: '{{companyId}}'.
+            data (object): data
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "_kx": "<string>",
+                      "anonymous_id": "<string>",
+                      "email": "<string>",
+                      "external_id": "<string>",
+                      "first_name": "<string>",
+                      "image": "<string>",
+                      "last_name": "<string>",
+                      "locale": "<string>",
+                      "location": {
+                        "address1": "<string>",
+                        "address2": "<string>",
+                        "city": "<string>",
+                        "country": "<string>",
+                        "ip": "<string>",
+                        "latitude": "<string>",
+                        "longitude": "<string>",
+                        "region": "<string>",
+                        "timezone": "<string>",
+                        "zip": "<string>"
+                      },
+                      "organization": "<string>",
+                      "phone_number": "<string>",
+                      "properties": {},
+                      "title": "<string>"
+                    },
+                    "id": "<string>",
+                    "meta": {
+                      "patch_properties": {
+                        "append": {},
+                        "unappend": {},
+                        "unset": "<string>"
+                      }
+                    },
+                    "type": "profile"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/client/profiles"
+        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def bulk_create_client_events(self, company_id=None, data=None) -> Any:
+        """
+Bulk Create Client Events
+
+        Args:
+            company_id (string): (Required) Your Public API Key / Site ID. See [this article](https://help.klaviyo.com/hc/en-us/articles/115005062267) for more details. Example: '{{companyId}}'.
+            data (object): data
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "events": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "metric": {
+                                "data": {
+                                  "attributes": {
+                                    "name": "<string>",
+                                    "service": "<string>"
+                                  },
+                                  "type": "metric"
+                                }
+                              },
+                              "properties": {},
+                              "time": "<dateTime>",
+                              "unique_id": "<string>",
+                              "value": "<number>",
+                              "value_currency": "<string>"
+                            },
+                            "type": "event"
+                          },
+                          {
+                            "attributes": {
+                              "metric": {
+                                "data": {
+                                  "attributes": {
+                                    "name": "<string>",
+                                    "service": "<string>"
+                                  },
+                                  "type": "metric"
+                                }
+                              },
+                              "properties": {},
+                              "time": "<dateTime>",
+                              "unique_id": "<string>",
+                              "value": "<number>",
+                              "value_currency": "<string>"
+                            },
+                            "type": "event"
+                          }
+                        ]
+                      },
+                      "profile": {
+                        "data": {
+                          "attributes": {
+                            "_kx": "<string>",
+                            "anonymous_id": "<string>",
+                            "email": "<string>",
+                            "external_id": "<string>",
+                            "first_name": "<string>",
+                            "image": "<string>",
+                            "last_name": "<string>",
+                            "locale": "<string>",
+                            "location": {
+                              "address1": "<string>",
+                              "address2": "<string>",
+                              "city": "<string>",
+                              "country": "<string>",
+                              "ip": "<string>",
+                              "latitude": "<string>",
+                              "longitude": "<string>",
+                              "region": "<string>",
+                              "timezone": "<string>",
+                              "zip": "<string>"
+                            },
+                            "organization": "<string>",
+                            "phone_number": "<string>",
+                            "properties": {},
+                            "title": "<string>"
+                          },
+                          "id": "<string>",
+                          "meta": {
+                            "patch_properties": {
+                              "append": {},
+                              "unappend": {},
+                              "unset": "<string>"
+                            }
+                          },
+                          "type": "profile"
+                        }
+                      }
+                    },
+                    "type": "event-bulk-create"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/client/event-bulk-create"
+        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def create_client_back_in_stock_subscription(self, company_id=None, data=None) -> Any:
+        """
+Create Client Back In Stock Subscription
+
+        Args:
+            company_id (string): (Required) Your Public API Key / Site ID. See [this article](https://help.klaviyo.com/hc/en-us/articles/115005062267) for more details. Example: '{{companyId}}'.
+            data (object): data
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "channels": [
+                        "SMS",
+                        "PUSH"
+                      ],
+                      "profile": {
+                        "data": {
+                          "attributes": {
+                            "anonymous_id": "<string>",
+                            "email": "<string>",
+                            "external_id": "<string>",
+                            "phone_number": "<string>"
+                          },
+                          "id": "<string>",
+                          "type": "profile"
+                        }
+                      }
+                    },
+                    "relationships": {
+                      "variant": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "catalog-variant"
+                        }
+                      }
+                    },
+                    "type": "back-in-stock-subscription"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/client/back-in-stock-subscriptions"
+        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
+        response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def get_coupons(self, fields_coupon=None, page_cursor=None) -> dict[str, Any]:
         """
-        Fetches coupons from the API with optional filtering by fields and pagination.
-        
+Get Coupons
+
         Args:
-            fields_coupon: A list of fields to include in the coupon response
-            page_cursor: A cursor for pagination of the results
-        
+            fields_coupon (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'external_id,external_id'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
         Returns:
-            A dictionary containing the API response with coupons and related metadata
-        
-        Raises:
-            requests.RequestException: When an HTTP request exception occurs, such as network issues or server errors
-        
-        Tags:
-            fetch, coupons, api
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/coupons/"
+        url = f"{self.base_url}/api/coupons"
         query_params = {k: v for k, v in [('fields[coupon]', fields_coupon), ('page[cursor]', page_cursor)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_coupon(self, data) -> dict[str, Any]:
+    def create_coupon(self, data=None) -> dict[str, Any]:
         """
-        Creates a new coupon using the provided data.
-        
+Create Coupon
+
         Args:
-            data: The data required to create a coupon. Must not be None.
-        
+            data (object): data
+
         Returns:
-            A dictionary containing the newly created coupon's details.
-        
-        Raises:
-            ValueError: Raised when the required 'data' parameter is missing.
-        
-        Tags:
-            create, coupon, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "description": "<string>",
+                      "external_id": "<string>"
+                    },
+                    "type": "coupon"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/coupons/"
+        url = f"{self.base_url}/api/coupons"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -2230,136 +3455,133 @@ class KlaviyoApp(APIApplication):
 
     def get_coupon(self, id, fields_coupon=None) -> dict[str, Any]:
         """
-        Retrieves a specific coupon's details from the API using the provided identifier.
-        
+Get Coupon
+
         Args:
-            id: The unique identifier of the coupon to retrieve.
-            fields_coupon: Optional string specifying which coupon fields to include in the response.
-        
+            id (string): id
+            fields_coupon (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'external_id,external_id'.
+
         Returns:
-            Dictionary containing the coupon's data as returned by the API.
-        
-        Raises:
-            ValueError: Raised if the required 'id' parameter is missing.
-            requests.HTTPError: Raised if the API request fails (e.g., 404 Not Found or 500 Internal Error).
-        
-        Tags:
-            retrieve, coupon, api, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/coupons/{id}/"
+        url = f"{self.base_url}/api/coupons/{id}"
         query_params = {k: v for k, v in [('fields[coupon]', fields_coupon)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_coupon(self, id, data) -> dict[str, Any]:
-        """
-        Updates an existing coupon's data by sending a PATCH request to the API endpoint.
-        
-        Args:
-            id: Unique identifier for the coupon to update (str or int).
-            data: Dictionary containing key-value pairs to update for the coupon (dict[str, Any]).
-        
-        Returns:
-            Dictionary containing the updated coupon data from the API response (dict[str, Any]).
-        
-        Raises:
-            ValueError: When either 'id' or 'data' parameter is None.
-            HTTPError: If the API request fails (e.g., 4XX client error or 5XX server error).
-        
-        Tags:
-            update, coupon, management, api, patch
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/coupons/{id}/"
-        query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
     def delete_coupon(self, id) -> Any:
         """
-        Deletes a coupon from the server using its unique identifier.
-        
+Delete Coupon
+
         Args:
-            id: The unique identifier of the coupon to delete. Must not be None.
-        
+            id (string): id
+
         Returns:
-            Parsed JSON response from the server containing deletion confirmation or coupon details.
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is not provided (None).
-            HTTPError: Raised if the API request fails (e.g., invalid permissions, non-existent coupon, or server error).
-        
-        Tags:
-            delete, coupon, management
+            Any: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/coupons/{id}/"
+        url = f"{self.base_url}/api/coupons/{id}"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
+    def update_coupon(self, id, data=None) -> dict[str, Any]:
+        """
+Update Coupon
+
+        Args:
+            id (string): id
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "description": "<string>"
+                    },
+                    "id": "<string>",
+                    "type": "coupon"
+                  }
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/coupons/{id}"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
     def get_coupon_codes(self, fields_coupon_code=None, fields_coupon=None, filter=None, include=None, page_cursor=None) -> dict[str, Any]:
         """
-        Fetches coupon codes from an API with optional filtering and pagination.
-        
+Get Coupon Codes
+
         Args:
-            fields_coupon_code: Fields to include in the coupon code response.
-            fields_coupon: Fields to include in the coupon response.
-            filter: Filters to apply to the coupon code query.
-            include: Fields to include as related resources.
-            page_cursor: Cursor to paginate the results.
-        
+            fields_coupon_code (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'status,unique_code'.
+            fields_coupon (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'external_id,external_id'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`expires_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`status`: `equals`<br>`coupon.id`: `any`, `equals`<br>`profile.id`: `any`, `equals` Example: '<string>'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'coupon,coupon'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
         Returns:
-            A dictionary containing the response data from the API.
-        
-        Raises:
-            requests.HTTPError: Raised if the HTTP request returned an unsuccessful status code.
-        
-        Tags:
-            fetch, coupon, api-call
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/coupon-codes/"
+        url = f"{self.base_url}/api/coupon-codes"
         query_params = {k: v for k, v in [('fields[coupon-code]', fields_coupon_code), ('fields[coupon]', fields_coupon), ('filter', filter), ('include', include), ('page[cursor]', page_cursor)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_coupon_code(self, data) -> dict[str, Any]:
+    def create_coupon_code(self, data=None) -> dict[str, Any]:
         """
-        Creates a new coupon code by posting data to the coupon codes API endpoint.
-        
+Create Coupon Code
+
         Args:
-            data: A dictionary containing the data required for creating the coupon code.
-        
+            data (object): data
+
         Returns:
-            A dictionary containing details about the newly created coupon code.
-        
-        Raises:
-            ValueError: Raised when the required 'data' parameter is missing.
-        
-        Tags:
-            create, coupon-code, api-post
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "expires_at": "<dateTime>",
+                      "unique_code": "<string>"
+                    },
+                    "relationships": {
+                      "coupon": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "coupon"
+                        }
+                      }
+                    },
+                    "type": "coupon-code"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/coupon-codes/"
+        url = f"{self.base_url}/api/coupon-codes"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -2367,163 +3589,179 @@ class KlaviyoApp(APIApplication):
 
     def get_coupon_code(self, id, fields_coupon_code=None, fields_coupon=None, include=None) -> dict[str, Any]:
         """
-        Fetches a coupon code from the API by its ID, with optional fields and includes.
-        
+Get Coupon Code
+
         Args:
-            id: The unique identifier of the coupon code.
-            fields_coupon_code: Optional fields to include for the coupon-code.
-            fields_coupon: Optional fields to include for the coupon.
-            include: Optional related records to include with the response.
-        
+            id (string): id
+            fields_coupon_code (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'status,unique_code'.
+            fields_coupon (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'external_id,external_id'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'coupon,coupon'.
+
         Returns:
-            A dictionary containing the response from the API.
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is missing.
-        
-        Tags:
-            fetch, coupon-management, api-call, optional-params
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/coupon-codes/{id}/"
+        url = f"{self.base_url}/api/coupon-codes/{id}"
         query_params = {k: v for k, v in [('fields[coupon-code]', fields_coupon_code), ('fields[coupon]', fields_coupon), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_coupon_code(self, id, data) -> dict[str, Any]:
-        """
-        Updates a coupon code by sending a PATCH request with provided data to the coupon code API endpoint.
-        
-        Args:
-            id: Unique identifier of the coupon code to update.
-            data: Dictionary of data to update the coupon code with.
-        
-        Returns:
-            A dictionary containing the updated coupon code details.
-        
-        Raises:
-            ValueError: Raised if either 'id' or 'data' is missing.
-        
-        Tags:
-            update, coupon, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/coupon-codes/{id}/"
-        query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
     def delete_coupon_code(self, id) -> Any:
         """
-        Delete a coupon code by ID using the API endpoint.
-        
+Delete Coupon Code
+
         Args:
-            id: Unique identifier of the coupon code to delete (required).
-        
+            id (string): id
+
         Returns:
-            JSON response data from the API after successful deletion.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is not provided.
-            requests.HTTPError: Raised if the API request fails (e.g., invalid ID or server error).
-        
-        Tags:
-            delete, coupon-code, management, api
+            Any: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/coupon-codes/{id}/"
+        url = f"{self.base_url}/api/coupon-codes/{id}"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_coupon_code_bulk_create_jobs(self, fields_coupon_code_bulk_create_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
+    def update_coupon_code(self, id, data=None) -> dict[str, Any]:
         """
-        Fetches bulk coupon code creation jobs with optional filtering and pagination.
-        
+Update Coupon Code
+
         Args:
-            fields_coupon_code_bulk_create_job: Fields to include for coupon code bulk create job resource
-            filter: Criteria to filter bulk coupon creation jobs
-            page_cursor: Pagination cursor to retrieve specific results page
-        
+            id (string): id
+            data (object): data
+
         Returns:
-            Dictionary containing paginated results of coupon code bulk creation jobs
-        
-        Raises:
-            Exception: When HTTP request fails or server returns error status
-        
-        Tags:
-            list, fetch, async_job, coupon, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "expires_at": "<dateTime>",
+                      "status": "USED"
+                    },
+                    "id": "<string>",
+                    "type": "coupon-code"
+                  }
+                }
+                ```
         """
-        url = f"{self.base_url}/api/coupon-code-bulk-create-jobs/"
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/coupon-codes/{id}"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_bulk_create_coupon_code_jobs(self, fields_coupon_code_bulk_create_job=None, filter=None, page_cursor=None) -> dict[str, Any]:
+        """
+Get Bulk Create Coupon Code Jobs
+
+        Args:
+            fields_coupon_code_bulk_create_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        url = f"{self.base_url}/api/coupon-code-bulk-create-jobs"
         query_params = {k: v for k, v in [('fields[coupon-code-bulk-create-job]', fields_coupon_code_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def spawn_coupon_code_bulk_create_job(self, data) -> dict[str, Any]:
+    def bulk_create_coupon_codes(self, data=None) -> dict[str, Any]:
         """
-        Initiates a bulk creation job for coupon codes using provided data.
-        
+Bulk Create Coupon Codes
+
         Args:
-            data: Dictionary containing coupon code batch creation parameters (required). None will raise ValueError.
-        
+            data (object): data
+
         Returns:
-            Dictionary containing the API response with job details (typically includes job ID and status).
-        
-        Raises:
-            ValueError: Raised when 'data' parameter is None.
-            HTTPError: Raised for failed API requests (status code >= 400).
-        
-        Tags:
-            coupon-code, bulk-create, async-job, api, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "coupon-codes": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "expires_at": "<dateTime>",
+                              "unique_code": "<string>"
+                            },
+                            "relationships": {
+                              "coupon": {
+                                "data": {
+                                  "id": "<string>",
+                                  "type": "coupon"
+                                }
+                              }
+                            },
+                            "type": "coupon-code"
+                          },
+                          {
+                            "attributes": {
+                              "expires_at": "<dateTime>",
+                              "unique_code": "<string>"
+                            },
+                            "relationships": {
+                              "coupon": {
+                                "data": {
+                                  "id": "<string>",
+                                  "type": "coupon"
+                                }
+                              }
+                            },
+                            "type": "coupon-code"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "coupon-code-bulk-create-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/coupon-code-bulk-create-jobs/"
+        url = f"{self.base_url}/api/coupon-code-bulk-create-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_coupon_code_bulk_create_job(self, job_id, fields_coupon_code_bulk_create_job=None, fields_coupon_code=None, include=None) -> dict[str, Any]:
+    def get_bulk_create_coupon_codes_job(self, job_id, fields_coupon_code_bulk_create_job=None, fields_coupon_code=None, include=None) -> dict[str, Any]:
         """
-        Retrieves a bulk coupon code creation job by job ID.
-        
+Get Bulk Create Coupon Codes Job
+
         Args:
-            job_id: The ID of the bulk coupon code creation job.
-            fields_coupon_code_bulk_create_job: Optional fields to include in the job details.
-            fields_coupon_code: Optional fields to include for each coupon code.
-            include: Optional relationships to include in the response.
-        
+            job_id (string): job_id
+            fields_coupon_code_bulk_create_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'errors,failed_count'.
+            fields_coupon_code (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'status,unique_code'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'coupon-codes,coupon-codes'.
+
         Returns:
-            A dictionary containing details of the bulk coupon code creation job.
-        
-        Raises:
-            ValueError: Raised if the job ID is missing.
-            HTTPError: Raised if the HTTP request fails (e.g., if the API endpoint returns an error).
-        
-        Tags:
-            get, coupon-code, bulk, job, management
+            dict[str, Any]: Success
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
-        url = f"{self.base_url}/api/coupon-code-bulk-create-jobs/{job_id}/"
+        url = f"{self.base_url}/api/coupon-code-bulk-create-jobs/{job_id}"
         query_params = {k: v for k, v in [('fields[coupon-code-bulk-create-job]', fields_coupon_code_bulk_create_job), ('fields[coupon-code]', fields_coupon_code), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -2531,50 +3769,36 @@ class KlaviyoApp(APIApplication):
 
     def get_coupon_for_coupon_code(self, id, fields_coupon=None) -> dict[str, Any]:
         """
-        Retrieve coupon details associated with a specific coupon code ID.
-        
+Get Coupon For Coupon Code
+
         Args:
-            id: The unique identifier of the coupon code to fetch the associated coupon.
-            fields_coupon: Optional filters specifying which coupon fields to include in the response.
-        
+            id (string): id
+            fields_coupon (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'external_id,external_id'.
+
         Returns:
-            A dictionary containing the coupon details retrieved from the API.
-        
-        Raises:
-            ValueError: Raised when the required parameter 'id' is not provided.
-            requests.exceptions.HTTPError: Raised when the API request fails (e.g., invalid ID or server error).
-        
-        Tags:
-            fetch, coupon, api, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/coupon-codes/{id}/coupon/"
+        url = f"{self.base_url}/api/coupon-codes/{id}/coupon"
         query_params = {k: v for k, v in [('fields[coupon]', fields_coupon)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_coupon_relationships_coupon_codes(self, id) -> dict[str, Any]:
+    def get_coupon_id_for_coupon_code(self, id) -> dict[str, Any]:
         """
-        Fetches the coupon relationship data associated with a specific coupon code ID by making a GET request to the API endpoint.
-        
+Get Coupon ID for Coupon Code
+
         Args:
-            id: The unique identifier of the coupon code for which to retrieve relationship data (required).
-        
+            id (string): id
+
         Returns:
-            A dictionary containing the coupon relationship data from the API response.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is not provided.
-            HTTPError: Raised when the API request fails (e.g., invalid ID or network error).
-        
-        Tags:
-            fetch, coupon-codes, api, relationships
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/coupon-codes/{id}/relationships/coupon/"
+        url = f"{self.base_url}/api/coupon-codes/{id}/relationships/coupon"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -2582,81 +3806,81 @@ class KlaviyoApp(APIApplication):
 
     def get_coupon_codes_for_coupon(self, id, fields_coupon_code=None, filter=None, page_cursor=None) -> dict[str, Any]:
         """
-        Fetches coupon codes for a specific coupon identified by ID.
-        
+Get Coupon Codes for Coupon
+
         Args:
-            id: Required unique identifier of the coupon.
-            fields_coupon_code: Optional fields to include in the coupon code response.
-            filter: Optional filter criteria for the coupon codes.
-            page_cursor: Optional cursor for pagination.
-        
+            id (string): id
+            fields_coupon_code (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'status,unique_code'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`expires_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`status`: `equals`<br>`coupon.id`: `any`, `equals`<br>`profile.id`: `any`, `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
         Returns:
-            A dictionary containing coupon codes for the specified coupon.
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is missing.
-            HTTPError: Raised if the HTTP request fails.
-        
-        Tags:
-            fetch, coupon, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/coupons/{id}/coupon-codes/"
+        url = f"{self.base_url}/api/coupons/{id}/coupon-codes"
         query_params = {k: v for k, v in [('fields[coupon-code]', fields_coupon_code), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_coupon_code_relationships_coupon(self, id, page_cursor=None) -> dict[str, Any]:
+    def get_coupon_code_ids_for_coupon(self, id, filter=None, page_cursor=None) -> dict[str, Any]:
         """
-        Retrieves the relationships between a coupon and its codes.
-        
+Get Coupon Code IDs for Coupon
+
         Args:
-            id: The ID of the coupon.
-            page_cursor: Optional cursor for pagination.
-        
+            id (string): id
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`expires_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`status`: `equals`<br>`coupon.id`: `any`, `equals`<br>`profile.id`: `any`, `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
         Returns:
-            A dictionary containing the relationship data.
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is missing.
-        
-        Tags:
-            retrieve, coupon, relationship
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/coupons/{id}/relationships/coupon-codes/"
-        query_params = {k: v for k, v in [('page[cursor]', page_cursor)] if v is not None}
+        url = f"{self.base_url}/api/coupons/{id}/relationships/coupon-codes"
+        query_params = {k: v for k, v in [('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def request_profile_deletion(self, data) -> Any:
+    def request_profile_deletion(self, data=None) -> Any:
         """
-        Initiates a profile deletion request by posting data to a privacy deletion endpoint.
-        
+Request Profile Deletion
+
         Args:
-            data: Payload containing necessary information for processing the deletion request, must not be None.
-        
+            data (object): data
+
         Returns:
-            Parsed JSON response from the server containing deletion job details.
-        
-        Raises:
-            ValueError: When 'data' parameter is None, indicating missing required payload.
-            HTTPError: When the API request fails, typically due to invalid parameters or server issues.
-        
-        Tags:
-            request, privacy, deletion, async_job
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "profile": {
+                        "data": {
+                          "attributes": {
+                            "email": "<string>",
+                            "phone_number": "<string>"
+                          },
+                          "id": "<string>",
+                          "type": "profile"
+                        }
+                      }
+                    },
+                    "type": "data-privacy-deletion-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/data-privacy-deletion-jobs/"
+        url = f"{self.base_url}/api/data-privacy-deletion-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -2664,55 +3888,105 @@ class KlaviyoApp(APIApplication):
 
     def get_events(self, fields_event=None, fields_metric=None, fields_profile=None, filter=None, include=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Retrieves events data from the API with customizable field selection and filtering.
-        
+Get Events
+
         Args:
-            fields_event: Fields to include for events.
-            fields_metric: Fields to include for metrics.
-            fields_profile: Fields to include for profiles.
-            filter: Filter criteria for event selection.
-            include: Additional data to include in the response.
-            page_cursor: Cursor for pagination.
-            sort: Sorting criteria for the returned events.
-        
+            fields_event (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'uuid,datetime'.
+            fields_metric (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'integration,created'.
+            fields_profile (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'location.country,location.zip'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`metric_id`: `equals`<br>`profile_id`: `equals`<br>`profile`: `has`<br>`datetime`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`timestamp`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'attributions,metric'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'datetime'.
+
         Returns:
-            A dictionary containing the event data.
-        
-        Raises:
-            HTTPError: Raised if there is an HTTP request error or if the response status code indicates failure.
-        
-        Tags:
-            fetch, events, api
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/events/"
+        url = f"{self.base_url}/api/events"
         query_params = {k: v for k, v in [('fields[event]', fields_event), ('fields[metric]', fields_metric), ('fields[profile]', fields_profile), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_event(self, data) -> Any:
+    def create_event(self, data=None) -> Any:
         """
-        Creates a new event by sending a POST request with the provided data to the events API.
-        
+Create Event
+
         Args:
-            data: The data required to create the event. It must be provided to avoid raising a ValueError.
-        
+            data (object): data
+
         Returns:
-            The JSON response from the server after successfully creating the event.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is missing or None.
-        
-        Tags:
-            create, event, api-call, data-management
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "metric": {
+                        "data": {
+                          "attributes": {
+                            "name": "<string>",
+                            "service": "<string>"
+                          },
+                          "type": "metric"
+                        }
+                      },
+                      "profile": {
+                        "data": {
+                          "attributes": {
+                            "_kx": "<string>",
+                            "anonymous_id": "<string>",
+                            "email": "<string>",
+                            "external_id": "<string>",
+                            "first_name": "<string>",
+                            "image": "<string>",
+                            "last_name": "<string>",
+                            "locale": "<string>",
+                            "location": {
+                              "address1": "<string>",
+                              "address2": "<string>",
+                              "city": "<string>",
+                              "country": "<string>",
+                              "ip": "<string>",
+                              "latitude": "<string>",
+                              "longitude": "<string>",
+                              "region": "<string>",
+                              "timezone": "<string>",
+                              "zip": "<string>"
+                            },
+                            "meta": {
+                              "patch_properties": {
+                                "append": {},
+                                "unappend": {},
+                                "unset": "<string>"
+                              }
+                            },
+                            "organization": "<string>",
+                            "phone_number": "<string>",
+                            "properties": {},
+                            "title": "<string>"
+                          },
+                          "id": "<string>",
+                          "type": "profile"
+                        }
+                      },
+                      "properties": {},
+                      "time": "<dateTime>",
+                      "unique_id": "<string>",
+                      "value": "<number>",
+                      "value_currency": "<string>"
+                    },
+                    "type": "event"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/events/"
+        url = f"{self.base_url}/api/events"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -2720,155 +3994,303 @@ class KlaviyoApp(APIApplication):
 
     def get_event(self, id, fields_event=None, fields_metric=None, fields_profile=None, include=None) -> dict[str, Any]:
         """
-        Retrieves event data from an API using the provided ID and optional field selectors.
-        
+Get Event
+
         Args:
-            id: The ID of the event to retrieve.
-            fields_event: Optional list of fields to include in the event data.
-            fields_metric: Optional list of fields to include in the metric data.
-            fields_profile: Optional list of fields to include in the profile data.
-            include: Optional parameters to include in the response.
-        
+            id (string): id
+            fields_event (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'uuid,datetime'.
+            fields_metric (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'integration,created'.
+            fields_profile (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'location.country,location.zip'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'attributions,metric'.
+
         Returns:
-            A dictionary containing the event data as JSON.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is None.
-        
-        Tags:
-            fetch, event, api
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/events/{id}/"
+        url = f"{self.base_url}/api/events/{id}"
         query_params = {k: v for k, v in [('fields[event]', fields_event), ('fields[metric]', fields_metric), ('fields[profile]', fields_profile), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def bulk_create_events(self, data) -> Any:
+    def bulk_create_events(self, data=None) -> Any:
         """
-        Creates multiple events in bulk using a POST request to the event-bulk-create-jobs API endpoint.
-        
+Bulk Create Events
+
         Args:
-            data: The list of event data to be created in bulk; cannot be None.
-        
+            data (object): data
+
         Returns:
-            A JSON response generated by the API upon successful creation.
-        
-        Raises:
-            ValueError: Raised if the required 'data' parameter is missing.
-        
-        Tags:
-            bulk, create, events, async_job
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "events-bulk-create": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "events": {
+                                "data": [
+                                  {
+                                    "attributes": {
+                                      "metric": {
+                                        "data": {
+                                          "attributes": {
+                                            "name": "<string>",
+                                            "service": "<string>"
+                                          },
+                                          "type": "metric"
+                                        }
+                                      },
+                                      "properties": {},
+                                      "time": "<dateTime>",
+                                      "unique_id": "<string>",
+                                      "value": "<number>",
+                                      "value_currency": "<string>"
+                                    },
+                                    "type": "event"
+                                  },
+                                  {
+                                    "attributes": {
+                                      "metric": {
+                                        "data": {
+                                          "attributes": {
+                                            "name": "<string>",
+                                            "service": "<string>"
+                                          },
+                                          "type": "metric"
+                                        }
+                                      },
+                                      "properties": {},
+                                      "time": "<dateTime>",
+                                      "unique_id": "<string>",
+                                      "value": "<number>",
+                                      "value_currency": "<string>"
+                                    },
+                                    "type": "event"
+                                  }
+                                ]
+                              },
+                              "profile": {
+                                "data": {
+                                  "attributes": {
+                                    "_kx": "<string>",
+                                    "anonymous_id": "<string>",
+                                    "email": "<string>",
+                                    "external_id": "<string>",
+                                    "first_name": "<string>",
+                                    "image": "<string>",
+                                    "last_name": "<string>",
+                                    "locale": "<string>",
+                                    "location": {
+                                      "address1": "<string>",
+                                      "address2": "<string>",
+                                      "city": "<string>",
+                                      "country": "<string>",
+                                      "ip": "<string>",
+                                      "latitude": "<string>",
+                                      "longitude": "<string>",
+                                      "region": "<string>",
+                                      "timezone": "<string>",
+                                      "zip": "<string>"
+                                    },
+                                    "organization": "<string>",
+                                    "phone_number": "<string>",
+                                    "properties": {},
+                                    "title": "<string>"
+                                  },
+                                  "id": "<string>",
+                                  "meta": {
+                                    "patch_properties": {
+                                      "append": {},
+                                      "unappend": {},
+                                      "unset": "<string>"
+                                    }
+                                  },
+                                  "type": "profile"
+                                }
+                              }
+                            },
+                            "type": "event-bulk-create"
+                          },
+                          {
+                            "attributes": {
+                              "events": {
+                                "data": [
+                                  {
+                                    "attributes": {
+                                      "metric": {
+                                        "data": {
+                                          "attributes": {
+                                            "name": "<string>",
+                                            "service": "<string>"
+                                          },
+                                          "type": "metric"
+                                        }
+                                      },
+                                      "properties": {},
+                                      "time": "<dateTime>",
+                                      "unique_id": "<string>",
+                                      "value": "<number>",
+                                      "value_currency": "<string>"
+                                    },
+                                    "type": "event"
+                                  },
+                                  {
+                                    "attributes": {
+                                      "metric": {
+                                        "data": {
+                                          "attributes": {
+                                            "name": "<string>",
+                                            "service": "<string>"
+                                          },
+                                          "type": "metric"
+                                        }
+                                      },
+                                      "properties": {},
+                                      "time": "<dateTime>",
+                                      "unique_id": "<string>",
+                                      "value": "<number>",
+                                      "value_currency": "<string>"
+                                    },
+                                    "type": "event"
+                                  }
+                                ]
+                              },
+                              "profile": {
+                                "data": {
+                                  "attributes": {
+                                    "_kx": "<string>",
+                                    "anonymous_id": "<string>",
+                                    "email": "<string>",
+                                    "external_id": "<string>",
+                                    "first_name": "<string>",
+                                    "image": "<string>",
+                                    "last_name": "<string>",
+                                    "locale": "<string>",
+                                    "location": {
+                                      "address1": "<string>",
+                                      "address2": "<string>",
+                                      "city": "<string>",
+                                      "country": "<string>",
+                                      "ip": "<string>",
+                                      "latitude": "<string>",
+                                      "longitude": "<string>",
+                                      "region": "<string>",
+                                      "timezone": "<string>",
+                                      "zip": "<string>"
+                                    },
+                                    "organization": "<string>",
+                                    "phone_number": "<string>",
+                                    "properties": {},
+                                    "title": "<string>"
+                                  },
+                                  "id": "<string>",
+                                  "meta": {
+                                    "patch_properties": {
+                                      "append": {},
+                                      "unappend": {},
+                                      "unset": "<string>"
+                                    }
+                                  },
+                                  "type": "profile"
+                                }
+                              }
+                            },
+                            "type": "event-bulk-create"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "event-bulk-create-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/event-bulk-create-jobs/"
+        url = f"{self.base_url}/api/event-bulk-create-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_event_metric(self, id, fields_metric=None) -> dict[str, Any]:
+    def get_metric_for_event(self, id, fields_metric=None) -> dict[str, Any]:
         """
-        Retrieve detailed metric data for a specific event by ID.
-        
+Get Metric for Event
+
         Args:
-            id: Unique identifier of the event to fetch metrics for
-            fields_metric: (Optional) Comma-separated fields to include in the metric response
-        
+            id (string): id
+            fields_metric (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'integration,created'.
+
         Returns:
-            Dictionary containing the requested event metric data
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is not provided
-            requests.HTTPError: Raised for HTTP request failures (e.g., 404 Not Found)
-        
-        Tags:
-            get, metrics, event, api
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/events/{id}/metric/"
+        url = f"{self.base_url}/api/events/{id}/metric"
         query_params = {k: v for k, v in [('fields[metric]', fields_metric)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_event_profile(self, id, additional_fields_profile=None, fields_profile=None) -> dict[str, Any]:
+    def get_metric_id_for_event(self, id) -> dict[str, Any]:
         """
-        Retrieves an event profile by ID, including optional additional or specific fields.
-        
-        Args:
-            id: Required event ID to fetch the profile.
-            additional_fields_profile: Optional parameter to specify additional fields for the event profile.
-            fields_profile: Optional parameter to specify specific fields for the event profile.
-        
-        Returns:
-            A dictionary containing the event profile data (key-value pairs).
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is missing (None).
-        
-        Tags:
-            fetch, profile, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/events/{id}/profile/"
-        query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile), ('fields[profile]', fields_profile)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Get Metric ID for Event
 
-    def get_event_relationships_metric(self, id) -> dict[str, Any]:
-        """
-        Fetches event relationships metric data from the API.
-        
         Args:
-            id: The event identifier required to retrieve the metric data.
-        
+            id (string): id
+
         Returns:
-            A dictionary containing the event relationships metric data.
-        
-        Raises:
-            ValueError: Raised if the `id` parameter is missing.
-        
-        Tags:
-            search, metric, event, api
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/events/{id}/relationships/metric/"
+        url = f"{self.base_url}/api/events/{id}/relationships/metric"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_event_relationships_profile(self, id) -> dict[str, Any]:
+    def get_profile_for_event(self, id, additional_fields_profile=None, fields_profile=None) -> dict[str, Any]:
         """
-        Fetches and returns the event relationships profile data for the specified event ID.
-        
+Get Profile for Event
+
         Args:
-            id: The unique identifier of the event for which to retrieve relationships profile data.
-        
+            id (string): id
+            additional_fields_profile (string): Request additional fields not included by default in the response. Supported values: 'subscriptions', 'predictive_analytics' Example: 'subscriptions,subscriptions'.
+            fields_profile (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'location.address2,subscriptions.sms.marketing.last_updated'.
+
         Returns:
-            A dictionary containing the relationships profile data.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing.
-        
-        Tags:
-            fetch, profile, relationship
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/events/{id}/relationships/profile/"
+        url = f"{self.base_url}/api/events/{id}/profile"
+        query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile), ('fields[profile]', fields_profile)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_profile_id_for_event(self, id) -> dict[str, Any]:
+        """
+Get Profile ID for Event
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/events/{id}/relationships/profile"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -2876,140 +4298,233 @@ class KlaviyoApp(APIApplication):
 
     def get_flows(self, fields_flow_action=None, fields_flow=None, fields_tag=None, filter=None, include=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
         """
-        Retrieves flow data with optional filtering, pagination, and field selection from the API.
-        
+Get Flows
+
         Args:
-            fields_flow_action: Comma-separated fields to include for flow-action items (None returns all fields)
-            fields_flow: Comma-separated fields to include for flow items (None returns all fields)
-            fields_tag: Comma-separated fields to include for tag items (None returns all fields)
-            filter: Filter criteria string to match flows against
-            include: Related resources to include in the response
-            page_cursor: Pagination cursor for paginated results
-            page_size: Maximum number of results per page
-            sort: Sorting criteria for results
-        
+            fields_flow_action (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'render_options.add_org_prefix,send_options.is_transactional'.
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'created,status'.
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`id`: `any`<br>`name`: `contains`, `ends-with`, `equals`, `starts-with`<br>`status`: `equals`<br>`archived`: `equals`<br>`created`: `equals`, `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`updated`: `equals`, `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`trigger_type`: `equals` Example: '<string>'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'tags,flow-actions'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 50. Min: 1. Max: 50. Example: '50'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-created'.
+
         Returns:
-            Dictionary containing API response data (parsed JSON) with flow entries and metadata
-        
-        Raises:
-            requests.exceptions.HTTPError: Raised for non-2xx HTTP responses from the API endpoint
-        
-        Tags:
-            api, retrieve, pagination, filtering, flows
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/flows/"
+        url = f"{self.base_url}/api/flows"
         query_params = {k: v for k, v in [('fields[flow-action]', fields_flow_action), ('fields[flow]', fields_flow), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_flow(self, id, fields_flow_action=None, fields_flow=None, fields_tag=None, include=None) -> dict[str, Any]:
+    def create_flow(self, additional_fields_flow=None, data=None) -> dict[str, Any]:
         """
-        Fetches flow data from the API for a given flow ID with optional fields for customization.
-        
-        Args:
-            id: The unique identifier of the flow to retrieve.
-            fields_flow_action: Optional list of fields related to flow actions to include.
-            fields_flow: Optional list of fields related to flows to include.
-            fields_tag: Optional list of fields related to tags to include.
-            include: Optional parameter for additional data inclusion.
-        
-        Returns:
-            A dictionary containing flow data with specified fields.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing.
-        
-        Tags:
-            retrieve, data-fetch, api-call
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flows/{id}/"
-        query_params = {k: v for k, v in [('fields[flow-action]', fields_flow_action), ('fields[flow]', fields_flow), ('fields[tag]', fields_tag), ('include', include)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Create Flow
 
-    def update_flow(self, id, data) -> dict[str, Any]:
-        """
-        Updates a flow by sending a PATCH request with the provided data to the specified flow ID.
-        
         Args:
-            id: The ID of the flow to be updated.
-            data: The data to be used for updating the flow.
-        
+            additional_fields_flow (string): Request additional fields not included by default in the response. Supported values: 'definition' Example: 'definition,definition'.
+            data (object): data
+
         Returns:
-            A dictionary containing the updated flow data.
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' is None, indicating missing required parameters.
-        
-        Tags:
-            update, patch, api, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "definition": {
+                        "actions": [
+                          {
+                            "id": "<string>",
+                            "links": {
+                              "next": "<string>"
+                            },
+                            "temporary_id": "<string>",
+                            "type": "back-in-stock-delay"
+                          },
+                          {
+                            "id": "<string>",
+                            "links": {
+                              "next": "<string>"
+                            },
+                            "temporary_id": "<string>",
+                            "type": "back-in-stock-delay"
+                          }
+                        ],
+                        "entry_action_id": "<string>",
+                        "profile_filter": {
+                          "condition_groups": [
+                            {
+                              "conditions": [
+                                {
+                                  "filter": {
+                                    "operator": "not-starts-with",
+                                    "type": "string",
+                                    "value": "<string>"
+                                  },
+                                  "property": "<string>",
+                                  "type": "profile-property"
+                                },
+                                {
+                                  "filter": {
+                                    "operator": "not-equals",
+                                    "type": "string",
+                                    "value": "<string>"
+                                  },
+                                  "property": "<string>",
+                                  "type": "profile-property"
+                                }
+                              ]
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "filter": {
+                                    "operator": "equals",
+                                    "type": "string",
+                                    "value": "<string>"
+                                  },
+                                  "property": "<string>",
+                                  "type": "profile-property"
+                                },
+                                {
+                                  "filter": {
+                                    "operator": "not-starts-with",
+                                    "type": "string",
+                                    "value": "<string>"
+                                  },
+                                  "property": "<string>",
+                                  "type": "profile-property"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "triggers": [
+                          {
+                            "id": "<string>",
+                            "type": "list"
+                          },
+                          {
+                            "id": "<string>",
+                            "type": "list"
+                          }
+                        ]
+                      },
+                      "name": "<string>"
+                    },
+                    "type": "flow"
+                  }
+                }
+                ```
         """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/flows/{id}/"
-        query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
+        url = f"{self.base_url}/api/flows"
+        query_params = {k: v for k, v in [('additional-fields[flow]', additional_fields_flow)] if v is not None}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_flow(self, id, additional_fields_flow=None, fields_flow_action=None, fields_flow=None, fields_tag=None, include=None) -> dict[str, Any]:
+        """
+Get Flow
+
+        Args:
+            id (string): id
+            additional_fields_flow (string): Request additional fields not included by default in the response. Supported values: 'definition' Example: 'definition,definition'.
+            fields_flow_action (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'render_options.add_org_prefix,send_options.is_transactional'.
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'status,definition.triggers'.
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'tags,flow-actions'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/flows/{id}"
+        query_params = {k: v for k, v in [('additional-fields[flow]', additional_fields_flow), ('fields[flow-action]', fields_flow_action), ('fields[flow]', fields_flow), ('fields[tag]', fields_tag), ('include', include)] if v is not None}
+        response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def delete_flow(self, id) -> Any:
         """
-        Deletes a flow by its ID from the API endpoint.
-        
+Delete Flow
+
         Args:
-            id: The unique identifier of the flow to be deleted.
-        
+            id (string): id
+
         Returns:
-            The JSON response from the server after the deletion
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is missing
-        
-        Tags:
-            delete, management
+            Any: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flows/{id}/"
+        url = f"{self.base_url}/api/flows/{id}"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_flow_action(self, id, fields_flow_action=None, fields_flow_message=None, fields_flow=None, include=None) -> dict[str, Any]:
+    def update_flow_status(self, id, data=None) -> dict[str, Any]:
         """
-        Retrieves a flow action's details by ID, with optional field filtering and related resource inclusion.
-        
+Update Flow Status
+
         Args:
-            id: The unique identifier of the flow action to retrieve.
-            fields_flow_action: (Optional) Specific fields to include from the flow-action resource.
-            fields_flow_message: (Optional) Specific fields to include from the flow-message resource in the response.
-            fields_flow: (Optional) Specific fields to include from the flow resource in the response.
-            include: (Optional) Related resources to include in the response.
-        
+            id (string): id
+            data (object): data
+
         Returns:
-            A dictionary containing the flow action's details and any requested related resources.
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is not provided.
-            requests.exceptions.HTTPError: Raised when the API request fails (e.g., invalid ID or server error).
-        
-        Tags:
-            retrieve, api, flow-action, details, inclusion, filter
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "status": "<string>"
+                    },
+                    "id": "<string>",
+                    "type": "flow"
+                  }
+                }
+                ```
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flow-actions/{id}/"
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/flows/{id}"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_flow_action(self, id, fields_flow_action=None, fields_flow_message=None, fields_flow=None, include=None) -> dict[str, Any]:
+        """
+Get Flow Action
+
+        Args:
+            id (string): id
+            fields_flow_action (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'render_options.add_org_prefix,send_options.is_transactional'.
+            fields_flow_message (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'content.cc_email,content.reply_to_email'.
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'created,status'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'flow-messages,flow-messages'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/flow-actions/{id}"
         query_params = {k: v for k, v in [('fields[flow-action]', fields_flow_action), ('fields[flow-message]', fields_flow_message), ('fields[flow]', fields_flow), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -3017,368 +4532,279 @@ class KlaviyoApp(APIApplication):
 
     def get_flow_message(self, id, fields_flow_action=None, fields_flow_message=None, fields_template=None, include=None) -> dict[str, Any]:
         """
-        Retrieves a flow message by its ID, optionally filtering fields and including related data.
-        
+Get Flow Message
+
         Args:
-            id: The identifier of the flow message to retrieve. Required.
-            fields_flow_action: Optionally specifies fields related to flow actions.
-            fields_flow_message: Optionally specifies fields related to flow messages.
-            fields_template: Optionally specifies fields related to templates.
-            include: Optionally includes additional related data in the response.
-        
+            id (string): id
+            fields_flow_action (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'render_options.add_org_prefix,send_options.is_transactional'.
+            fields_flow_message (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'content.cc_email,content.reply_to_email'.
+            fields_template (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,text'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'template,template'.
+
         Returns:
-            A dictionary containing the flow message details.
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is missing or None.
-        
-        Tags:
-            fetch, message, api, flow-management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flow-messages/{id}/"
+        url = f"{self.base_url}/api/flow-messages/{id}"
         query_params = {k: v for k, v in [('fields[flow-action]', fields_flow_action), ('fields[flow-message]', fields_flow_message), ('fields[template]', fields_template), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_flow_flow_actions(self, id, fields_flow_action=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+    def get_actions_for_flow(self, id, fields_flow_action=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
         """
-        Retrieve flow actions for a specified flow via API, with optional filtering and pagination.
-        
+Get Actions for Flow
+
         Args:
-            id: Unique identifier of the flow (required)
-            fields_flow_action: Specific fields to include for the flow action
-            filter: Criteria to filter the flow actions
-            page_cursor: Pagination cursor for result set continuation
-            page_size: Number of items to return per page
-            sort: Ordering criteria for the results
-        
+            id (string): id
+            fields_flow_action (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'render_options.add_org_prefix,send_options.is_transactional'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`id`: `any`<br>`action_type`: `any`, `equals`<br>`status`: `equals`<br>`created`: `equals`, `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`updated`: `equals`, `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 50. Min: 1. Max: 50. Example: '50'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'action_type'.
+
         Returns:
-            Dictionary containing the parsed JSON response with flow actions data
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is not provided
-            requests.exceptions.HTTPError: Raised for HTTP request failures
-        
-        Tags:
-            retrieve, flow-actions, api, pagination, filtering, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flows/{id}/flow-actions/"
+        url = f"{self.base_url}/api/flows/{id}/flow-actions"
         query_params = {k: v for k, v in [('fields[flow-action]', fields_flow_action), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_flow_relationships_flow_actions(self, id, filter=None, page_size=None, sort=None) -> dict[str, Any]:
+    def get_action_ids_for_flow(self, id, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
         """
-        Retrieves relationships between flows and flow actions for a specified flow ID
-        
-        Args:
-            id: Unique identifier of the flow
-            filter: Optional filter parameter for narrowing down results
-            page_size: Optional parameter for specifying the number of items per page
-            sort: Optional parameter for specifying the sort order of the results
-        
-        Returns:
-            A dictionary containing relationships between flows and flow actions
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is None
-        
-        Tags:
-            fetch, flow, relationships
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flows/{id}/relationships/flow-actions/"
-        query_params = {k: v for k, v in [('filter', filter), ('page[size]', page_size), ('sort', sort)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Get Action IDs for Flow
 
-    def get_flow_relationships_tags(self, id) -> dict[str, Any]:
-        """
-        Retrieve tags associated with a specific flow's relationships by ID.
-        
         Args:
-            id: Unique identifier of the flow whose relationship tags to fetch.
-        
-        Returns:
-            Dictionary containing tag data from the API response.
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is None.
-            HTTPError: Raised for unsuccessful HTTP responses (4xx/5xx status codes).
-        
-        Tags:
-            fetch, relationships, tags, api-client
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flows/{id}/relationships/tags/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+            id (string): id
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`id`: `any`<br>`action_type`: `any`, `equals`<br>`status`: `equals`<br>`created`: `equals`, `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`updated`: `equals`, `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 50. Min: 1. Max: 50. Example: '50'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'action_type'.
 
-    def get_flow_tags(self, id, fields_tag=None) -> dict[str, Any]:
-        """
-        Retrieves tags for a specific flow identified by its ID.
-        
-        Args:
-            id: The unique identifier of the flow.
-            fields_tag: Optional parameter to specify fields related to tags.
-        
         Returns:
-            A dictionary containing tags for the flow.
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is missing.
-        
-        Tags:
-            fetch, metadata, api
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flows/{id}/tags/"
-        query_params = {k: v for k, v in [('fields[tag]', fields_tag)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_flow_action_flow(self, id, fields_flow=None) -> dict[str, Any]:
-        """
-        Retrieves flow actions based on the provided ID and optional flow fields.
-        
-        Args:
-            id: The unique ID of the flow action to retrieve.
-            fields_flow: Optional list of flow fields to include in the response.
-        
-        Returns:
-            A dictionary containing the flow action information.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing.
-        
-        Tags:
-            retrieve, flow-action, api
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flow-actions/{id}/flow/"
-        query_params = {k: v for k, v in [('fields[flow]', fields_flow)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_flow_action_relationships_flow(self, id) -> dict[str, Any]:
-        """
-        Retrieve relationships flow data for a specific flow action by ID from the API.
-        
-        Args:
-            id: The unique identifier of the flow action for which to fetch relationship data
-        
-        Returns:
-            A dictionary containing the flow relationships data from the API response
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is not provided (None)
-            requests.HTTPError: Raised when the API request fails (non-2XX status code)
-        
-        Tags:
-            fetch, relationships, flow-action, api, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flow-actions/{id}/relationships/flow/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_flow_action_messages(self, id, fields_flow_message=None, filter=None, page_size=None, sort=None) -> dict[str, Any]:
-        """
-        Retrieves flow action messages associated with a given ID.
-        
-        Args:
-            id: The unique identifier required to fetch flow action messages.
-            fields_flow_message: Optional specification of fields to include in flow messages.
-            filter: Optional filter criteria for flow messages.
-            page_size: Optional number of flow messages to return per page.
-            sort: Optional sorting criteria for flow messages.
-        
-        Returns:
-            A dictionary containing flow action messages.
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is missing.
-        
-        Tags:
-            retrieve, management, flow-action
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flow-actions/{id}/flow-messages/"
-        query_params = {k: v for k, v in [('fields[flow-message]', fields_flow_message), ('filter', filter), ('page[size]', page_size), ('sort', sort)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_flow_action_relationships_messages(self, id, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
-        """
-        Retrieves flow action relationships messages from a specified ID with optional filtering, pagination, and sorting.
-        
-        Args:
-            id: Required identifier for the flow action.
-            filter: Optional filter for narrowing down the results.
-            page_cursor: Optional cursor for pagination.
-            page_size: Optional size of each page for pagination.
-            sort: Optional parameter for sorting results.
-        
-        Returns:
-            A dictionary containing flow action relationships messages.
-        
-        Raises:
-            ValueError: Raised if the required 'id' parameter is missing.
-        
-        Tags:
-            fetch, relationships, pagination, api-call
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flow-actions/{id}/relationships/flow-messages/"
+        url = f"{self.base_url}/api/flows/{id}/relationships/flow-actions"
         query_params = {k: v for k, v in [('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_flow_message_action(self, id, fields_flow_action=None) -> dict[str, Any]:
+    def get_tags_for_flow(self, id, fields_tag=None) -> dict[str, Any]:
         """
-        Retrieves a specific flow message action from the API using its ID and optional field filtering.
-        
+Get Tags for Flow
+
         Args:
-            id: Unique identifier of the flow message action to retrieve.
-            fields_flow_action: Optional string specifying which fields to include in the flow-action resource response (comma-separated).
-        
+            id (string): id
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+
         Returns:
-            A dictionary containing the flow message action details, parsed from the JSON response.
-        
-        Raises:
-            ValueError: When the 'id' parameter is None or not provided.
-            requests.HTTPError: When the HTTP request fails (e.g., 404 Not Found or 500 Internal Server Error).
-        
-        Tags:
-            retrieve, api, flow-action, async_job
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flow-messages/{id}/flow-action/"
+        url = f"{self.base_url}/api/flows/{id}/tags"
+        query_params = {k: v for k, v in [('fields[tag]', fields_tag)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_tag_ids_for_flow(self, id) -> dict[str, Any]:
+        """
+Get Tag IDs for Flow
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/flows/{id}/relationships/tags"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_flow_for_flow_action(self, id, fields_flow=None) -> dict[str, Any]:
+        """
+Get Flow for Flow Action
+
+        Args:
+            id (string): id
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'created,status'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/flow-actions/{id}/flow"
+        query_params = {k: v for k, v in [('fields[flow]', fields_flow)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_flow_id_for_flow_action(self, id) -> dict[str, Any]:
+        """
+Get Flow ID for Flow Action
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/flow-actions/{id}/relationships/flow"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_messages_for_flow_action(self, id, fields_flow_message=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+        """
+Get Messages For Flow Action
+
+        Args:
+            id (string): id
+            fields_flow_message (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'content.cc_email,content.reply_to_email'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`id`: `any`<br>`name`: `contains`, `ends-with`, `equals`, `starts-with`<br>`created`: `equals`, `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`updated`: `equals`, `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 50. Min: 1. Max: 50. Example: '50'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-updated'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/flow-actions/{id}/flow-messages"
+        query_params = {k: v for k, v in [('fields[flow-message]', fields_flow_message), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_message_ids_for_flow_action(self, id, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+        """
+Get Message IDs for Flow Action
+
+        Args:
+            id (string): id
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`name`: `contains`, `ends-with`, `equals`, `starts-with`<br>`created`: `equals`, `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`updated`: `equals`, `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 50. Min: 1. Max: 50. Example: '50'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-updated'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/flow-actions/{id}/relationships/flow-messages"
+        query_params = {k: v for k, v in [('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_action_for_flow_message(self, id, fields_flow_action=None) -> dict[str, Any]:
+        """
+Get Action for Flow Message
+
+        Args:
+            id (string): id
+            fields_flow_action (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'render_options.add_org_prefix,send_options.is_transactional'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/flow-messages/{id}/flow-action"
         query_params = {k: v for k, v in [('fields[flow-action]', fields_flow_action)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_flow_message_relationships_action(self, id) -> dict[str, Any]:
+    def get_action_id_for_flow_message(self, id) -> dict[str, Any]:
         """
-        Retrieve flow action relationships for a specified flow message ID by querying the API endpoint.
-        
+Get Action ID for Flow Message
+
         Args:
-            id: The unique identifier of the flow message for which to fetch relationships. Required.
-        
+            id (string): id
+
         Returns:
-            Dictionary containing relationship data for the flow action associated with the specified message ID.
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is None.
-            requests.HTTPError: Raised if the API request fails (e.g., invalid ID or server error).
-        
-        Tags:
-            fetch, relationships, flow-action, api
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flow-messages/{id}/relationships/flow-action/"
+        url = f"{self.base_url}/api/flow-messages/{id}/relationships/flow-action"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_flow_message_relationships_template(self, id) -> dict[str, Any]:
+    def get_template_for_flow_message(self, id, fields_template=None) -> dict[str, Any]:
         """
-        Retrieves the template relationships data for a specific flow message.
-        
-        Args:
-            id: The unique identifier of the flow message (required)
-        
-        Returns:
-            A dictionary containing the template relationships data from the API response
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is not provided
-            requests.HTTPError: Raised when the API request fails (handled via response.raise_for_status())
-        
-        Tags:
-            retrieve, flow-messages, api, relationships, template
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flow-messages/{id}/relationships/template/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Get Template for Flow Message
 
-    def get_flow_message_template(self, id, fields_template=None) -> dict[str, Any]:
-        """
-        Retrieve a flow message template by ID, optionally specifying fields to include in the template.
-        
         Args:
-            id: The unique identifier of the flow message template to retrieve
-            fields_template: (Optional) Comma-separated fields to include in the template response
-        
+            id (string): id
+            fields_template (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,text'.
+
         Returns:
-            Dictionary containing the flow message template data
-        
-        Raises:
-            ValueError: If the 'id' parameter is not provided
-            requests.HTTPError: If the API request fails (e.g., 404 for invalid ID or 500 for server errors)
-        
-        Tags:
-            retrieve, api, flow-messages, template
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/flow-messages/{id}/template/"
+        url = f"{self.base_url}/api/flow-messages/{id}/template"
         query_params = {k: v for k, v in [('fields[template]', fields_template)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_template_id_for_flow_message(self, id) -> dict[str, Any]:
+        """
+Get Template ID for Flow Message
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/flow-messages/{id}/relationships/template"
+        query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def get_forms(self, fields_form=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
         """
-        Retrieves forms from an API endpoint with optional filtering, pagination, and sorting.
-        
+Get Forms
+
         Args:
-            fields_form: Optional parameter to filter forms based on specific fields.
-            filter: Optional filter to apply when retrieving forms.
-            page_cursor: Cursor for pagination to retrieve the next set of forms.
-            page_size: Number of forms to retrieve per page.
-            sort: Optional parameter to sort the retrieved forms.
-        
+            fields_form (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,ab_test'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`id`: `any`, `equals`<br>`name`: `any`, `contains`, `equals`<br>`ab_test`: `equals`<br>`updated_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`created_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`status`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-created_at'.
+
         Returns:
-            A dictionary containing the requested forms.
-        
-        Raises:
-            HTTPError: Raised if the HTTP request to the API fails.
-        
-        Tags:
-            list, forms, api_request, pagination
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/forms/"
+        url = f"{self.base_url}/api/forms"
         query_params = {k: v for k, v in [('fields[form]', fields_form), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -3386,26 +4812,20 @@ class KlaviyoApp(APIApplication):
 
     def get_form(self, id, fields_form_version=None, fields_form=None, include=None) -> dict[str, Any]:
         """
-        Retrieves a form by its ID with optional parameters to specify form version, fields, and included data.
-        
+Get Form
+
         Args:
-            id: The ID of the form to retrieve.
-            fields_form_version: The version of the form fields.
-            fields_form: The specific fields of the form.
-            include: Additional data to be included in the response.
-        
+            id (string): id
+            fields_form_version (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'updated_at,form_type'.
+            fields_form (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,ab_test'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'form-versions,form-versions'.
+
         Returns:
-            A dictionary containing the form data.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing.
-        
-        Tags:
-            retrieve, management, api-call
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/forms/{id}/"
+        url = f"{self.base_url}/api/forms/{id}"
         query_params = {k: v for k, v in [('fields[form-version]', fields_form_version), ('fields[form]', fields_form), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -3413,25 +4833,18 @@ class KlaviyoApp(APIApplication):
 
     def get_form_version(self, id, fields_form_version=None) -> dict[str, Any]:
         """
-        Retrieves a specific form version's details by ID from the API.
-        
+Get Form Version
+
         Args:
-            id: The unique identifier of the form version to fetch[1][2].
-            fields_form_version: Optional comma-separated fields to include in the response (e.g., 'name,status'). Omit for all fields[1][2].
-        
+            id (string): id
+            fields_form_version (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'updated_at,form_type'.
+
         Returns:
-            A dictionary containing the form version's data as returned by the API[1][2].
-        
-        Raises:
-            ValueError: If the 'id' parameter is None[1][2].
-            requests.HTTPError: If the API request fails (e.g., authentication error, invalid ID, or server error)[1][2].
-        
-        Tags:
-            get, form-version, api-call, retrieve
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/form-versions/{id}/"
+        url = f"{self.base_url}/api/form-versions/{id}"
         query_params = {k: v for k, v in [('fields[form-version]', fields_form_version)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -3439,1600 +4852,2661 @@ class KlaviyoApp(APIApplication):
 
     def get_versions_for_form(self, id, fields_form_version=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
         """
-        Retrieves paginated form versions for a specified form ID with optional filtering, sorting, and field selection.
-        
+Get Versions for Form
+
         Args:
-            id: Unique identifier of the form whose versions are being retrieved
-            fields_form_version: Comma-separated list of specific fields to include in each form version (optional)
-            filter: Criteria to filter form versions (optional)
-            page_cursor: Pagination cursor for fetching specific result pages (optional)
-            page_size: Number of form versions to return per page (optional)
-            sort: Sorting criteria for form versions (optional)
-        
+            id (string): id
+            fields_form_version (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'updated_at,form_type'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`form_type`: `any`, `equals`<br>`status`: `equals`<br>`updated_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`created_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-created_at'.
+
         Returns:
-            Dictionary containing paginated form version data from the API response
-        
-        Raises:
-            ValueError: When 'id' parameter is not provided
-            requests.HTTPError: When API request fails (4xx/5xx status codes)
-        
-        Tags:
-            get, list, form-versions, pagination, api, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/forms/{id}/form-versions/"
+        url = f"{self.base_url}/api/forms/{id}/form-versions"
         query_params = {k: v for k, v in [('fields[form-version]', fields_form_version), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_version_ids_for_form(self, id) -> dict[str, Any]:
+    def get_version_ids_for_form(self, id, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
         """
-        Retrieves version IDs for a specific form identified by its ID.
-        
-        Args:
-            id: The unique identifier of the form to fetch version IDs for.
-        
-        Returns:
-            A dictionary mapping version IDs to their respective details.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing.
-        
-        Tags:
-            fetch, api-call, form-management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/forms/{id}/relationships/form-versions/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Get Version IDs for Form
 
-    def get_form_id_for_form_version(self, id) -> dict[str, Any]:
-        """
-        Retrieves the form ID associated with a specific form version.
-        
         Args:
-            id: The ID of the form version to retrieve the form ID for.
-        
+            id (string): id
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`form_type`: `any`, `equals`<br>`status`: `equals`<br>`updated_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`created_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-created_at'.
+
         Returns:
-            A dictionary containing the form ID for the specified form version.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing.
-        
-        Tags:
-            fetch, form, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/form-versions/{id}/relationships/form/"
-        query_params = {}
+        url = f"{self.base_url}/api/forms/{id}/relationships/form-versions"
+        query_params = {k: v for k, v in [('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def get_form_for_form_version(self, id, fields_form=None) -> dict[str, Any]:
         """
-        Fetches a form for a specified form version.
-        
+Get Form for Form Version
+
         Args:
-            id: Unique identifier of the form version.
-            fields_form: Optional parameter to specify fields[form] in the query.
-        
+            id (string): id
+            fields_form (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,ab_test'.
+
         Returns:
-            A dictionary containing the form data.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing.
-        
-        Tags:
-            fetch, form, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/form-versions/{id}/form/"
+        url = f"{self.base_url}/api/form-versions/{id}/form"
         query_params = {k: v for k, v in [('fields[form]', fields_form)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_form_id_for_form_version(self, id) -> dict[str, Any]:
+        """
+Get Form ID for Form Version
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/form-versions/{id}/relationships/form"
+        query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def get_images(self, fields_image=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
         """
-        Retrieve a paginated list of images from the API endpoint with optional filtering, sorting, and field selection.
-        
+Get Images
+
         Args:
-            fields_image: Comma-separated fields to include in the 'image' resource response (None returns all fields)
-            filter: Criteria to filter images (format depends on API implementation)
-            page_cursor: Pagination cursor for retrieving specific page of results
-            page_size: Maximum number of items to return per page
-            sort: Field(s) and direction to sort results (format: 'field1,-field2')
-        
+            fields_image (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'image_url,name'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`id`: `any`, `equals`<br>`updated_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`format`: `any`, `equals`<br>`name`: `any`, `contains`, `ends-with`, `equals`, `starts-with`<br>`size`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`hidden`: `any`, `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-format'.
+
         Returns:
-            Dictionary containing parsed JSON response with image data and pagination information
-        
-        Raises:
-            requests.HTTPError: When the API request fails (non-2xx status code)
-        
-        Tags:
-            retrieve, list, pagination, api, images
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/images/"
+        url = f"{self.base_url}/api/images"
         query_params = {k: v for k, v in [('fields[image]', fields_image), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
+    def upload_image_from_url(self, data=None) -> dict[str, Any]:
+        """
+Upload Image From URL
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "hidden": false,
+                      "import_from_url": "<string>",
+                      "name": "<string>"
+                    },
+                    "type": "image"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/images"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
     def get_image(self, id, fields_image=None) -> dict[str, Any]:
         """
-        Retrieves an image by its ID from an API, allowing optional specification of image fields.
-        
+Get Image
+
         Args:
-            id: The unique identifier of the image to be retrieved.
-            fields_image: Optional parameter to specify which fields of the image are returned.
-        
+            id (string): id
+            fields_image (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'image_url,name'.
+
         Returns:
-            A dictionary containing the image data as per the specified fields.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing.
-        
-        Tags:
-            retrieve, api-call, image-fetching
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/images/{id}/"
+        url = f"{self.base_url}/api/images/{id}"
         query_params = {k: v for k, v in [('fields[image]', fields_image)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_image(self, id, data) -> dict[str, Any]:
+    def update_image(self, id, data=None) -> dict[str, Any]:
         """
-        Updates an image's data via a PATCH request to the API endpoint.
-        
+Update Image
+
         Args:
-            id: The unique identifier of the image to update.
-            data: The updated image data to send in the request body.
-        
+            id (string): id
+            data (object): data
+
         Returns:
-            A dictionary containing the updated image details from the API response.
-        
-        Raises:
-            ValueError: Raised if either 'id' or 'data' parameters are None.
-            requests.HTTPError: Raised if the API request fails (handled by response.raise_for_status()).
-        
-        Tags:
-            update, patch, api, image, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "hidden": "<boolean>",
+                      "name": "<string>"
+                    },
+                    "id": "<string>",
+                    "type": "image"
+                  }
+                }
+                ```
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/images/{id}/"
+        url = f"{self.base_url}/api/images/{id}"
         query_params = {}
         response = self._patch(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_lists(self, fields_list=None, fields_tag=None, filter=None, include=None, page_cursor=None, sort=None) -> dict[str, Any]:
+  
         """
-        Retrieves a paginated collection of lists with optional filtering, sorting, and field selection.
-        
-        Args:
-            fields_list: Optional comma-separated fields to include for list objects
-            fields_tag: Optional comma-separated fields to include for tag objects
-            filter: Optional filter criteria to apply to the list collection
-            include: Optional related resources to include in the response
-            page_cursor: Cursor token for paginating through large result sets
-            sort: Optional sort order for the returned list collection
-        
-        Returns:
-            Dictionary containing the API response with list collection data and pagination details
-        
-        Raises:
-            requests.exceptions.HTTPError: Raised when the API request fails (non-2xx status code)
-        
-        Tags:
-            list, pagination, api-client, filtering, sorting
-        """
-        url = f"{self.base_url}/api/lists/"
-        query_params = {k: v for k, v in [('fields[list]', fields_list), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Upload Image From File
 
-    def create_list(self, data) -> dict[str, Any]:
-        """
-        Creates a list by sending a POST request to the API endpoint with the provided data.
-        
-        Args:
-            data: (Any) Data to include in the list creation request. Must not be None.
-        
         Returns:
-            dict[str, Any]: Parsed JSON response from the API containing the created list details.
-        
-        Raises:
-            ValueError: Raised if the 'data' parameter is None.
-            HTTPError: Raised if the API request fails (HTTP status code 4XX/5XX).
-        
-        Tags:
-            create, api, post, management
+            dict[str, Any]: Success
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/lists/"
+        url = f"{self.base_url}/api/image-upload"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_list(self, id, additional_fields_list=None, fields_list=None, fields_tag=None, include=None) -> dict[str, Any]:
+    def get_lists(self, fields_flow=None, fields_list=None, fields_tag=None, filter=None, include=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Retrieves a specific list's details by ID from an API endpoint
-        
+Get Lists
+
         Args:
-            id: Unique identifier of the list to retrieve (required)
-            additional_fields_list: Optional additional fields to include for the list
-            fields_list: Optional specific fields to return for the list
-            fields_tag: Optional specific fields to return for associated tags
-            include: Optional related resources to include in the response
-        
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'created,status'.
+            fields_list (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'updated,opt_in_process'.
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`name`: `any`, `equals`<br>`id`: `any`, `equals`<br>`created`: `greater-than`<br>`updated`: `greater-than` Example: '<string>'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'flow-triggers,tags'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-updated'.
+
         Returns:
-            Dictionary containing the list details and requested fields from the API response
-        
-        Raises:
-            ValueError: Raised when required parameter 'id' is None
-            requests.exceptions.HTTPError: Raised for HTTP request failures (4XX/5XX status codes)
-        
-        Tags:
-            list, retrieve, api, details, management
+            dict[str, Any]: Success
         """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/lists/{id}/"
-        query_params = {k: v for k, v in [('additional-fields[list]', additional_fields_list), ('fields[list]', fields_list), ('fields[tag]', fields_tag), ('include', include)] if v is not None}
+        url = f"{self.base_url}/api/lists"
+        query_params = {k: v for k, v in [('fields[flow]', fields_flow), ('fields[list]', fields_list), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_list(self, id, data) -> dict[str, Any]:
+    def create_list(self, data=None) -> dict[str, Any]:
         """
-        Updates a list by sending a PATCH request to the specified API endpoint.
-        
+Create List
+
         Args:
-            id: The identifier of the list to update.
-            data: The data to update in the list.
-        
+            data (object): data
+
         Returns:
-            A dictionary containing the updated list data.
-        
-        Raises:
-            ValueError: Raised if either 'id' or 'data' is missing from the request.
-        
-        Tags:
-            update, patch, api-call, list-management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "name": "<string>"
+                    },
+                    "type": "list"
+                  }
+                }
+                ```
         """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/lists/{id}/"
+        url = f"{self.base_url}/api/lists"
         query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_list(self, id, additional_fields_list=None, fields_flow=None, fields_list=None, fields_tag=None, include=None) -> dict[str, Any]:
+        """
+Get List
+
+        Args:
+            id (string): id
+            additional_fields_list (string): Request additional fields not included by default in the response. Supported values: 'profile_count' Example: 'profile_count,profile_count'.
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'created,status'.
+            fields_list (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'updated,opt_in_process'.
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'flow-triggers,tags'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/lists/{id}"
+        query_params = {k: v for k, v in [('additional-fields[list]', additional_fields_list), ('fields[flow]', fields_flow), ('fields[list]', fields_list), ('fields[tag]', fields_tag), ('include', include)] if v is not None}
+        response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def delete_list(self, id) -> Any:
         """
-        Deletes a list by its ID and returns the response in JSON format.
-        
+Delete List
+
         Args:
-            id: The ID of the list to be deleted.
-        
+            id (string): id
+
         Returns:
-            The JSON response from the server after deleting the list.
-        
-        Raises:
-            ValueError: Raised if the required 'id' parameter is missing.
-        
-        Tags:
-            delete, list, management
+            Any: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/lists/{id}/"
+        url = f"{self.base_url}/api/lists/{id}"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_list_relationships_tags(self, id) -> dict[str, Any]:
+    def update_list(self, id, data=None) -> dict[str, Any]:
         """
-        Retrieves tag relationships for a specified list ID by querying the API endpoint.
-        
+Update List
+
         Args:
-            id: The unique identifier of the list for which to fetch relationships and tags (required).
-        
+            id (string): id
+            data (object): data
+
         Returns:
-            Parsed JSON response containing tag relationships data as a dictionary.
-        
-        Raises:
-            ValueError: Raised if 'id' parameter is None or missing.
-            requests.exceptions.HTTPError: Raised if the API request fails (e.g., invalid ID or server error).
-        
-        Tags:
-            retrieve, list, relationships, tags, api
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "name": "<string>"
+                    },
+                    "id": "<string>",
+                    "type": "list"
+                  }
+                }
+                ```
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/lists/{id}/relationships/tags/"
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/lists/{id}"
         query_params = {}
-        response = self._get(url, params=query_params)
+        response = self._patch(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_list_tags(self, id, fields_tag=None) -> dict[str, Any]:
+    def get_tags_for_list(self, id, fields_tag=None) -> dict[str, Any]:
         """
-        Retrieve tags associated with a specific list by ID, with optional field filtering.
-        
+Get Tags for List
+
         Args:
-            id: The unique identifier of the list whose tags to retrieve
-            fields_tag: Optional comma-separated fields to include in the tag response (None returns all fields)
-        
+            id (string): id
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+
         Returns:
-            Dictionary containing tag data from the API response
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is not provided
-            requests.HTTPError: Raised for 4XX/5XX status codes from the API
-        
-        Tags:
-            list, retrieve, tags, api
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/lists/{id}/tags/"
+        url = f"{self.base_url}/api/lists/{id}/tags"
         query_params = {k: v for k, v in [('fields[tag]', fields_tag)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_list_relationships_profiles(self, id, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+    def get_tag_ids_for_list(self, id) -> dict[str, Any]:
         """
-        Retrieves the list of relationships between a specified list and profiles, optionally filtered, paginated, and sorted.
-        
+Get Tag IDs for List
+
         Args:
-            id: The ID of the list for which relationships are to be retrieved.
-            filter: Optional filter to apply to the retrieved relationships.
-            page_cursor: Optional cursor for pagination.
-            page_size: Optional size of each page for pagination.
-            sort: Optional criteria to sort the retrieved relationships.
-        
+            id (string): id
+
         Returns:
-            A dictionary containing the list of relationships and pagination information.
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is missing.
-        
-        Tags:
-            list, profiles, relationships, async, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/lists/{id}/relationships/profiles/"
+        url = f"{self.base_url}/api/lists/{id}/relationships/tags"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_profiles_for_list(self, id, additional_fields_profile=None, fields_profile=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+        """
+Get Profiles for List
+
+        Args:
+            id (string): id
+            additional_fields_profile (string): Request additional fields not included by default in the response. Supported values: 'subscriptions', 'predictive_analytics' Example: 'subscriptions,subscriptions'.
+            fields_profile (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'location.address1,first_name'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`email`: `any`, `equals`<br>`phone_number`: `any`, `equals`<br>`push_token`: `any`, `equals`<br>`_kx`: `equals`<br>`joined_group_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-joined_group_at'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/lists/{id}/profiles"
+        query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile), ('fields[profile]', fields_profile), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_profile_ids_for_list(self, id, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+        """
+Get Profile IDs for List
+
+        Args:
+            id (string): id
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`email`: `any`, `equals`<br>`phone_number`: `any`, `equals`<br>`push_token`: `any`, `equals`<br>`_kx`: `equals`<br>`joined_group_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-joined_group_at'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/lists/{id}/relationships/profiles"
         query_params = {k: v for k, v in [('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_list_relationships(self, id, data) -> Any:
+    def add_profiles_to_list(self, id, data=None) -> Any:
         """
-        Creates relationships between a list and profiles by sending a POST request to the API endpoint.
-        
+Add Profiles to List
+
         Args:
-            id: The unique identifier of the list to which relationships will be added.
-            data: The data containing profile relationship details to be associated with the list.
-        
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'profile'}, {'id': '<string>', 'type': 'profile'}]".
+
         Returns:
-            A JSON-decoded response from the API containing the created relationships or operation results.
-        
-        Raises:
-            ValueError: Raised if either 'id' or 'data' parameter is not provided.
-            requests.HTTPError: Raised if the API request fails (handled by response.raise_for_status()).
-        
-        Tags:
-            create, relationships, api, management
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "profile"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "profile"
+                    }
+                  ]
+                }
+                ```
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/lists/{id}/relationships/profiles/"
+        url = f"{self.base_url}/api/lists/{id}/relationships/profiles"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def delete_list_relationships(self, id, data) -> Any:
+    def remove_profiles_from_list(self, id, data=None) -> Any:
         """
-        Deletes relationships between a list and associated profiles based on the provided ID and data.
-        
+Remove Profiles from List
+
         Args:
-            id: The ID of the list to delete relationships from.
-            data: Data required for the deletion operation.
-        
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'profile'}, {'id': '<string>', 'type': 'profile'}]".
+
         Returns:
-            The JSON response from the server after deletion.
-        
-        Raises:
-            ValueError: Raised if either 'id' or 'data' is None, as both are required parameters.
-        
-        Tags:
-            delete, list-management, relationship
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "profile"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "profile"
+                    }
+                  ]
+                }
+                ```
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/lists/{id}/relationships/profiles/"
+        url = f"{self.base_url}/api/lists/{id}/relationships/profiles"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_list_profiles(self, id, additional_fields_profile=None, fields_profile=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+    def get_flows_triggered_by_list(self, id, fields_flow=None) -> dict[str, Any]:
         """
-        Retrieves a list of profiles associated with a specified list id, including optional filtering and pagination.
-        
+Get Flows Triggered by List
+
         Args:
-            id: Required identifier of the list to fetch profiles from.
-            additional_fields_profile: Optional list of additional fields to include in the profile data.
-            fields_profile: Optional list of fields to include in the profile data.
-            filter: Optional filter criteria to apply to the profiles.
-            page_cursor: Optional cursor to specify the starting point of the page.
-            page_size: Optional number of items to return in each page.
-            sort: Optional criteria to sort the profiles.
-        
+            id (string): id
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'created,status'.
+
         Returns:
-            A dictionary containing the response data from the API call.
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is missing or None.
-        
-        Tags:
-            retrieve, profiles, list, api_call
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/lists/{id}/profiles/"
-        query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile), ('fields[profile]', fields_profile), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
+        url = f"{self.base_url}/api/lists/{id}/flow-triggers"
+        query_params = {k: v for k, v in [('fields[flow]', fields_flow)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_metrics(self, fields_metric=None, filter=None, page_cursor=None) -> dict[str, Any]:
+    def get_ids_for_flows_triggered_by_list(self, id) -> dict[str, Any]:
         """
-        Fetches metrics data from the API endpoint with optional filtering and pagination.
-        
-        Args:
-            fields_metric: Optional string specifying fields to include for metrics. None returns default fields.
-            filter: Optional filter string to constrain results. None applies no filters.
-            page_cursor: Optional pagination cursor for API result pagination. None fetches the first page.
-        
-        Returns:
-            Dictionary containing metrics data in the API response format.
-        
-        Raises:
-            requests.HTTPError: Raised for unsuccessful HTTP responses (4XX/5XX status codes).
-        
-        Tags:
-            fetch, metrics, pagination, api, data-retrieval
-        """
-        url = f"{self.base_url}/api/metrics/"
-        query_params = {k: v for k, v in [('fields[metric]', fields_metric), ('filter', filter), ('page[cursor]', page_cursor)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Get IDs for Flows Triggered by List
 
-    def get_metric(self, id, fields_metric=None) -> dict[str, Any]:
-        """
-        Retrieve a specific metric's data by ID from the API endpoint.
-        
         Args:
-            id: The unique identifier of the metric to fetch (required).
-            fields_metric: Optional fields to include in the metric response (str | None).
-        
+            id (string): id
+
         Returns:
-            Dictionary containing the metric data parsed from the JSON response.
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is not provided.
-            requests.HTTPError: Raised for unsuccessful HTTP responses (4XX/5XX status codes).
-        
-        Tags:
-            retrieve, metric, api, get
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/metrics/{id}/"
-        query_params = {k: v for k, v in [('fields[metric]', fields_metric)] if v is not None}
+        url = f"{self.base_url}/api/lists/{id}/relationships/flow-triggers"
+        query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def query_metric_aggregates(self, data) -> dict[str, Any]:
+    def get_metrics(self, fields_flow=None, fields_metric=None, filter=None, include=None, page_cursor=None) -> dict[str, Any]:
         """
-        Query metric aggregates by sending provided data to the API endpoint and returning the parsed JSON response.
-        
+Get Metrics
+
         Args:
-            data: Required data payload containing metric parameters for the API request. Must not be None.
-        
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'created,status'.
+            fields_metric (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'integration,created'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`integration.name`: `equals`<br>`integration.category`: `equals` Example: '<string>'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'flow-triggers,flow-triggers'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+
         Returns:
-            dict[str, Any]: Parsed JSON response containing metric aggregation results from the API.
-        
-        Raises:
-            ValueError: If input 'data' parameter is None, indicating missing required data.
-            requests.HTTPError: If the HTTP POST request fails (non-2xx response code).
-        
-        Tags:
-            query, metrics, aggregates, api, post
+            dict[str, Any]: Success
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
+        url = f"{self.base_url}/api/metrics"
+        query_params = {k: v for k, v in [('fields[flow]', fields_flow), ('fields[metric]', fields_metric), ('filter', filter), ('include', include), ('page[cursor]', page_cursor)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_metric(self, id, fields_flow=None, fields_metric=None, include=None) -> dict[str, Any]:
+        """
+Get Metric
+
+        Args:
+            id (string): id
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'created,status'.
+            fields_metric (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'integration,created'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'flow-triggers,flow-triggers'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/metrics/{id}"
+        query_params = {k: v for k, v in [('fields[flow]', fields_flow), ('fields[metric]', fields_metric), ('include', include)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_metric_property(self, id, additional_fields_metric_property=None, fields_metric_property=None, fields_metric=None, include=None) -> dict[str, Any]:
+        """
+Get Metric Property
+
+        Args:
+            id (string): id
+            additional_fields_metric_property (string): Request additional fields not included by default in the response. Supported values: 'sample_values' Example: 'sample_values,sample_values'.
+            fields_metric_property (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'sample_values,property'.
+            fields_metric (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'integration,created'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'metric,metric'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/metric-properties/{id}"
+        query_params = {k: v for k, v in [('additional-fields[metric-property]', additional_fields_metric_property), ('fields[metric-property]', fields_metric_property), ('fields[metric]', fields_metric), ('include', include)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def query_metric_aggregates(self, data=None) -> dict[str, Any]:
+        """
+Query Metric Aggregates
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "by": [
+                        "$attributed_channel",
+                        "Client Type"
+                      ],
+                      "filter": [
+                        "<string>",
+                        "<string>"
+                      ],
+                      "interval": "day",
+                      "measurements": [
+                        "unique",
+                        "unique"
+                      ],
+                      "metric_id": "<string>",
+                      "page_cursor": "<string>",
+                      "page_size": 500,
+                      "return_fields": [
+                        "<string>",
+                        "<string>"
+                      ],
+                      "sort": "-URL",
+                      "timezone": "UTC"
+                    },
+                    "type": "metric-aggregate"
+                  }
+                }
+                ```
+        """
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/metric-aggregates/"
+        url = f"{self.base_url}/api/metric-aggregates"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
+    def get_flows_triggered_by_metric(self, id, fields_flow=None) -> dict[str, Any]:
+        """
+Get Flows Triggered by Metric
+
+        Args:
+            id (string): id
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'created,status'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/metrics/{id}/flow-triggers"
+        query_params = {k: v for k, v in [('fields[flow]', fields_flow)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_ids_for_flows_triggered_by_metric(self, id) -> dict[str, Any]:
+        """
+Get IDs for Flows Triggered by Metric
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/metrics/{id}/relationships/flow-triggers"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_properties_for_metric(self, id, additional_fields_metric_property=None, fields_metric_property=None) -> dict[str, Any]:
+        """
+Get Properties for Metric
+
+        Args:
+            id (string): id
+            additional_fields_metric_property (string): Request additional fields not included by default in the response. Supported values: 'sample_values' Example: 'sample_values,sample_values'.
+            fields_metric_property (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'sample_values,property'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/metrics/{id}/metric-properties"
+        query_params = {k: v for k, v in [('additional-fields[metric-property]', additional_fields_metric_property), ('fields[metric-property]', fields_metric_property)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_property_ids_for_metric(self, id) -> dict[str, Any]:
+        """
+Get Property IDs for Metric
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/metrics/{id}/relationships/metric-properties"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_metric_for_metric_property(self, id, fields_metric=None) -> dict[str, Any]:
+        """
+Get Metric for Metric Property
+
+        Args:
+            id (string): id
+            fields_metric (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'integration,created'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/metric-properties/{id}/metric"
+        query_params = {k: v for k, v in [('fields[metric]', fields_metric)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_metric_id_for_metric_property(self, id) -> dict[str, Any]:
+        """
+Get Metric ID for Metric Property
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/metric-properties/{id}/relationships/metric"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
     def get_profiles(self, additional_fields_profile=None, fields_profile=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
         """
-        Fetches profiles from the API with optional filtering and pagination.
-        
+Get Profiles
+
         Args:
-            additional_fields_profile: Optional list of additional fields to include in the profile.
-            fields_profile: Optional list of fields to include in the profile.
-            filter: Optional filter criteria for selecting profiles.
-            page_cursor: Optional cursor for pagination.
-            page_size: Optional number of profiles to return per page.
-            sort: Optional sorting criteria for profiles.
-        
+            additional_fields_profile (string): Request additional fields not included by default in the response. Supported values: 'subscriptions', 'predictive_analytics' Example: 'subscriptions,subscriptions'.
+            fields_profile (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'location.address2,subscriptions.sms.marketing.last_updated'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`id`: `any`, `equals`<br>`email`: `any`, `equals`<br>`phone_number`: `any`, `equals`<br>`external_id`: `any`, `equals`<br>`_kx`: `equals`<br>`created`: `greater-than`, `less-than`<br>`updated`: `greater-than`, `less-than`<br>`subscriptions.email.marketing.list_suppressions.reason`: `equals`<br>`subscriptions.email.marketing.list_suppressions.timestamp`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`subscriptions.email.marketing.list_suppressions.list_id`: `equals`<br>`subscriptions.email.marketing.suppression.reason`: `equals`<br>`subscriptions.email.marketing.suppression.timestamp`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-subscriptions.email.marketing.suppression.timestamp'.
+
         Returns:
-            A dictionary containing profiles based on the query parameters.
-        
-        Raises:
-            requests.RequestException: Raised if there is an issue with the HTTP request, such as a network error or a non-200 status code.
-        
-        Tags:
-            fetch, profiles, api, management
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/profiles/"
+        url = f"{self.base_url}/api/profiles"
         query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile), ('fields[profile]', fields_profile), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_profile(self, data) -> dict[str, Any]:
+    def create_profile(self, additional_fields_profile=None, data=None) -> dict[str, Any]:
         """
-        Creates a new profile by sending a POST request to the API endpoint with the provided data.
-        
+Create Profile
+
         Args:
-            data: Required parameter containing the profile data to be created. Must not be None.
-        
+            additional_fields_profile (string): Request additional fields not included by default in the response. Supported values: 'subscriptions', 'predictive_analytics' Example: 'subscriptions,subscriptions'.
+            data (object): data
+
         Returns:
-            dict[str, Any]: A dictionary containing the created profile data from the API response.
-        
-        Raises:
-            ValueError: Raised if the 'data' parameter is None.
-            requests.HTTPError: Raised if the API request fails (e.g., 4xx/5xx status code).
-        
-        Tags:
-            create, profile, api, post, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "email": "<string>",
+                      "external_id": "<string>",
+                      "first_name": "<string>",
+                      "image": "<string>",
+                      "last_name": "<string>",
+                      "locale": "<string>",
+                      "location": {
+                        "address1": "<string>",
+                        "address2": "<string>",
+                        "city": "<string>",
+                        "country": "<string>",
+                        "ip": "<string>",
+                        "latitude": "<string>",
+                        "longitude": "<string>",
+                        "region": "<string>",
+                        "timezone": "<string>",
+                        "zip": "<string>"
+                      },
+                      "organization": "<string>",
+                      "phone_number": "<string>",
+                      "properties": {},
+                      "title": "<string>"
+                    },
+                    "type": "profile"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/profiles/"
-        query_params = {}
+        url = f"{self.base_url}/api/profiles"
+        query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile)] if v is not None}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def get_profile(self, id, additional_fields_profile=None, fields_list=None, fields_profile=None, fields_segment=None, include=None) -> dict[str, Any]:
         """
-        Retrieves a profile by ID with optional additional fields.
-        
+Get Profile
+
         Args:
-            id: Required profile ID.
-            additional_fields_profile: Optional additional fields to include in the profile.
-            fields_list: Optional fields to include for lists.
-            fields_profile: Optional fields to include from the profile.
-            fields_segment: Optional fields to include from segments.
-            include: Additional items to include in the response.
-        
+            id (string): id
+            additional_fields_profile (string): Request additional fields not included by default in the response. Supported values: 'subscriptions', 'predictive_analytics' Example: 'subscriptions,subscriptions'.
+            fields_list (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'updated,opt_in_process'.
+            fields_profile (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'location.address2,subscriptions.sms.marketing.last_updated'.
+            fields_segment (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'is_processing,is_processing'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'lists,segments'.
+
         Returns:
-            A dictionary containing the profile information.
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is missing.
-        
-        Tags:
-            retrieve, profile, api-call
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/profiles/{id}/"
+        url = f"{self.base_url}/api/profiles/{id}"
         query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile), ('fields[list]', fields_list), ('fields[profile]', fields_profile), ('fields[segment]', fields_segment), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_profile(self, id, data) -> dict[str, Any]:
+    def update_profile(self, id, additional_fields_profile=None, data=None) -> dict[str, Any]:
         """
-        Updates a user profile by sending a PATCH request with the provided data to the specified profile ID.
-        
+Update Profile
+
         Args:
-            id: The ID of the profile to update.
-            data: The data to be updated in the profile.
-        
+            id (string): id
+            additional_fields_profile (string): Request additional fields not included by default in the response. Supported values: 'subscriptions', 'predictive_analytics' Example: 'subscriptions,subscriptions'.
+            data (object): data
+
         Returns:
-            A dictionary containing the updated profile details.
-        
-        Raises:
-            ValueError: Raised if either 'id' or 'data' is missing.
-        
-        Tags:
-            update, profile, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "anonymous_id": "<string>",
+                      "email": "<string>",
+                      "external_id": "<string>",
+                      "first_name": "<string>",
+                      "image": "<string>",
+                      "last_name": "<string>",
+                      "locale": "<string>",
+                      "location": {
+                        "address1": "<string>",
+                        "address2": "<string>",
+                        "city": "<string>",
+                        "country": "<string>",
+                        "ip": "<string>",
+                        "latitude": "<string>",
+                        "longitude": "<string>",
+                        "region": "<string>",
+                        "timezone": "<string>",
+                        "zip": "<string>"
+                      },
+                      "organization": "<string>",
+                      "phone_number": "<string>",
+                      "properties": {},
+                      "title": "<string>"
+                    },
+                    "id": "<string>",
+                    "meta": {
+                      "patch_properties": {
+                        "append": {},
+                        "unappend": {},
+                        "unset": "<string>"
+                      }
+                    },
+                    "type": "profile"
+                  }
+                }
+                ```
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/profiles/{id}/"
-        query_params = {}
+        url = f"{self.base_url}/api/profiles/{id}"
+        query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile)] if v is not None}
         response = self._patch(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_bulk_profile_import_jobs(self, fields_profile_bulk_import_job=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+    def get_bulk_suppress_profiles_jobs(self, fields_profile_suppression_bulk_create_job=None, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Retrieves a list of bulk profile import jobs with optional filtering, sorting, and pagination.
-        
+Get Bulk Suppress Profiles Jobs
+
         Args:
-            fields_profile_bulk_import_job: Optional list of fields to include in the response for each profile bulk import job.
-            filter: Optional filter query to narrow down the results.
-            page_cursor: Optional page cursor for pagination.
-            page_size: Optional number of items per page.
-            sort: Optional sort order for the results.
-        
+            fields_profile_suppression_bulk_create_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'completed_at,completed_count'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `equals`<br>`list_id`: `equals`<br>`segment_id`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'created'.
+
         Returns:
-            A dictionary containing the paginated list of bulk profile import jobs.
-        
-        Raises:
-            requests.HTTPError: Raised if the HTTP request encounters an error (non-successful status code).
-        
-        Tags:
-            list, management, import
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/profile-bulk-import-jobs/"
-        query_params = {k: v for k, v in [('fields[profile-bulk-import-job]', fields_profile_bulk_import_job), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
+        url = f"{self.base_url}/api/profile-suppression-bulk-create-jobs"
+        query_params = {k: v for k, v in [('fields[profile-suppression-bulk-create-job]', fields_profile_suppression_bulk_create_job), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def spawn_bulk_profile_import_job(self, data) -> dict[str, Any]:
+    def bulk_suppress_profiles(self, data=None) -> dict[str, Any]:
         """
-        Spawns a bulk profile import job by sending the provided data to the profile bulk import API endpoint.
-        
+Bulk Suppress Profiles
+
         Args:
-            data: The data to be used for the bulk import job.
-        
+            data (object): data
+
         Returns:
-            A dictionary containing the response data from the API endpoint.
-        
-        Raises:
-            ValueError: Raised if the required 'data' parameter is missing.
-        
-        Tags:
-            spawn, bulk, import, async_job
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "profiles": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "email": "<string>"
+                            },
+                            "type": "profile"
+                          },
+                          {
+                            "attributes": {
+                              "email": "<string>"
+                            },
+                            "type": "profile"
+                          }
+                        ]
+                      }
+                    },
+                    "relationships": {
+                      "list": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "list"
+                        }
+                      },
+                      "segment": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "segment"
+                        }
+                      }
+                    },
+                    "type": "profile-suppression-bulk-create-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/profile-bulk-import-jobs/"
+        url = f"{self.base_url}/api/profile-suppression-bulk-create-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_bulk_profile_import_job(self, job_id, fields_list=None, fields_profile_bulk_import_job=None, include=None) -> dict[str, Any]:
+    def get_bulk_suppress_profiles_job(self, job_id, fields_profile_suppression_bulk_create_job=None) -> dict[str, Any]:
         """
-        Retrieves details of a bulk profile import job by ID with optional field filtering.
-        
+Get Bulk Suppress Profiles Job
+
         Args:
-            job_id: (str) Required identifier for the bulk profile import job
-            fields_list: (Optional[str]) Comma-separated fields to include for list-related data
-            fields_profile_bulk_import_job: (Optional[str]) Comma-separated fields specific to the profile bulk import job resource
-            include: (Optional[str]) Additional related resources to include in the response
-        
+            job_id (string): job_id
+            fields_profile_suppression_bulk_create_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'completed_at,completed_count'.
+
         Returns:
-            dict[str, Any]: JSON response containing job details and requested fields
-        
-        Raises:
-            ValueError: When job_id parameter is not provided
-            requests.exceptions.HTTPError: For HTTP request failures (4xx/5xx status codes)
-        
-        Tags:
-            retrieve, profile-import, management, async-job, http-client
+            dict[str, Any]: Success
         """
         if job_id is None:
             raise ValueError("Missing required parameter 'job_id'")
-        url = f"{self.base_url}/api/profile-bulk-import-jobs/{job_id}/"
-        query_params = {k: v for k, v in [('fields[list]', fields_list), ('fields[profile-bulk-import-job]', fields_profile_bulk_import_job), ('include', include)] if v is not None}
+        url = f"{self.base_url}/api/profile-suppression-bulk-create-jobs/{job_id}"
+        query_params = {k: v for k, v in [('fields[profile-suppression-bulk-create-job]', fields_profile_suppression_bulk_create_job)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_or_update_profile(self, data) -> dict[str, Any]:
+    def get_bulk_unsuppress_profiles_jobs(self, fields_profile_suppression_bulk_delete_job=None, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Creates or updates a user profile by sending data to a profile import API endpoint.
-        
+Get Bulk Unsuppress Profiles Jobs
+
         Args:
-            data: A dictionary containing profile data to be processed (required). None values will be removed from the request body.
-        
+            fields_profile_suppression_bulk_delete_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'completed_at,completed_count'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `equals`<br>`list_id`: `equals`<br>`segment_id`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'created'.
+
         Returns:
-            Dictionary containing the API response json with imported profile details
-        
-        Raises:
-            ValueError: Raised when 'data' parameter is None
-            requests.exceptions.HTTPError: Raised for unsuccessful HTTP responses (4XX/5XX status codes)
-        
-        Tags:
-            profile-management, api-client, async_job
+            dict[str, Any]: Success
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
+        url = f"{self.base_url}/api/profile-suppression-bulk-delete-jobs"
+        query_params = {k: v for k, v in [('fields[profile-suppression-bulk-delete-job]', fields_profile_suppression_bulk_delete_job), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def bulk_unsuppress_profiles(self, data=None) -> dict[str, Any]:
+        """
+Bulk Unsuppress Profiles
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "profiles": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "email": "<string>"
+                            },
+                            "type": "profile"
+                          },
+                          {
+                            "attributes": {
+                              "email": "<string>"
+                            },
+                            "type": "profile"
+                          }
+                        ]
+                      }
+                    },
+                    "relationships": {
+                      "list": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "list"
+                        }
+                      },
+                      "segment": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "segment"
+                        }
+                      }
+                    },
+                    "type": "profile-suppression-bulk-delete-job"
+                  }
+                }
+                ```
+        """
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/profile-import/"
+        url = f"{self.base_url}/api/profile-suppression-bulk-delete-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def merge_profiles(self, data) -> dict[str, Any]:
+    def get_bulk_unsuppress_profiles_job(self, job_id, fields_profile_suppression_bulk_delete_job=None) -> dict[str, Any]:
         """
-        Merges user profile data by sending a POST request to the profile-merge API endpoint.
-        
+Get Bulk Unsuppress Profiles Job
+
         Args:
-            data: Profile data to be merged. Must not be None.
-        
+            job_id (string): job_id
+            fields_profile_suppression_bulk_delete_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'completed_at,completed_count'.
+
         Returns:
-            dict[str, Any]: Parsed JSON response containing merged profile data from the API.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is None or missing.
-            requests.exceptions.HTTPError: Raised when the API request fails, based on HTTP status code.
-        
-        Tags:
-            merge, user-profiles, api, post
+            dict[str, Any]: Success
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
+        if job_id is None:
+            raise ValueError("Missing required parameter 'job_id'")
+        url = f"{self.base_url}/api/profile-suppression-bulk-delete-jobs/{job_id}"
+        query_params = {k: v for k, v in [('fields[profile-suppression-bulk-delete-job]', fields_profile_suppression_bulk_delete_job)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def create_or_update_profile(self, additional_fields_profile=None, data=None) -> dict[str, Any]:
+        """
+Create or Update Profile
+
+        Args:
+            additional_fields_profile (string): Request additional fields not included by default in the response. Supported values: 'subscriptions', 'predictive_analytics' Example: 'subscriptions,subscriptions'.
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Profile Updated Successfully
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "_kx": "<string>",
+                      "anonymous_id": "<string>",
+                      "email": "<string>",
+                      "external_id": "<string>",
+                      "first_name": "<string>",
+                      "image": "<string>",
+                      "last_name": "<string>",
+                      "locale": "<string>",
+                      "location": {
+                        "address1": "<string>",
+                        "address2": "<string>",
+                        "city": "<string>",
+                        "country": "<string>",
+                        "ip": "<string>",
+                        "latitude": "<string>",
+                        "longitude": "<string>",
+                        "region": "<string>",
+                        "timezone": "<string>",
+                        "zip": "<string>"
+                      },
+                      "organization": "<string>",
+                      "phone_number": "<string>",
+                      "properties": {},
+                      "title": "<string>"
+                    },
+                    "id": "<string>",
+                    "meta": {
+                      "patch_properties": {
+                        "append": {},
+                        "unappend": {},
+                        "unset": "<string>"
+                      }
+                    },
+                    "type": "profile"
+                  }
+                }
+                ```
+        """
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/profile-merge/"
+        url = f"{self.base_url}/api/profile-import"
+        query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile)] if v is not None}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def merge_profiles(self, data=None) -> dict[str, Any]:
+        """
+Merge Profiles
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "id": "<string>",
+                    "relationships": {
+                      "profiles": {
+                        "data": [
+                          {
+                            "id": "<string>",
+                            "type": "profile"
+                          },
+                          {
+                            "id": "<string>",
+                            "type": "profile"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "profile-merge"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/profile-merge"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def suppress_profiles(self, data) -> Any:
+    def create_or_update_push_token(self, data=None) -> Any:
         """
-        Supresses profiles by creating a bulk job through a POST request.
-        
+Create or Update Push Token
+
         Args:
-            data: The data required for the profile suppression operation.
-        
+            data (object): data
+
         Returns:
-            The JSON response from the server.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is missing or None.
-        
-        Tags:
-            bulk, profiles, suppression, create, api
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "background": "AVAILABLE",
+                      "device_metadata": {
+                        "app_build": "<string>",
+                        "app_id": "<string>",
+                        "app_name": "<string>",
+                        "app_version": "<string>",
+                        "device_id": "<string>",
+                        "device_model": "<string>",
+                        "environment": "debug",
+                        "klaviyo_sdk": "android",
+                        "manufacturer": "<string>",
+                        "os_name": "ipados",
+                        "os_version": "<string>",
+                        "sdk_version": "<string>"
+                      },
+                      "enablement_status": "AUTHORIZED",
+                      "platform": "android",
+                      "profile": {
+                        "data": {
+                          "attributes": {
+                            "_kx": "<string>",
+                            "anonymous_id": "<string>",
+                            "email": "<string>",
+                            "external_id": "<string>",
+                            "first_name": "<string>",
+                            "image": "<string>",
+                            "last_name": "<string>",
+                            "locale": "<string>",
+                            "location": {
+                              "address1": "<string>",
+                              "address2": "<string>",
+                              "city": "<string>",
+                              "country": "<string>",
+                              "ip": "<string>",
+                              "latitude": "<string>",
+                              "longitude": "<string>",
+                              "region": "<string>",
+                              "timezone": "<string>",
+                              "zip": "<string>"
+                            },
+                            "meta": {
+                              "patch_properties": {
+                                "append": {},
+                                "unappend": {},
+                                "unset": "<string>"
+                              }
+                            },
+                            "organization": "<string>",
+                            "phone_number": "<string>",
+                            "properties": {},
+                            "title": "<string>"
+                          },
+                          "id": "<string>",
+                          "type": "profile"
+                        }
+                      },
+                      "token": "<string>",
+                      "vendor": "apns"
+                    },
+                    "type": "push-token"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/profile-suppression-bulk-create-jobs/"
+        url = f"{self.base_url}/api/push-tokens"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def unsuppress_profiles(self, data) -> Any:
+    def get_lists_for_profile(self, id, fields_list=None) -> dict[str, Any]:
         """
-        Deletes suppressed profiles in bulk by issuing a POST request with the provided data.
-        
-        Args:
-            data: A collection of data to unsuppress profiles; required parameter.
-        
-        Returns:
-            The JSON response from the server after the bulk delete operation.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is missing (i.e., None).
-        
-        Tags:
-            bulk-delete, profile-management
-        """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/profile-suppression-bulk-delete-jobs/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Get Lists for Profile
 
-    def subscribe_profiles(self, data) -> Any:
-        """
-        Initiates bulk profile subscription jobs by sending provided data to a specified API endpoint.
-        
         Args:
-            data: Required data payload for profile subscriptions, typically containing subscription details (dict/list). None values are automatically filtered from the request.
-        
-        Returns:
-            Parsed JSON response containing details of the created bulk subscription job.
-        
-        Raises:
-            ValueError: Raised when 'data' parameter is not provided.
-            requests.HTTPError: Raised for HTTP request failures, propagated from the '_post' call.
-        
-        Tags:
-            bulk-subscription, async-job, profile-management, api-call
-        """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/profile-subscription-bulk-create-jobs/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
+            id (string): id
+            fields_list (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'updated,opt_in_process'.
 
-    def unsubscribe_profiles(self, data) -> Any:
-        """
-        Initiates a bulk unsubscribe job for profiles using provided data
-        
-        Args:
-            data: Required payload containing profile identifiers for unsubscribing. Must not be None
-        
         Returns:
-            Parsed JSON response containing the created bulk unsubscribe job details
-        
-        Raises:
-            ValueError: Raised when 'data' parameter is None, indicating missing required input
-            requests.exceptions.HTTPError: Raised for HTTP request failures (4XX/5XX status codes)
-        
-        Tags:
-            unsubscribe, batch, management
-        """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/profile-subscription-bulk-delete-jobs/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def create_push_token(self, data) -> Any:
-        """
-        Creates and registers a push token using the provided data.
-        
-        Args:
-            data: Data required to create a push token.
-        
-        Returns:
-            JSON response from the push token creation request.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is missing.
-        
-        Tags:
-            create, register, push-token
-        """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/push-tokens/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_profile_lists(self, id, fields_list=None) -> dict[str, Any]:
-        """
-        Retrieve profile lists for a specified profile ID, with optional field filtering.
-        
-        Args:
-            id: Profile ID to fetch associated lists (required)
-            fields_list: Optional list of fields to include in the response. If None, returns all fields (default: None)
-        
-        Returns:
-            Dictionary containing the profile lists data from the API response
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is not provided
-            HTTPError: Raised when the HTTP request fails (e.g., invalid profile ID or server error)
-        
-        Tags:
-            get, retrieve, profile, lists, api, http
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/profiles/{id}/lists/"
+        url = f"{self.base_url}/api/profiles/{id}/lists"
         query_params = {k: v for k, v in [('fields[list]', fields_list)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_profile_relationships_lists(self, id) -> dict[str, Any]:
+    def get_list_ids_for_profile(self, id) -> dict[str, Any]:
         """
-        Fetches relationship lists for a profile based on the given ID.
-        
+Get List IDs for Profile
+
         Args:
-            id: The unique identifier of the profile.
-        
+            id (string): id
+
         Returns:
-            A dictionary containing relationship lists for the profile.
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is missing or None.
-        
-        Tags:
-            fetch, profile, relationship, api
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/profiles/{id}/relationships/lists/"
+        url = f"{self.base_url}/api/profiles/{id}/relationships/lists"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_profile_segments(self, id, fields_segment=None) -> dict[str, Any]:
+    def get_segments_for_profile(self, id, fields_segment=None) -> dict[str, Any]:
         """
-        Retrieve profile segments for a specified ID by making a GET request to the API endpoint.
-        
+Get Segments for Profile
+
         Args:
-            id: The unique identifier of the profile to fetch segments for.
-            fields_segment: (Optional) Comma-separated fields to include in the segment data. If not specified, all fields are returned by default.
-        
+            id (string): id
+            fields_segment (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'is_processing,is_processing'.
+
         Returns:
-            A dictionary containing the parsed JSON response from the API, representing the profile segments.
-        
-        Raises:
-            ValueError: Raised when the required parameter 'id' is not provided.
-            requests.exceptions.HTTPError: Raised when the API request returns a non-successful status code.
-        
-        Tags:
-            retrieve, api, profile, segments
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/profiles/{id}/segments/"
+        url = f"{self.base_url}/api/profiles/{id}/segments"
         query_params = {k: v for k, v in [('fields[segment]', fields_segment)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_profile_relationships_segments(self, id) -> dict[str, Any]:
+    def get_segment_ids_for_profile(self, id) -> dict[str, Any]:
         """
-        Retrieve relationship segments for a profile ID from the API.
-        
+Get Segment IDs for Profile
+
         Args:
-            id: Profile identifier (cannot be None).
-        
+            id (string): id
+
         Returns:
-            Dictionary containing relationship segments data from the API response.
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is None.
-            requests.exceptions.HTTPError: Raised if the API request fails (non-2xx status code).
-        
-        Tags:
-            retrieve, api, profile, relationships, segments
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/profiles/{id}/relationships/segments/"
+        url = f"{self.base_url}/api/profiles/{id}/relationships/segments"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_bulk_profile_import_job_lists(self, id, fields_list=None) -> dict[str, Any]:
+    def get_bulk_import_profiles_jobs(self, fields_profile_bulk_import_job=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
         """
-        Fetches a list of profiles for a bulk import job based on the provided ID and optional field specifications.
-        
+Get Bulk Import Profiles Jobs
+
         Args:
-            id: Required ID of the bulk import job.
-            fields_list: Optional list of fields to include in the response.
-        
+            fields_profile_bulk_import_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'started_at,completed_at'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`status`: `any`, `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'created_at'.
+
         Returns:
-            A dictionary containing the profile lists for the specified bulk import job.
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is not provided.
-        
-        Tags:
-            fetch, profiles, bulk-import, management
+            dict[str, Any]: Success
+        """
+        url = f"{self.base_url}/api/profile-bulk-import-jobs"
+        query_params = {k: v for k, v in [('fields[profile-bulk-import-job]', fields_profile_bulk_import_job), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def bulk_import_profiles(self, data=None) -> dict[str, Any]:
+        """
+Bulk Import Profiles
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "profiles": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "_kx": "<string>",
+                              "anonymous_id": "<string>",
+                              "email": "<string>",
+                              "external_id": "<string>",
+                              "first_name": "<string>",
+                              "image": "<string>",
+                              "last_name": "<string>",
+                              "locale": "<string>",
+                              "location": {
+                                "address1": "<string>",
+                                "address2": "<string>",
+                                "city": "<string>",
+                                "country": "<string>",
+                                "ip": "<string>",
+                                "latitude": "<string>",
+                                "longitude": "<string>",
+                                "region": "<string>",
+                                "timezone": "<string>",
+                                "zip": "<string>"
+                              },
+                              "organization": "<string>",
+                              "phone_number": "<string>",
+                              "properties": {},
+                              "title": "<string>"
+                            },
+                            "id": "<string>",
+                            "meta": {
+                              "patch_properties": {
+                                "append": {},
+                                "unappend": {},
+                                "unset": "<string>"
+                              }
+                            },
+                            "type": "profile"
+                          },
+                          {
+                            "attributes": {
+                              "_kx": "<string>",
+                              "anonymous_id": "<string>",
+                              "email": "<string>",
+                              "external_id": "<string>",
+                              "first_name": "<string>",
+                              "image": "<string>",
+                              "last_name": "<string>",
+                              "locale": "<string>",
+                              "location": {
+                                "address1": "<string>",
+                                "address2": "<string>",
+                                "city": "<string>",
+                                "country": "<string>",
+                                "ip": "<string>",
+                                "latitude": "<string>",
+                                "longitude": "<string>",
+                                "region": "<string>",
+                                "timezone": "<string>",
+                                "zip": "<string>"
+                              },
+                              "organization": "<string>",
+                              "phone_number": "<string>",
+                              "properties": {},
+                              "title": "<string>"
+                            },
+                            "id": "<string>",
+                            "meta": {
+                              "patch_properties": {
+                                "append": {},
+                                "unappend": {},
+                                "unset": "<string>"
+                              }
+                            },
+                            "type": "profile"
+                          }
+                        ]
+                      }
+                    },
+                    "relationships": {
+                      "lists": {
+                        "data": [
+                          {
+                            "id": "<string>",
+                            "type": "list"
+                          },
+                          {
+                            "id": "<string>",
+                            "type": "list"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "profile-bulk-import-job"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/profile-bulk-import-jobs"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_bulk_import_profiles_job(self, job_id, fields_list=None, fields_profile_bulk_import_job=None, include=None) -> dict[str, Any]:
+        """
+Get Bulk Import Profiles Job
+
+        Args:
+            job_id (string): job_id
+            fields_list (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'updated,opt_in_process'.
+            fields_profile_bulk_import_job (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'started_at,completed_at'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'lists,lists'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if job_id is None:
+            raise ValueError("Missing required parameter 'job_id'")
+        url = f"{self.base_url}/api/profile-bulk-import-jobs/{job_id}"
+        query_params = {k: v for k, v in [('fields[list]', fields_list), ('fields[profile-bulk-import-job]', fields_profile_bulk_import_job), ('include', include)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_list_for_bulk_import_profiles_job(self, id, fields_list=None) -> dict[str, Any]:
+        """
+Get List for Bulk Import Profiles Job
+
+        Args:
+            id (string): id
+            fields_list (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'updated,opt_in_process'.
+
+        Returns:
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/profile-bulk-import-jobs/{id}/lists/"
+        url = f"{self.base_url}/api/profile-bulk-import-jobs/{id}/lists"
         query_params = {k: v for k, v in [('fields[list]', fields_list)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_bulk_profile_import_job_relationships_lists(self, id) -> dict[str, Any]:
+    def get_list_ids_for_bulk_import_profiles_job(self, id) -> dict[str, Any]:
         """
-        Retrieves relationship lists associated with a specific bulk profile import job by ID.
-        
+Get List IDs for Bulk Import Profiles Job
+
         Args:
-            id: The unique identifier of the bulk profile import job (required)
-        
+            id (string): id
+
         Returns:
-            A dictionary containing the relationship lists data returned from the API
-        
-        Raises:
-            ValueError: Raised when no ID is provided for the bulk profile import job
-            HTTPError: Raised when the API request fails (e.g., invalid ID or network issues)
-        
-        Tags:
-            retrieve, profile-import, relationships, lists, api, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/profile-bulk-import-jobs/{id}/relationships/lists/"
+        url = f"{self.base_url}/api/profile-bulk-import-jobs/{id}/relationships/lists"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_bulk_profile_import_job_profiles(self, id, additional_fields_profile=None, fields_profile=None, page_cursor=None, page_size=None) -> dict[str, Any]:
+    def get_profiles_for_bulk_import_profiles_job(self, id, additional_fields_profile=None, fields_profile=None, page_cursor=None, page_size=None) -> dict[str, Any]:
         """
-        Retrieve profiles associated with a bulk import job by its ID, with optional pagination and field selection.
-        
+Get Profiles for Bulk Import Profiles Job
+
         Args:
-            id: The unique identifier of the bulk import job.
-            additional_fields_profile: Optional list of additional profile fields to include in the response.
-            fields_profile: Optional list of profile fields to include in the response (exclusive selection).
-            page_cursor: Optional pagination cursor for result navigation.
-            page_size: Optional maximum number of profiles to return per page.
-        
+            id (string): id
+            additional_fields_profile (string): Request additional fields not included by default in the response. Supported values: 'subscriptions', 'predictive_analytics' Example: 'subscriptions,subscriptions'.
+            fields_profile (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'location.address2,subscriptions.sms.marketing.last_updated'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+
         Returns:
-            Dictionary containing profile data and metadata from the API response.
-        
-        Raises:
-            ValueError: When the 'id' parameter is not provided.
-            requests.exceptions.HTTPError: When the API request fails (e.g., invalid ID or server error).
-        
-        Tags:
-            retrieve, profiles, bulk-import, pagination, api, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/profile-bulk-import-jobs/{id}/profiles/"
+        url = f"{self.base_url}/api/profile-bulk-import-jobs/{id}/profiles"
         query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile), ('fields[profile]', fields_profile), ('page[cursor]', page_cursor), ('page[size]', page_size)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_bulk_profile_import_job_relationships_profiles(self, id, page_cursor=None, page_size=None) -> dict[str, Any]:
+    def get_profile_ids_for_bulk_import_profiles_job(self, id, page_cursor=None, page_size=None) -> dict[str, Any]:
         """
-        Retrieves the relationships between a bulk profile import job and its associated profiles.
-        
+Get Profile IDs for Bulk Import Profiles Job
+
         Args:
-            id: The ID of the bulk profile import job.
-            page_cursor: Optional page cursor for pagination.
-            page_size: Optional number of profiles to include per page.
-        
+            id (string): id
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+
         Returns:
-            A dictionary containing the relationships data.
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is missing.
-        
-        Tags:
-            fetch, import, job, profile, bulk
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/profile-bulk-import-jobs/{id}/relationships/profiles/"
+        url = f"{self.base_url}/api/profile-bulk-import-jobs/{id}/relationships/profiles"
         query_params = {k: v for k, v in [('page[cursor]', page_cursor), ('page[size]', page_size)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_bulk_profile_import_job_import_errors(self, id, fields_import_error=None, page_cursor=None, page_size=None) -> dict[str, Any]:
+    def get_errors_for_bulk_import_profiles_job(self, id, fields_import_error=None, page_cursor=None, page_size=None) -> dict[str, Any]:
         """
-        Retrieves import errors for a bulk profile import job by ID, optionally filtering by specific import error fields and paginating the results.
-        
+Get Errors for Bulk Import Profiles Job
+
         Args:
-            id: The ID of the bulk profile import job.
-            fields_import_error: Optional fields to filter import errors by specific import error.
-            page_cursor: Optional cursor for pagination.
-            page_size: Optional size for pagination.
-        
+            id (string): id
+            fields_import_error (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'code,original_payload'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+
         Returns:
-            A dictionary containing import error details for the specified job.
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is missing.
-        
-        Tags:
-            list, error, profile, import, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/profile-bulk-import-jobs/{id}/import-errors/"
+        url = f"{self.base_url}/api/profile-bulk-import-jobs/{id}/import-errors"
         query_params = {k: v for k, v in [('fields[import-error]', fields_import_error), ('page[cursor]', page_cursor), ('page[size]', page_size)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def query_campaign_values(self, data, page_cursor=None) -> dict[str, Any]:
+    def bulk_subscribe_profiles(self, data=None) -> Any:
         """
-        Queries campaign values based on provided data and returns the response as a dictionary.
-        
+Bulk Subscribe Profiles
+
         Args:
-            data: Required data to be queried for campaign values.
-            page_cursor: Optional cursor for pagination; defaults to None.
-        
+            data (object): data
+
         Returns:
-            A dictionary containing campaign value reports.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is missing.
-        
-        Tags:
-            query, campaign, management
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "custom_source": "<string>",
+                      "historical_import": false,
+                      "profiles": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "age_gated_date_of_birth": "<date>",
+                              "email": "<string>",
+                              "phone_number": "<string>",
+                              "subscriptions": {
+                                "email": {
+                                  "marketing": {
+                                    "consent": "SUBSCRIBED",
+                                    "consented_at": "<dateTime>"
+                                  }
+                                },
+                                "sms": {
+                                  "marketing": {
+                                    "consent": "SUBSCRIBED",
+                                    "consented_at": "<dateTime>"
+                                  },
+                                  "transactional": {
+                                    "consent": "SUBSCRIBED",
+                                    "consented_at": "<dateTime>"
+                                  }
+                                }
+                              }
+                            },
+                            "id": "<string>",
+                            "type": "profile"
+                          },
+                          {
+                            "attributes": {
+                              "age_gated_date_of_birth": "<date>",
+                              "email": "<string>",
+                              "phone_number": "<string>",
+                              "subscriptions": {
+                                "email": {
+                                  "marketing": {
+                                    "consent": "SUBSCRIBED",
+                                    "consented_at": "<dateTime>"
+                                  }
+                                },
+                                "sms": {
+                                  "marketing": {
+                                    "consent": "SUBSCRIBED",
+                                    "consented_at": "<dateTime>"
+                                  },
+                                  "transactional": {
+                                    "consent": "SUBSCRIBED",
+                                    "consented_at": "<dateTime>"
+                                  }
+                                }
+                              }
+                            },
+                            "id": "<string>",
+                            "type": "profile"
+                          }
+                        ]
+                      }
+                    },
+                    "relationships": {
+                      "list": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "list"
+                        }
+                      }
+                    },
+                    "type": "profile-subscription-bulk-create-job"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/campaign-values-reports/"
-        query_params = {k: v for k, v in [('page_cursor', page_cursor)] if v is not None}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def query_flow_values(self, data, page_cursor=None) -> dict[str, Any]:
-        """
-        Queries flow values reports by sending a POST request with provided data and optional page cursor.
-        
-        Args:
-            data: Required data payload for the request
-            page_cursor: Optional page cursor for pagination
-        
-        Returns:
-            A dictionary of query results
-        
-        Raises:
-            ValueError: Raised if the required 'data' parameter is missing
-        
-        Tags:
-            query, api, pagination, batch, report
-        """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/flow-values-reports/"
-        query_params = {k: v for k, v in [('page_cursor', page_cursor)] if v is not None}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def query_flow_series(self, data, page_cursor=None) -> dict[str, Any]:
-        """
-        Queries the flow series reports by posting the provided data and handling pagination.
-        
-        Args:
-            data: The required data to be posted to the API.
-            page_cursor: Optional cursor for pagination; if provided, it facilitates fetching subsequent pages of results.
-        
-        Returns:
-            A dictionary containing the response from the flow series reports API.
-        
-        Raises:
-            ValueError: Raised when the 'data' argument is missing.
-        
-        Tags:
-            query, reports, api, async_job
-        """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/flow-series-reports/"
-        query_params = {k: v for k, v in [('page_cursor', page_cursor)] if v is not None}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_segments(self, fields_segment=None, fields_tag=None, filter=None, include=None, page_cursor=None, sort=None) -> dict[str, Any]:
-        """
-        Retrieves segment data from a specified API endpoint.
-        
-        Args:
-            fields_segment: Optional fields to include in the segment data.
-            fields_tag: Optional fields to include in the tag data.
-            filter: Optional filter criteria for segment data.
-            include: Optional data to include in the response.
-            page_cursor: Optional cursor for pagination.
-            sort: Optional sort criteria for the response.
-        
-        Returns:
-            Dictionary containing segment data.
-        
-        Raises:
-            requests.HTTPError: If the HTTP request returns an unsuccessful status code.
-        
-        Tags:
-            fetch, api_call, data_retrieval
-        """
-        url = f"{self.base_url}/api/segments/"
-        query_params = {k: v for k, v in [('fields[segment]', fields_segment), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def create_segment(self, data) -> dict[str, Any]:
-        """
-        Creates a new segment by sending a POST request with the provided data.
-        
-        Args:
-            data: Data payload required for segment creation. Must not be None.
-        
-        Returns:
-            Parsed JSON response from the API as a dictionary.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is None.
-            HTTPError: Raised for bad requests (4XX) or server errors (5XX) from the API.
-        
-        Tags:
-            create, segment, post, api, management
-        """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/segments/"
+        url = f"{self.base_url}/api/profile-subscription-bulk-create-jobs"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_segment(self, id, additional_fields_segment=None, fields_segment=None, fields_tag=None, include=None) -> dict[str, Any]:
+    def bulk_unsubscribe_profiles(self, data=None) -> Any:
         """
-        Retrieves a specific segment's data from an API endpoint with customizable field selection.
-        
-        Args:
-            id: The unique identifier of the segment to retrieve (required)
-            additional_fields_segment: Optional additional fields to include for the segment
-            fields_segment: Field inclusion filters for the segment
-            fields_tag: Field inclusion filters for associated tags
-            include: Related resources to include in the response
-        
-        Returns:
-            Dictionary containing the segment data as returned by the API
-        
-        Raises:
-            ValueError: When required parameter 'id' is not provided
-            HTTPError: When API request fails (e.g., 4XX/5XX status code)
-        
-        Tags:
-            retrieve, api, segment, data-fetch
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/segments/{id}/"
-        query_params = {k: v for k, v in [('additional-fields[segment]', additional_fields_segment), ('fields[segment]', fields_segment), ('fields[tag]', fields_tag), ('include', include)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Bulk Unsubscribe Profiles
 
-    def update_segment(self, id, data) -> dict[str, Any]:
-        """
-        Updates a segment's data via a PATCH request to the API endpoint.
-        
         Args:
-            id: Unique identifier of the segment to update (required)
-            data: Dictionary containing updated segment properties (required)
-        
+            data (object): data
+
         Returns:
-            Dictionary containing the API response data after successful update
-        
-        Raises:
-            ValueError: When 'id' or 'data' parameter is None
-            requests.HTTPError: When the API returns a failed HTTP status code
-        
-        Tags:
-            update, segment, async_job, api, management
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "profiles": {
+                        "data": [
+                          {
+                            "attributes": {
+                              "email": "<string>",
+                              "phone_number": "<string>",
+                              "subscriptions": {
+                                "email": {
+                                  "marketing": {
+                                    "consent": "UNSUBSCRIBED"
+                                  }
+                                },
+                                "sms": {
+                                  "marketing": {
+                                    "consent": "UNSUBSCRIBED"
+                                  },
+                                  "transactional": {
+                                    "consent": "UNSUBSCRIBED"
+                                  }
+                                }
+                              }
+                            },
+                            "type": "profile"
+                          },
+                          {
+                            "attributes": {
+                              "email": "<string>",
+                              "phone_number": "<string>",
+                              "subscriptions": {
+                                "email": {
+                                  "marketing": {
+                                    "consent": "UNSUBSCRIBED"
+                                  }
+                                },
+                                "sms": {
+                                  "marketing": {
+                                    "consent": "UNSUBSCRIBED"
+                                  },
+                                  "transactional": {
+                                    "consent": "UNSUBSCRIBED"
+                                  }
+                                }
+                              }
+                            },
+                            "type": "profile"
+                          }
+                        ]
+                      }
+                    },
+                    "relationships": {
+                      "list": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "list"
+                        }
+                      }
+                    },
+                    "type": "profile-subscription-bulk-delete-job"
+                  }
+                }
+                ```
         """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/segments/{id}/"
+        url = f"{self.base_url}/api/profile-subscription-bulk-delete-jobs"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def query_campaign_values(self, page_cursor=None, data=None) -> dict[str, Any]:
+        """
+Query Campaign Values
+
+        Args:
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "conversion_metric_id": "<string>",
+                      "filter": "<string>",
+                      "statistics": [
+                        "unsubscribe_rate",
+                        "spam_complaint_rate"
+                      ],
+                      "timeframe": {
+                        "key": "last_3_months"
+                      }
+                    },
+                    "type": "campaign-values-report"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/campaign-values-reports"
+        query_params = {k: v for k, v in [('page_cursor', page_cursor)] if v is not None}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def query_flow_values(self, page_cursor=None, data=None) -> dict[str, Any]:
+        """
+Query Flow Values
+
+        Args:
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "conversion_metric_id": "<string>",
+                      "filter": "<string>",
+                      "statistics": [
+                        "open_rate",
+                        "conversion_value"
+                      ],
+                      "timeframe": {
+                        "key": "this_week"
+                      }
+                    },
+                    "type": "flow-values-report"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/flow-values-reports"
+        query_params = {k: v for k, v in [('page_cursor', page_cursor)] if v is not None}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def query_flow_series(self, page_cursor=None, data=None) -> dict[str, Any]:
+        """
+Query Flow Series
+
+        Args:
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "conversion_metric_id": "<string>",
+                      "filter": "<string>",
+                      "interval": "hourly",
+                      "statistics": [
+                        "clicks_unique",
+                        "conversion_rate"
+                      ],
+                      "timeframe": {
+                        "key": "last_365_days"
+                      }
+                    },
+                    "type": "flow-series-report"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/flow-series-reports"
+        query_params = {k: v for k, v in [('page_cursor', page_cursor)] if v is not None}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def query_form_values(self, data=None) -> dict[str, Any]:
+        """
+Query Form Values
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "filter": "<string>",
+                      "group_by": [
+                        "form_version_id",
+                        "form_version_id"
+                      ],
+                      "statistics": [
+                        "viewed_form_step",
+                        "viewed_form"
+                      ],
+                      "timeframe": {
+                        "key": "last_3_months"
+                      }
+                    },
+                    "type": "form-values-report"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/form-values-reports"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def query_form_series(self, data=None) -> dict[str, Any]:
+        """
+Query Form Series
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "filter": "<string>",
+                      "group_by": [
+                        "form_id",
+                        "form_id"
+                      ],
+                      "interval": "weekly",
+                      "statistics": [
+                        "viewed_form_step_uniques",
+                        "closed_form_uniques"
+                      ],
+                      "timeframe": {
+                        "key": "last_week"
+                      }
+                    },
+                    "type": "form-series-report"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/form-series-reports"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def query_segment_values(self, data=None) -> dict[str, Any]:
+        """
+Query Segment Values
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "filter": "<string>",
+                      "statistics": [
+                        "members_added",
+                        "net_members_changed"
+                      ],
+                      "timeframe": {
+                        "key": "this_week"
+                      }
+                    },
+                    "type": "segment-values-report"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/segment-values-reports"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def query_segment_series(self, data=None) -> dict[str, Any]:
+        """
+Query Segment Series
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "filter": "<string>",
+                      "interval": "daily",
+                      "statistics": [
+                        "members_removed",
+                        "members_added"
+                      ],
+                      "timeframe": {
+                        "key": "last_week"
+                      }
+                    },
+                    "type": "segment-series-report"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/segment-series-reports"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_reviews(self, fields_event=None, fields_review=None, filter=None, include=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+        """
+Get Reviews
+
+        Args:
+            fields_event (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'uuid,datetime'.
+            fields_review (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'author,images'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`created`: `greater-or-equal`, `less-or-equal`<br>`rating`: `any`, `equals`, `greater-or-equal`, `less-or-equal`<br>`id`: `any`, `equals`<br>`item.id`: `any`, `equals`<br>`content`: `contains`<br>`status`: `equals`<br>`review_type`: `equals`<br>`verified`: `equals` Example: '<string>'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'events,events'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-updated'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        url = f"{self.base_url}/api/reviews"
+        query_params = {k: v for k, v in [('fields[event]', fields_event), ('fields[review]', fields_review), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_review(self, id, fields_event=None, fields_review=None, include=None) -> dict[str, Any]:
+        """
+Get Review
+
+        Args:
+            id (string): id
+            fields_event (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'uuid,datetime'.
+            fields_review (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'author,images'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'events,events'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/reviews/{id}"
+        query_params = {k: v for k, v in [('fields[event]', fields_event), ('fields[review]', fields_review), ('include', include)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def update_review(self, id, data=None) -> dict[str, Any]:
+        """
+Update Review
+
+        Args:
+            id (string): id
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "status": {
+                        "rejection_reason": {
+                          "reason": "other",
+                          "status_explanation": "<string>"
+                        },
+                        "value": "rejected"
+                      }
+                    },
+                    "id": "<string>",
+                    "type": "review"
+                  }
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/reviews/{id}"
         query_params = {}
         response = self._patch(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def delete_segment(self, id) -> Any:
+    def get_segments(self, fields_flow=None, fields_segment=None, fields_tag=None, filter=None, include=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Deletes a segment by its ID and returns the JSON response.
-        
+Get Segments
+
         Args:
-            id: The ID of the segment to be deleted.
-        
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'created,status'.
+            fields_segment (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'is_processing,is_processing'.
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`name`: `any`, `equals`<br>`id`: `any`, `equals`<br>`created`: `greater-than`<br>`updated`: `greater-than`<br>`is_active`: `any`, `equals`<br>`is_starred`: `equals` Example: '<string>'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'flow-triggers,tags'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-updated'.
+
         Returns:
-            The JSON response from the delete operation.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing or None.
-        
-        Tags:
-            delete, management
+            dict[str, Any]: Success
+        """
+        url = f"{self.base_url}/api/segments"
+        query_params = {k: v for k, v in [('fields[flow]', fields_flow), ('fields[segment]', fields_segment), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def create_segment(self, data=None) -> dict[str, Any]:
+        """
+Create Segment
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "definition": {
+                        "condition_groups": [
+                          {
+                            "conditions": [
+                              {
+                                "group_ids": [
+                                  "<string>",
+                                  "<string>"
+                                ],
+                                "is_member": true,
+                                "timeframe_filter": {
+                                  "date": "<dateTime>",
+                                  "operator": "before",
+                                  "type": "date"
+                                },
+                                "type": "profile-group-membership"
+                              },
+                              {
+                                "group_ids": [
+                                  "<string>",
+                                  "<string>"
+                                ],
+                                "is_member": true,
+                                "timeframe_filter": {
+                                  "date": "<dateTime>",
+                                  "operator": "before",
+                                  "type": "date"
+                                },
+                                "type": "profile-group-membership"
+                              }
+                            ]
+                          },
+                          {
+                            "conditions": [
+                              {
+                                "group_ids": [
+                                  "<string>",
+                                  "<string>"
+                                ],
+                                "is_member": true,
+                                "timeframe_filter": {
+                                  "date": "<dateTime>",
+                                  "operator": "before",
+                                  "type": "date"
+                                },
+                                "type": "profile-group-membership"
+                              },
+                              {
+                                "group_ids": [
+                                  "<string>",
+                                  "<string>"
+                                ],
+                                "is_member": true,
+                                "timeframe_filter": {
+                                  "date": "<dateTime>",
+                                  "operator": "before",
+                                  "type": "date"
+                                },
+                                "type": "profile-group-membership"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "is_starred": false,
+                      "name": "<string>"
+                    },
+                    "type": "segment"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/segments"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_segment(self, id, additional_fields_segment=None, fields_flow=None, fields_segment=None, fields_tag=None, include=None) -> dict[str, Any]:
+        """
+Get Segment
+
+        Args:
+            id (string): id
+            additional_fields_segment (string): Request additional fields not included by default in the response. Supported values: 'profile_count' Example: 'profile_count,profile_count'.
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'created,status'.
+            fields_segment (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'updated,is_active'.
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'flow-triggers,tags'.
+
+        Returns:
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/segments/{id}/"
+        url = f"{self.base_url}/api/segments/{id}"
+        query_params = {k: v for k, v in [('additional-fields[segment]', additional_fields_segment), ('fields[flow]', fields_flow), ('fields[segment]', fields_segment), ('fields[tag]', fields_tag), ('include', include)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def delete_segment(self, id) -> Any:
+        """
+Delete Segment
+
+        Args:
+            id (string): id
+
+        Returns:
+            Any: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/segments/{id}"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_segment_relationships_tags(self, id) -> dict[str, Any]:
+    def update_segment(self, id, data=None) -> dict[str, Any]:
         """
-        Retrieve tag relationships for a specific segment from the API.
-        
+Update Segment
+
         Args:
-            id: The unique identifier of the segment for which to retrieve tag relationships. Must not be None.
-        
+            id (string): id
+            data (object): data
+
         Returns:
-            A dictionary containing the tag relationships associated with the specified segment, parsed from the API response.
-        
-        Raises:
-            ValueError: Raised when 'id' is None.
-            HTTPError: Raised when the API request fails (e.g., 4xx/5xx status codes).
-        
-        Tags:
-            retrieve, relationships, tags, api, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "definition": {
+                        "condition_groups": [
+                          {
+                            "conditions": [
+                              {
+                                "group_ids": [
+                                  "<string>",
+                                  "<string>"
+                                ],
+                                "is_member": true,
+                                "timeframe_filter": {
+                                  "date": "<dateTime>",
+                                  "operator": "before",
+                                  "type": "date"
+                                },
+                                "type": "profile-group-membership"
+                              },
+                              {
+                                "group_ids": [
+                                  "<string>",
+                                  "<string>"
+                                ],
+                                "is_member": true,
+                                "timeframe_filter": {
+                                  "date": "<dateTime>",
+                                  "operator": "before",
+                                  "type": "date"
+                                },
+                                "type": "profile-group-membership"
+                              }
+                            ]
+                          },
+                          {
+                            "conditions": [
+                              {
+                                "group_ids": [
+                                  "<string>",
+                                  "<string>"
+                                ],
+                                "is_member": true,
+                                "timeframe_filter": {
+                                  "date": "<dateTime>",
+                                  "operator": "before",
+                                  "type": "date"
+                                },
+                                "type": "profile-group-membership"
+                              },
+                              {
+                                "group_ids": [
+                                  "<string>",
+                                  "<string>"
+                                ],
+                                "is_member": true,
+                                "timeframe_filter": {
+                                  "date": "<dateTime>",
+                                  "operator": "before",
+                                  "type": "date"
+                                },
+                                "type": "profile-group-membership"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "is_starred": "<boolean>",
+                      "name": "<string>"
+                    },
+                    "id": "<string>",
+                    "type": "segment"
+                  }
+                }
+                ```
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/segments/{id}/relationships/tags/"
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/segments/{id}"
         query_params = {}
-        response = self._get(url, params=query_params)
+        response = self._patch(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_segment_tags(self, id, fields_tag=None) -> dict[str, Any]:
+    def get_tags_for_segment(self, id, fields_tag=None) -> dict[str, Any]:
         """
-        Retrieve tags for a specific segment by ID, with optional field filtering for tag data
-        
+Get Tags for Segment
+
         Args:
-            id: Unique identifier of the segment to fetch tags for
-            fields_tag: Optional comma-separated fields to include in the tag response data (None returns all fields)
-        
+            id (string): id
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+
         Returns:
-            Dictionary containing the retrieved tag data from the API response
-        
-        Raises:
-            ValueError: When no ID is provided for the segment
-            requests.HTTPError: When the API request fails (from response.raise_for_status())
-        
-        Tags:
-            retrieve, segment-tags, api, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/segments/{id}/tags/"
+        url = f"{self.base_url}/api/segments/{id}/tags"
         query_params = {k: v for k, v in [('fields[tag]', fields_tag)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_segment_relationships_profiles(self, id, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+    def get_tag_ids_for_segment(self, id) -> dict[str, Any]:
         """
-        Retrieve relationship profiles associated with a specific segment using pagination and filtering.
-        
+Get Tag IDs for Segment
+
         Args:
-            id: Unique identifier of the segment to query (required)
-            filter: Optional filtering criteria for the relationship profiles (default: None)
-            page_cursor: Pagination cursor from the previous response (default: None)
-            page_size: Number of items per page (default: None)
-            sort: Sorting criteria for the results (default: None)
-        
+            id (string): id
+
         Returns:
-            Dictionary containing the paginated relationship profile data from the API response
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is not provided
-            requests.HTTPError: Raised when the API request fails (e.g., invalid ID or server error)
-        
-        Tags:
-            retrieve, profiles, segments, pagination, async_job
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/segments/{id}/relationships/profiles/"
+        url = f"{self.base_url}/api/segments/{id}/relationships/tags"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_profiles_for_segment(self, id, additional_fields_profile=None, fields_profile=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+        """
+Get Profiles for Segment
+
+        Args:
+            id (string): id
+            additional_fields_profile (string): Request additional fields not included by default in the response. Supported values: 'subscriptions', 'predictive_analytics' Example: 'subscriptions,subscriptions'.
+            fields_profile (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'location.address1,first_name'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`email`: `any`, `equals`<br>`phone_number`: `any`, `equals`<br>`push_token`: `any`, `equals`<br>`_kx`: `equals`<br>`joined_group_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-joined_group_at'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/segments/{id}/profiles"
+        query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile), ('fields[profile]', fields_profile), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_profile_ids_for_segment(self, id, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+        """
+Get Profile IDs for Segment
+
+        Args:
+            id (string): id
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`email`: `any`, `equals`<br>`phone_number`: `any`, `equals`<br>`push_token`: `any`, `equals`<br>`_kx`: `equals`<br>`joined_group_at`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-joined_group_at'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/segments/{id}/relationships/profiles"
         query_params = {k: v for k, v in [('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_segment_profiles(self, id, additional_fields_profile=None, fields_profile=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+    def get_flows_triggered_by_segment(self, id, fields_flow=None) -> dict[str, Any]:
         """
-        Retrieves segment profiles from the specified API endpoint based on the provided ID and optional query parameters.
-        
+Get Flows Triggered by Segment
+
         Args:
-            id: Required ID of the segment.
-            additional_fields_profile: Additional fields to include in the profile. Optional.
-            fields_profile: Specific fields to retrieve in the profile. Optional.
-            filter: Filter criteria for the profiles. Optional.
-            page_cursor: Cursor for pagination. Optional.
-            page_size: Number of items to include per page. Optional.
-            sort: Sorting criteria for the profiles. Optional.
-        
+            id (string): id
+            fields_flow (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'created,status'.
+
         Returns:
-            A dictionary containing the retrieved segment profiles.
-        
-        Raises:
-            ValueError: Raised if the required 'id' parameter is missing.
-        
-        Tags:
-            fetch, profiles, id-based, api
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/segments/{id}/profiles/"
-        query_params = {k: v for k, v in [('additional-fields[profile]', additional_fields_profile), ('fields[profile]', fields_profile), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
+        url = f"{self.base_url}/api/segments/{id}/flow-triggers"
+        query_params = {k: v for k, v in [('fields[flow]', fields_flow)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_ids_for_flows_triggered_by_segment(self, id) -> dict[str, Any]:
+        """
+Get IDs for Flows Triggered by Segment
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/segments/{id}/relationships/flow-triggers"
+        query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def get_tags(self, fields_tag_group=None, fields_tag=None, filter=None, include=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Fetches a list of tags from the API with optional filtering and sorting.
-        
+Get Tags
+
         Args:
-            fields_tag_group: Tag group fields to include in the response.
-            fields_tag: Specific tag fields to include in the response.
-            filter: Filter criteria for selecting tags.
-            include: Related resources to include in the response.
-            page_cursor: Pagination cursor for fetching the next page of results.
-            sort: Sorting criteria for the tags.
-        
+            fields_tag_group (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,exclusive'.
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`name`: `contains`, `ends-with`, `equals`, `starts-with` Example: '<string>'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'tag-group,tag-group'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'name'.
+
         Returns:
-            A dictionary containing the tags data.
-        
-        Raises:
-            requests.HTTPError: Raised if the HTTP request encounters a status error.
-        
-        Tags:
-            fetch, tags, api, management
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/tags/"
+        url = f"{self.base_url}/api/tags"
         query_params = {k: v for k, v in [('fields[tag-group]', fields_tag_group), ('fields[tag]', fields_tag), ('filter', filter), ('include', include), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_tag(self, data) -> dict[str, Any]:
+    def create_tag(self, data=None) -> dict[str, Any]:
         """
-        Creates a new tag by sending a POST request to the tag API endpoint with the provided data.
-        
+Create Tag
+
         Args:
-            data: Required dictionary containing data for the new tag; cannot be None.
-        
+            data (object): data
+
         Returns:
-            A dictionary containing the response from the server after creating a new tag.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is missing or None.
-        
-        Tags:
-            create, tag, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "name": "<string>"
+                    },
+                    "relationships": {
+                      "tag-group": {
+                        "data": {
+                          "id": "<string>",
+                          "type": "tag-group"
+                        }
+                      }
+                    },
+                    "type": "tag"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/tags/"
+        url = f"{self.base_url}/api/tags"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -5040,136 +7514,547 @@ class KlaviyoApp(APIApplication):
 
     def get_tag(self, id, fields_tag_group=None, fields_tag=None, include=None) -> dict[str, Any]:
         """
-        Retrieves a tag by its ID, optionally including additional fields and related data.
-        
+Get Tag
+
         Args:
-            id: The unique identifier of the tag to retrieve.
-            fields_tag_group: Optional filter to include specific fields related to the tag group.
-            fields_tag: Optional filter to include specific fields related to the tag itself.
-            include: Optional parameter for including additional related data.
-        
+            id (string): id
+            fields_tag_group (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,exclusive'.
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'tag-group,tag-group'.
+
         Returns:
-            A dictionary containing the retrieved tag and any specified fields or included data.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing.
-        
-        Tags:
-            fetch, tag-retrieval, api-call
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/tags/{id}/"
+        url = f"{self.base_url}/api/tags/{id}"
         query_params = {k: v for k, v in [('fields[tag-group]', fields_tag_group), ('fields[tag]', fields_tag), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_tag(self, id, data) -> Any:
-        """
-        Updates a tag's data using a PATCH request to the API endpoint.
-        
-        Args:
-            id: The unique identifier of the tag to update (required).
-            data: The new data to update the tag with (required).
-        
-        Returns:
-            The JSON response containing updated tag details from the API call.
-        
-        Raises:
-            ValueError: Raised if either 'id' or 'data' parameter is None.
-            HTTPError: Raised if the API request fails (handled via response.raise_for_status()).
-        
-        Tags:
-            update, patch, api, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/tags/{id}/"
-        query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
     def delete_tag(self, id) -> Any:
         """
-        Deletes a tag specified by its ID from the API.
-        
+Delete Tag
+
         Args:
-            id: The unique identifier of the tag to delete.
-        
+            id (string): id
+
         Returns:
-            The JSON response from the API after deleting the tag.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is None.
-        
-        Tags:
-            delete, tags, api-management
+            Any: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/tags/{id}/"
+        url = f"{self.base_url}/api/tags/{id}"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
+    def update_tag(self, id, data=None) -> Any:
+        """
+Update Tag
+
+        Args:
+            id (string): id
+            data (object): data
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "name": "<string>"
+                    },
+                    "id": "<string>",
+                    "type": "tag"
+                  }
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/tags/{id}"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_flow_ids_for_tag(self, id) -> dict[str, Any]:
+        """
+Get Flow IDs for Tag
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/tags/{id}/relationships/flows"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def tag_flows(self, id, data=None) -> Any:
+        """
+Tag Flows
+
+        Args:
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'flow'}, {'id': '<string>', 'type': 'flow'}]".
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "flow"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "flow"
+                    }
+                  ]
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/tags/{id}/relationships/flows"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def remove_tag_from_flows(self, id, data=None) -> Any:
+        """
+Remove Tag from Flows
+
+        Args:
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'flow'}, {'id': '<string>', 'type': 'flow'}]".
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "flow"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "flow"
+                    }
+                  ]
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/tags/{id}/relationships/flows"
+        query_params = {}
+        response = self._delete(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_campaign_ids_for_tag(self, id) -> dict[str, Any]:
+        """
+Get Campaign IDs for Tag
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/tags/{id}/relationships/campaigns"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def tag_campaigns(self, id, data=None) -> Any:
+        """
+Tag Campaigns
+
+        Args:
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'campaign'}, {'id': '<string>', 'type': 'campaign'}]".
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "campaign"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "campaign"
+                    }
+                  ]
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/tags/{id}/relationships/campaigns"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def remove_tag_from_campaigns(self, id, data=None) -> Any:
+        """
+Remove Tag from Campaigns
+
+        Args:
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'campaign'}, {'id': '<string>', 'type': 'campaign'}]".
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "campaign"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "campaign"
+                    }
+                  ]
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/tags/{id}/relationships/campaigns"
+        query_params = {}
+        response = self._delete(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_list_ids_for_tag(self, id) -> dict[str, Any]:
+        """
+Get List IDs for Tag
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/tags/{id}/relationships/lists"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def tag_lists(self, id, data=None) -> Any:
+        """
+Tag Lists
+
+        Args:
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'list'}, {'id': '<string>', 'type': 'list'}]".
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "list"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "list"
+                    }
+                  ]
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/tags/{id}/relationships/lists"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def remove_tag_from_lists(self, id, data=None) -> Any:
+        """
+Remove Tag from Lists
+
+        Args:
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'list'}, {'id': '<string>', 'type': 'list'}]".
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "list"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "list"
+                    }
+                  ]
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/tags/{id}/relationships/lists"
+        query_params = {}
+        response = self._delete(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_segment_ids_for_tag(self, id) -> dict[str, Any]:
+        """
+Get Segment IDs for Tag
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/tags/{id}/relationships/segments"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def tag_segments(self, id, data=None) -> Any:
+        """
+Tag Segments
+
+        Args:
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'segment'}, {'id': '<string>', 'type': 'segment'}]".
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "segment"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "segment"
+                    }
+                  ]
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/tags/{id}/relationships/segments"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def remove_tag_from_segments(self, id, data=None) -> Any:
+        """
+Remove Tag from Segments
+
+        Args:
+            id (string): id
+            data (array): data Example: "[{'id': '<string>', 'type': 'segment'}, {'id': '<string>', 'type': 'segment'}]".
+
+        Returns:
+            Any: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": [
+                    {
+                      "id": "<string>",
+                      "type": "segment"
+                    },
+                    {
+                      "id": "<string>",
+                      "type": "segment"
+                    }
+                  ]
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/tags/{id}/relationships/segments"
+        query_params = {}
+        response = self._delete(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_tag_group_for_tag(self, id, fields_tag_group=None) -> dict[str, Any]:
+        """
+Get Tag Group for Tag
+
+        Args:
+            id (string): id
+            fields_tag_group (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,exclusive'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/tags/{id}/tag-group"
+        query_params = {k: v for k, v in [('fields[tag-group]', fields_tag_group)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_tag_group_id_for_tag(self, id) -> dict[str, Any]:
+        """
+Get Tag Group ID for Tag
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/tags/{id}/relationships/tag-group"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
     def get_tag_groups(self, fields_tag_group=None, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Retrieve paginated tag groups from the API with optional filtering, sorting, and field selection.
-        
+Get Tag Groups
+
         Args:
-            fields_tag_group: Comma-separated fields to include for tag-group resources (default: None).
-            filter: Filter criteria to apply to tag groups (default: None).
-            page_cursor: Pagination cursor for offset-based navigation (default: None).
-            sort: Sorting criteria for results (default: None).
-        
+            fields_tag_group (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,exclusive'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`name`: `contains`, `ends-with`, `equals`, `starts-with`<br>`exclusive`: `equals`<br>`default`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: 'name'.
+
         Returns:
-            Dictionary containing API response data including tag groups and pagination metadata.
-        
-        Raises:
-            HTTPError: If the API request fails (non-2xx status code).
-        
-        Tags:
-            list, pagination, api-client, management
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/tag-groups/"
+        url = f"{self.base_url}/api/tag-groups"
         query_params = {k: v for k, v in [('fields[tag-group]', fields_tag_group), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_tag_group(self, data) -> dict[str, Any]:
+    def create_tag_group(self, data=None) -> dict[str, Any]:
         """
-        Creates a new tag group by sending the provided payload to the API endpoint.
-        
+Create Tag Group
+
         Args:
-            data: Payload containing tag group details. Must not be None.
-        
+            data (object): data
+
         Returns:
-            Dictionary containing the created tag group's data from the API response.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is None.
-            requests.HTTPError: Raised if the API request fails (4XX/5XX status code).
-        
-        Tags:
-            create, tag-group, api, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "exclusive": false,
+                      "name": "<string>"
+                    },
+                    "type": "tag-group"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/tag-groups/"
+        url = f"{self.base_url}/api/tag-groups"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -5177,588 +8062,167 @@ class KlaviyoApp(APIApplication):
 
     def get_tag_group(self, id, fields_tag_group=None) -> dict[str, Any]:
         """
-        Fetches details of a tag group from the API by its ID.
-        
+Get Tag Group
+
         Args:
-            id: The unique identifier of the tag group to retrieve.
-            fields_tag_group: (Optional) A comma-separated string of fields to include in the response for the tag group.
-        
+            id (string): id
+            fields_tag_group (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,exclusive'.
+
         Returns:
-            A dictionary containing the tag group data, structured according to the API response.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is None.
-            HTTPError: Raised when the API request fails, typically due to invalid ID or network issues.
-        
-        Tags:
-            fetch, api, tag-group, details, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/tag-groups/{id}/"
+        url = f"{self.base_url}/api/tag-groups/{id}"
         query_params = {k: v for k, v in [('fields[tag-group]', fields_tag_group)] if v is not None}
         response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def update_tag_group(self, id, data) -> dict[str, Any]:
-        """
-        Updates a tag group by ID using the provided data via a PATCH request.
-        
-        Args:
-            id: The unique identifier of the tag group to update (required)
-            data: Dictionary containing the fields and values to update (required)
-        
-        Returns:
-            Dictionary containing the updated tag group data from the API response
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' parameters are None
-            requests.HTTPError: Raised when the API request fails (handled by response.raise_for_status())
-        
-        Tags:
-            update, tag-group, patch, api, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/tag-groups/{id}/"
-        query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def delete_tag_group(self, id) -> dict[str, Any]:
         """
-        Deletes a tag group with the specified ID using an HTTP DELETE request and returns the JSON response.
-        
+Delete Tag Group
+
         Args:
-            id: The unique identifier of the tag group to delete. Must be provided; cannot be None.
-        
+            id (string): id
+
         Returns:
-            A dictionary containing the JSON response body from the API.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is None.
-            HTTPError: Raised for unsuccessful HTTP responses (non-2xx status codes).
-        
-        Tags:
-            delete, async-job, api, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/tag-groups/{id}/"
+        url = f"{self.base_url}/api/tag-groups/{id}"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def get_tag_relationships_flows(self, id) -> dict[str, Any]:
+    def update_tag_group(self, id, data=None) -> dict[str, Any]:
         """
-        Fetch tag-flow relationships by tag ID from the API.
-        
-        Args:
-            id: The unique identifier of the tag whose flow relationships are being retrieved
-        
-        Returns:
-            Dictionary containing API response data with tag-flow relationships
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is None
-            requests.exceptions.HTTPError: Raised for failed API responses (non-2xx status codes)
-        
-        Tags:
-            get, tag, relationships, flows, api
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/tags/{id}/relationships/flows/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Update Tag Group
 
-    def create_tag_relationships_flows(self, id, data) -> Any:
-        """
-        Creates relationships between a tag and multiple flows by sending a POST request to the API.
-        
         Args:
-            id: The unique identifier of the tag to which flows will be related.
-            data: A dictionary containing the flow relationship data to be associated with the tag.
-        
+            id (string): id
+            data (object): data
+
         Returns:
-            JSON response from the API containing the result of the relationship creation operation.
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' parameter is not provided.
-            HTTPError: Raised when the API request fails, typically due to invalid parameters or server errors.
-        
-        Tags:
-            create, tag, relationships, flows, api, post, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "name": "<string>",
+                      "return_fields": [
+                        "<string>",
+                        "<string>"
+                      ]
+                    },
+                    "id": "<string>",
+                    "type": "tag-group"
+                  }
+                }
+                ```
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/tags/{id}/relationships/flows/"
+        url = f"{self.base_url}/api/tag-groups/{id}"
         query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
+        response = self._patch(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def delete_tag_relationships_flows(self, id, data) -> Any:
+    def get_tags_for_tag_group(self, id, fields_tag=None) -> dict[str, Any]:
         """
-        Deletes tag relationships flows by the provided id and data.
-        
-        Args:
-            id: The identifier for the tag.
-            data: The data associated with the relationship.
-        
-        Returns:
-            A JSON response object containing the results of the deletion operation.
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' parameter is missing.
-        
-        Tags:
-            delete, relationship, management, api-call
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/tags/{id}/relationships/flows/"
-        query_params = {}
-        response = self._delete(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+Get Tags for Tag Group
 
-    def get_tag_relationships_campaigns(self, id) -> dict[str, Any]:
-        """
-        Retrieve campaigns associated with a specific tag by ID.
-        
         Args:
-            id: The unique identifier of the tag to fetch associated campaigns for
-        
-        Returns:
-            Dictionary containing campaign data associated with the specified tag
-        
-        Raises:
-            ValueError: Raised when no ID is provided
-            requests.HTTPError: Raised for HTTP request failures (e.g., 404 Not Found or 500 Internal Server Error)
-        
-        Tags:
-            get, relationships, campaigns, api, tags
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/tags/{id}/relationships/campaigns/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
+            id (string): id
+            fields_tag (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,name'.
 
-    def create_tag_relationships_campaigns(self, id, data) -> Any:
-        """
-        Creates relationships between a tag and campaigns by sending a POST request to the API.
-        
-        Args:
-            id: The identifier of the tag to link with campaigns.
-            data: The relationship data payload to link campaigns to the tag (e.g., campaign IDs).
-        
         Returns:
-            The JSON response from the API containing the created relationships.
-        
-        Raises:
-            ValueError: Raised if either 'id' or 'data' parameters are None.
-            requests.exceptions.HTTPError: Raised if the API request fails (e.g., 4XX/5XX status codes).
-        
-        Tags:
-            create, tag-relationships, campaigns, api, async_job, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/tags/{id}/relationships/campaigns/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def delete_tag_relationships_campaigns(self, id, data) -> Any:
-        """
-        Deletes relationships between a tag and campaigns using the specified tag ID and request data.
-        
-        Args:
-            id: The unique identifier of the tag whose campaign relationships will be modified.
-            data: The payload containing campaign relationship data to be removed.
-        
-        Returns:
-            Parsed JSON response data from the API endpoint.
-        
-        Raises:
-            ValueError: When either 'id' or 'data' parameters are None.
-            requests.HTTPError: If the HTTP request fails (handled by response.raise_for_status()).
-        
-        Tags:
-            delete, relationships, campaigns, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/tags/{id}/relationships/campaigns/"
-        query_params = {}
-        response = self._delete(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_tag_relationships_lists(self, id) -> dict[str, Any]:
-        """
-        Retrieves a list of tag relationships for the specified ID.
-        
-        Args:
-            id: The ID for which to fetch tag relationships
-        
-        Returns:
-            A dictionary containing the tag relationships for the given ID
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing
-        
-        Tags:
-            fetch, tag-relationships, api-call
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/tags/{id}/relationships/lists/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def create_tag_relationships_lists(self, id, data) -> Any:
-        """
-        Creates relationships between tags and lists by sending a POST request with the provided data to the specified URL.
-        
-        Args:
-            id: The ID of the tag to create relationships for.
-            data: The data to be sent in the request body to establish tag relationships.
-        
-        Returns:
-            A JSON response from the server after establishing the tag relationships.
-        
-        Raises:
-            ValueError: Raised when either the 'id' or 'data' parameter is missing.
-        
-        Tags:
-            create, tag-relationship, management, api-call
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/tags/{id}/relationships/lists/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def delete_tag_relationships_lists(self, id, data) -> Any:
-        """
-        Deletes tag relationships with lists for a specified tag ID using the provided data.
-        
-        Args:
-            id: The ID of the tag from which relationships are to be deleted.
-            data: Data used in the request to handle the deletion of tag relationships.
-        
-        Returns:
-            JSON data from the server response after deletion.
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' is None.
-        
-        Tags:
-            delete, tag, api-call
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/tags/{id}/relationships/lists/"
-        query_params = {}
-        response = self._delete(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_tag_relationships_segments(self, id) -> dict[str, Any]:
-        """
-        Retrieve segment relationships associated with a specified tag ID by querying the API endpoint.
-        
-        Args:
-            id: The unique identifier of the tag for which to retrieve segment relationships. Must not be None.
-        
-        Returns:
-            A dictionary containing the segment relationships data returned by the API. The structure matches the API's JSON response.
-        
-        Raises:
-            ValueError: Raised if the 'id' parameter is None, indicating a missing required argument.
-            requests.exceptions.HTTPError: Raised if the API request fails with an unsuccessful status code.
-        
-        Tags:
-            retrieve, tag-relationships, segments, api
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/tags/{id}/relationships/segments/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def create_tag_relationships_segments(self, id, data) -> Any:
-        """
-        Creates relationships between a tag and segments.
-        
-        Args:
-            id: The unique identifier for the tag.
-            data: Data required for creating the relationships.
-        
-        Returns:
-            JSON response from the server, containing details about the created relationships.
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' is missing. Indicates that a required parameter is absent.
-        
-        Tags:
-            create, relationship, segment, api
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/tags/{id}/relationships/segments/"
-        query_params = {}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def delete_tag_relationships_segments(self, id, data) -> Any:
-        """
-        Delete segments associated with a specific tag by making a DELETE request to the API endpoint.
-        
-        Args:
-            id: The unique identifier of the tag whose associated segments will be deleted.
-            data: The data payload containing segment information for deletion.
-        
-        Returns:
-            JSON response containing the result of the deletion operation from the API.
-        
-        Raises:
-            ValueError: Raised if either 'id' or 'data' parameter is None.
-            HTTPError: Raised if the API request fails (handled via response.raise_for_status()).
-        
-        Tags:
-            delete, tag-relationships, segments, api, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/tags/{id}/relationships/segments/"
-        query_params = {}
-        response = self._delete(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_tag_relationships_tag_group(self, id) -> dict[str, Any]:
-        """
-        Retrieve tag group relationships associated with a specified tag ID.
-        
-        Args:
-            id: The unique identifier of the tag whose relationships should be retrieved. Must not be None.
-        
-        Returns:
-            A dictionary containing the tag group relationships data in JSON format from the API response.
-        
-        Raises:
-            ValueError: Raised when the required parameter 'id' is not provided (None).
-            HTTPError: Raised for HTTP request failures (e.g., 404 Not Found, 500 Internal Server Error).
-        
-        Tags:
-            tag-relationships, tag-group, api-call, json-response
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/tags/{id}/relationships/tag-group/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_tag_group_relationships_tags(self, id) -> dict[str, Any]:
-        """
-        Retrieve tag relationships for a specified tag group by ID.
-        
-        Args:
-            id: The unique identifier of the tag group to fetch relationships for.
-        
-        Returns:
-            A dictionary containing tag relationship data as returned by the API.
-        
-        Raises:
-            ValueError: Raised if 'id' parameter is missing or None.
-            HTTPError: Raised if the API request fails with a non-2XX response.
-        
-        Tags:
-            retrieve, tag-group, relationships, api
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/tag-groups/{id}/relationships/tags/"
-        query_params = {}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_tag_tag_group(self, id, fields_tag_group=None) -> dict[str, Any]:
-        """
-        Retrieve a tag group associated with a specific tag ID, with optional field filtering.
-        
-        Args:
-            id: The unique identifier of the tag for which to fetch the associated tag group.
-            fields_tag_group: Optional string specifying which fields of the tag-group to include in the response (comma-separated or as per API format).
-        
-        Returns:
-            Dictionary containing the tag group data as returned by the API.
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is not provided.
-            HTTPError: Raised when the API request fails (e.g., invalid ID, server error).
-        
-        Tags:
-            retrieve, tag-group, api, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/tags/{id}/tag-group/"
-        query_params = {k: v for k, v in [('fields[tag-group]', fields_tag_group)] if v is not None}
-        response = self._get(url, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def get_tag_group_tags(self, id, fields_tag=None) -> dict[str, Any]:
-        """
-        Retrieves tags for a specified tag group by ID.
-        
-        Args:
-            id: The ID of the tag group.
-            fields_tag: Optional parameter to specify which fields of the tag to include.
-        
-        Returns:
-            A dictionary containing the retrieved tags.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing.
-        
-        Tags:
-            tag, fetch, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/tag-groups/{id}/tags/"
+        url = f"{self.base_url}/api/tag-groups/{id}/tags"
         query_params = {k: v for k, v in [('fields[tag]', fields_tag)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_tag_ids_for_tag_group(self, id) -> dict[str, Any]:
+        """
+Get Tag IDs for Tag Group
+
+        Args:
+            id (string): id
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/tag-groups/{id}/relationships/tags"
+        query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def get_templates(self, fields_template=None, filter=None, page_cursor=None, sort=None) -> dict[str, Any]:
         """
-        Retrieve template entries from the API with optional filtering, pagination, and field selection.
-        
+Get Templates
+
         Args:
-            fields_template: Comma-separated fields to include in the template response, or None for all fields
-            filter: API-specific filter string to limit returned templates, or None
-            page_cursor: Pagination cursor for batch retrieval, or None
-            sort: Sorting criteria as an API-compatible string, or None
-        
+            fields_template (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,text'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`id`: `any`, `equals`<br>`name`: `any`, `equals`<br>`created`: `equals`, `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`updated`: `equals`, `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-updated'.
+
         Returns:
-            Dictionary containing API response data with template entries
-        
-        Raises:
-            requests.HTTPError: Raised for non-2xx HTTP status codes during the API request
-        
-        Tags:
-            list, templates, pagination, api-client
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/templates/"
+        url = f"{self.base_url}/api/templates"
         query_params = {k: v for k, v in [('fields[template]', fields_template), ('filter', filter), ('page[cursor]', page_cursor), ('sort', sort)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_template(self, data) -> dict[str, Any]:
+    def create_template(self, data=None) -> dict[str, Any]:
         """
-        Creates a new template by sending data to the API endpoint and returning the parsed JSON response.
-        
+Create Template
+
         Args:
-            data: Required dictionary containing template configuration data to be sent in the request body.
-        
+            data (object): data
+
         Returns:
-            Dictionary containing the parsed JSON response from the API.
-        
-        Raises:
-            ValueError: When the 'data' parameter is None, indicating missing required input.
-            requests.HTTPError: When the API request fails (e.g., 4XX/5XX status code).
-        
-        Tags:
-            create, template, api, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "editor_type": "<string>",
+                      "html": "<string>",
+                      "name": "<string>",
+                      "text": "<string>"
+                    },
+                    "type": "template"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/templates/"
+        url = f"{self.base_url}/api/templates"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -5766,188 +8230,508 @@ class KlaviyoApp(APIApplication):
 
     def get_template(self, id, fields_template=None) -> dict[str, Any]:
         """
-        Retrieves a template by its ID, optionally specifying the fields to include in the template.
-        
+Get Template
+
         Args:
-            id: The identifier of the template to retrieve.
-            fields_template: An optional list of fields to include in the retrieved template.
-        
+            id (string): id
+            fields_template (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'name,text'.
+
         Returns:
-            A dictionary containing the retrieved template data.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing.
-        
-        Tags:
-            fetch, template, management
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/templates/{id}/"
+        url = f"{self.base_url}/api/templates/{id}"
         query_params = {k: v for k, v in [('fields[template]', fields_template)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_template(self, id, data) -> dict[str, Any]:
-        """
-        Updates a template with the provided ID by sending a patch request to the API with the given data.
-        
-        Args:
-            id: The unique identifier of the template to be updated.
-            data: A dictionary containing the data to update in the template.
-        
-        Returns:
-            A dictionary containing the updated template data.
-        
-        Raises:
-            ValueError: Raised if either the 'id' or 'data' parameter is missing.
-        
-        Tags:
-            update, edit, api-call, async
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/templates/{id}/"
-        query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
     def delete_template(self, id) -> Any:
         """
-        Deletes a template resource by ID and returns the server's JSON response.
-        
+Delete Template
+
         Args:
-            id: Unique identifier of the template to delete (required)
-        
+            id (string): id
+
         Returns:
-            Parsed JSON data from the server's response upon successful deletion
-        
-        Raises:
-            ValueError: Raised when 'id' parameter is None
-            requests.HTTPError: Raised for HTTP request failures (4XX/5XX status codes)
-        
-        Tags:
-            delete, template, management, api-call
+            Any: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/templates/{id}/"
+        url = f"{self.base_url}/api/templates/{id}"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_template_render(self, data) -> dict[str, Any]:
+    def update_template(self, id, data=None) -> dict[str, Any]:
         """
-        Creates a rendered template using provided data.
-        
+Update Template
+
         Args:
-            data: The data to be used in rendering the template.
-        
+            id (string): id
+            data (object): data
+
         Returns:
-            A dictionary containing the rendered template data.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is None.
-        
-        Tags:
-            render, template, api-call
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "html": "<string>",
+                      "name": "<string>",
+                      "text": "<string>"
+                    },
+                    "id": "<string>",
+                    "type": "template"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/template-render/"
+        url = f"{self.base_url}/api/templates/{id}"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def render_template(self, data=None) -> dict[str, Any]:
+        """
+Render Template
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "context": {}
+                    },
+                    "id": "<string>",
+                    "type": "template"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/template-render"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_template_clone(self, data) -> dict[str, Any]:
+    def clone_template(self, data=None) -> dict[str, Any]:
         """
-        Creates a clone of a template by sending a POST request with provided data to the template-clone API endpoint.
-        
+Clone Template
+
         Args:
-            data: Configuration data required for cloning the template. Must not be None.
-        
+            data (object): data
+
         Returns:
-            Dictionary containing the cloned template's response data from the API.
-        
-        Raises:
-            ValueError: Raised when the 'data' parameter is None, indicating missing required input.
-            requests.exceptions.HTTPError: Raised for unsuccessful HTTP responses (status code ≥ 400).
-        
-        Tags:
-            create, template, clone, post, async_job, api, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "name": "<string>"
+                    },
+                    "id": "<string>",
+                    "type": "template"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/template-clone/"
+        url = f"{self.base_url}/api/template-clone"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_all_universal_content(self, fields_template_universal_content=None, filter=None, page_cursor=None, page_size=None, sort=None) -> dict[str, Any]:
+        """
+Get All Universal Content
+
+        Args:
+            fields_template_universal_content (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'definition.data.content,definition.data.styles.color'.
+            filter (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#filtering<br>Allowed field(s)/operator(s):<br>`id`: `any`, `equals`<br>`name`: `any`, `equals`<br>`created`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`updated`: `greater-or-equal`, `greater-than`, `less-or-equal`, `less-than`<br>`definition.content_type`: `equals`<br>`definition.type`: `equals` Example: '<string>'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 20. Min: 1. Max: 100. Example: '20'.
+            sort (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sorting Example: '-updated'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        url = f"{self.base_url}/api/template-universal-content"
+        query_params = {k: v for k, v in [('fields[template-universal-content]', fields_template_universal_content), ('filter', filter), ('page[cursor]', page_cursor), ('page[size]', page_size), ('sort', sort)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def create_universal_content(self, data=None) -> dict[str, Any]:
+        """
+Create Universal Content
+
+        Args:
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "definition": {
+                        "content_type": "block",
+                        "data": {
+                          "content": "<string>",
+                          "display_options": {
+                            "content_repeat": {
+                              "item_alias": "<string>",
+                              "repeat_for": "<string>"
+                            },
+                            "show_on": "all",
+                            "visible_check": "<string>"
+                          }
+                        },
+                        "type": "html"
+                      },
+                      "name": "<string>"
+                    },
+                    "type": "template-universal-content"
+                  }
+                }
+                ```
+        """
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/template-universal-content"
+        query_params = {}
+        response = self._post(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_universal_content(self, id, fields_template_universal_content=None) -> dict[str, Any]:
+        """
+Get Universal Content
+
+        Args:
+            id (string): id
+            fields_template_universal_content (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'definition.data.content,definition.data.styles.color'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/template-universal-content/{id}"
+        query_params = {k: v for k, v in [('fields[template-universal-content]', fields_template_universal_content)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def delete_universal_content(self, id) -> Any:
+        """
+Delete Universal Content
+
+        Args:
+            id (string): id
+
+        Returns:
+            Any: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/template-universal-content/{id}"
+        query_params = {}
+        response = self._delete(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def update_universal_content(self, id, data=None) -> dict[str, Any]:
+        """
+Update Universal Content
+
+        Args:
+            id (string): id
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "definition": {
+                        "content_type": "block",
+                        "data": {
+                          "content": "<string>",
+                          "display_options": {
+                            "content_repeat": {
+                              "item_alias": "<string>",
+                              "repeat_for": "<string>"
+                            },
+                            "show_on": "desktop",
+                            "visible_check": "<string>"
+                          }
+                        },
+                        "type": "html"
+                      },
+                      "name": "<string>"
+                    },
+                    "id": "<string>",
+                    "type": "template-universal-content"
+                  }
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/template-universal-content/{id}"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_tracking_settings(self, fields_tracking_setting=None, page_cursor=None, page_size=None) -> dict[str, Any]:
+        """
+Get Tracking Settings
+
+        Args:
+            fields_tracking_setting (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'utm_term.campaign.value,utm_medium.flow.type'.
+            page_cursor (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#pagination Example: '<string>'.
+            page_size (string): Default: 1. Min: 1. Max: 1. Example: '1'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        url = f"{self.base_url}/api/tracking-settings"
+        query_params = {k: v for k, v in [('fields[tracking-setting]', fields_tracking_setting), ('page[cursor]', page_cursor), ('page[size]', page_size)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_tracking_setting(self, id, fields_tracking_setting=None) -> dict[str, Any]:
+        """
+Get Tracking Setting
+
+        Args:
+            id (string): id
+            fields_tracking_setting (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'utm_term.campaign.value,utm_medium.flow.type'.
+
+        Returns:
+            dict[str, Any]: Success
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        url = f"{self.base_url}/api/tracking-settings/{id}"
+        query_params = {k: v for k, v in [('fields[tracking-setting]', fields_tracking_setting)] if v is not None}
+        response = self._get(url, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
+    def update_tracking_setting(self, id, data=None) -> dict[str, Any]:
+        """
+Update Tracking Setting
+
+        Args:
+            id (string): id
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "auto_add_parameters": "<boolean>",
+                      "custom_parameters": [
+                        {
+                          "campaign": {
+                            "type": "dynamic",
+                            "value": "campaign_name_id"
+                          },
+                          "flow": {
+                            "type": "dynamic",
+                            "value": "flow_id"
+                          },
+                          "name": "<string>"
+                        },
+                        {
+                          "campaign": {
+                            "type": "dynamic",
+                            "value": "campaign_name"
+                          },
+                          "flow": {
+                            "type": "dynamic",
+                            "value": "message_type"
+                          },
+                          "name": "<string>"
+                        }
+                      ],
+                      "utm_campaign": {
+                        "campaign": {
+                          "type": "dynamic",
+                          "value": "profile_external_id"
+                        },
+                        "flow": {
+                          "type": "dynamic",
+                          "value": "profile_external_id"
+                        }
+                      },
+                      "utm_id": {
+                        "campaign": {
+                          "type": "dynamic",
+                          "value": "group_id"
+                        },
+                        "flow": {
+                          "type": "dynamic",
+                          "value": "flow_id"
+                        }
+                      },
+                      "utm_medium": {
+                        "campaign": {
+                          "type": "dynamic",
+                          "value": "campaign_name_id"
+                        },
+                        "flow": {
+                          "type": "dynamic",
+                          "value": "message_name_id"
+                        }
+                      },
+                      "utm_source": {
+                        "campaign": {
+                          "type": "dynamic",
+                          "value": "email_subject"
+                        },
+                        "flow": {
+                          "type": "dynamic",
+                          "value": "flow_id"
+                        }
+                      },
+                      "utm_term": {
+                        "campaign": {
+                          "type": "dynamic",
+                          "value": "link_alt_text"
+                        },
+                        "flow": {
+                          "type": "dynamic",
+                          "value": "flow_name"
+                        }
+                      }
+                    },
+                    "id": "<string>",
+                    "type": "tracking-setting"
+                  }
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/tracking-settings/{id}"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
         response.raise_for_status()
         return response.json()
 
     def get_webhooks(self, fields_webhook=None, include=None) -> dict[str, Any]:
         """
-        Retrieve webhooks configuration from the API endpoint.
-        
+Get Webhooks
+
         Args:
-            fields_webhook: Optional comma-separated field names to include in webhook data
-            include: Optional related resources to include in the response
-        
+            fields_webhook (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'description,updated_at'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'webhook-topics,webhook-topics'.
+
         Returns:
-            JSON-parsed response containing webhooks data as a dictionary
-        
-        Raises:
-            requests.HTTPError: When the API request fails with a 4XX/5XX status code
-        
-        Tags:
-            retrieve, webhook, api, management
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/webhooks/"
+        url = f"{self.base_url}/api/webhooks"
         query_params = {k: v for k, v in [('fields[webhook]', fields_webhook), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_webhook(self, data) -> dict[str, Any]:
+    def create_webhook(self, data=None) -> dict[str, Any]:
         """
-        Creates a webhook by sending a POST request with the provided data to the specified API endpoint.
-        
+Create Webhook
+
         Args:
-            data: A dictionary containing the data for the webhook; cannot be None
-        
+            data (object): data
+
         Returns:
-            A dictionary containing the response data from the API.
-        
-        Raises:
-            ValueError: Raised when the required 'data' parameter is missing or None.
-        
-        Tags:
-            create, webhook, api, management
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "description": "<string>",
+                      "endpoint_url": "<string>",
+                      "name": "<string>",
+                      "secret_key": "<string>"
+                    },
+                    "relationships": {
+                      "webhook-topics": {
+                        "data": [
+                          {
+                            "id": "<string>",
+                            "type": "webhook-topic"
+                          },
+                          {
+                            "id": "<string>",
+                            "type": "webhook-topic"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "webhook"
+                  }
+                }
+                ```
         """
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
         request_body = {
             'data': data,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/webhooks/"
+        url = f"{self.base_url}/api/webhooks"
         query_params = {}
         response = self._post(url, data=request_body, params=query_params)
         response.raise_for_status()
@@ -5955,101 +8739,104 @@ class KlaviyoApp(APIApplication):
 
     def get_webhook(self, id, fields_webhook=None, include=None) -> dict[str, Any]:
         """
-        Fetches a webhook by ID with optional fields and includes.
-        
+Get Webhook
+
         Args:
-            id: The ID of the webhook to fetch (required).
-            fields_webhook: Optional fields to include in the webhook response.
-            include: Optional related objects or data to include in the response.
-        
+            id (string): id
+            fields_webhook (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#sparse-fieldsets Example: 'description,updated_at'.
+            include (string): For more information please visit https://developers.klaviyo.com/en/v2025-01-15/reference/api-overview#relationships Example: 'webhook-topics,webhook-topics'.
+
         Returns:
-            A dictionary containing the webhook details.
-        
-        Raises:
-            ValueError: Raised when the 'id' parameter is missing.
-        
-        Tags:
-            fetch, webhook, api
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/webhooks/{id}/"
+        url = f"{self.base_url}/api/webhooks/{id}"
         query_params = {k: v for k, v in [('fields[webhook]', fields_webhook), ('include', include)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def update_webhook(self, id, data) -> dict[str, Any]:
-        """
-        Updates an existing webhook configuration by sending a PATCH request to the specified endpoint.
-        
-        Args:
-            id: Unique identifier of the webhook to update
-            data: Dictionary containing the updated webhook configuration values
-        
-        Returns:
-            Dictionary containing the updated webhook configuration from the API response
-        
-        Raises:
-            ValueError: Raised when either 'id' or 'data' parameter is None
-            requests.HTTPError: Raised for unsuccessful HTTP responses (4XX/5XX status codes) from the API
-        
-        Tags:
-            webhook, update, patch-request, management
-        """
-        if id is None:
-            raise ValueError("Missing required parameter 'id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/api/webhooks/{id}/"
-        query_params = {}
-        response = self._patch(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
     def delete_webhook(self, id) -> Any:
         """
-        Deletes a webhook by its ID.
-        
+Delete Webhook
+
         Args:
-            id: The ID of the webhook to be deleted.
-        
+            id (string): id
+
         Returns:
-            The JSON response from the server after deleting the webhook.
-        
-        Raises:
-            ValueError: Raised when the required 'id' parameter is missing.
-            requests.HTTPError: Raised if the HTTP request returns an unsuccessful status code.
-        
-        Tags:
-            delete, webhook, api-call
+            Any: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/webhooks/{id}/"
+        url = f"{self.base_url}/api/webhooks/{id}"
         query_params = {}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
+    def update_webhook(self, id, data=None) -> dict[str, Any]:
+        """
+Update Webhook
+
+        Args:
+            id (string): id
+            data (object): data
+
+        Returns:
+            dict[str, Any]: Success
+
+        Request Body Example:
+                ```json
+                {
+                  "data": {
+                    "attributes": {
+                      "description": "<string>",
+                      "enabled": "<boolean>",
+                      "endpoint_url": "<string>",
+                      "name": "<string>",
+                      "secret_key": "<string>"
+                    },
+                    "id": "<string>",
+                    "relationships": {
+                      "webhook-topics": {
+                        "data": [
+                          {
+                            "id": "<string>",
+                            "type": "webhook-topic"
+                          },
+                          {
+                            "id": "<string>",
+                            "type": "webhook-topic"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "webhook"
+                  }
+                }
+                ```
+        """
+        if id is None:
+            raise ValueError("Missing required parameter 'id'")
+        request_body = {
+            'data': data,
+        }
+        request_body = {k: v for k, v in request_body.items() if v is not None}
+        url = f"{self.base_url}/api/webhooks/{id}"
+        query_params = {}
+        response = self._patch(url, data=request_body, params=query_params)
+        response.raise_for_status()
+        return response.json()
+
     def get_webhook_topics(self) -> dict[str, Any]:
         """
-        Retrieve a dictionary of available webhook topics and their associated data from the API endpoint.
-        
+Get Webhook Topics
+
         Returns:
-            A dictionary containing webhook topics and their metadata as returned by the API.
-        
-        Raises:
-            requests.exceptions.HTTPError: Raised when the API request fails due to HTTP errors (4xx/5xx status codes).
-        
-        Tags:
-            webhook, retrieve, api, topics, management
+            dict[str, Any]: Success
         """
-        url = f"{self.base_url}/api/webhook-topics/"
+        url = f"{self.base_url}/api/webhook-topics"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
@@ -6057,477 +8844,289 @@ class KlaviyoApp(APIApplication):
 
     def get_webhook_topic(self, id) -> dict[str, Any]:
         """
-        Retrieves details of a specific webhook topic by ID.
-        
+Get Webhook Topic
+
         Args:
-            id: The unique identifier of the webhook topic to retrieve (required).
-        
+            id (string): id
+
         Returns:
-            A dictionary containing the webhook topic's details, parsed from the JSON response.
-        
-        Raises:
-            ValueError: Raised when the required parameter 'id' is not provided.
-            requests.HTTPError: Raised for HTTP 4XX/5XX errors from the API request.
-        
-        Tags:
-            retrieve, webhook, api
+            dict[str, Any]: Success
         """
         if id is None:
             raise ValueError("Missing required parameter 'id'")
-        url = f"{self.base_url}/api/webhook-topics/{id}/"
+        url = f"{self.base_url}/api/webhook-topics/{id}"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def create_client_subscription(self, company_id, data) -> Any:
-        """
-        Creates a client subscription by sending a POST request with provided data and company ID.
-        
-        Args:
-            company_id: The ID of the company for which the subscription is being created.
-            data: The data required for creating the client subscription.
-        
-        Returns:
-            The JSON response from the server after creating the subscription.
-        
-        Raises:
-            ValueError: Raised when either 'company_id' or 'data' is missing.
-        
-        Tags:
-            create, subscription, client-management
-        """
-        if company_id is None:
-            raise ValueError("Missing required parameter 'company_id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/client/subscriptions/"
-        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def create_client_push_token(self, company_id, data) -> Any:
-        """
-        Creates a client push token by sending a POST request with the provided company ID and data.
-        
-        Args:
-            company_id: The ID of the company for which the push token is being created.
-            data: The data payload to be included in the request.
-        
-        Returns:
-            The JSON response from the server containing the newly created push token.
-        
-        Raises:
-            ValueError: Raised when either 'company_id' or 'data' is missing.
-        
-        Tags:
-            create, client, push-token
-        """
-        if company_id is None:
-            raise ValueError("Missing required parameter 'company_id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/client/push-tokens/"
-        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def unregister_client_push_token(self, company_id, data) -> Any:
-        """
-        Unregisters a client push token for a company by sending a POST request.
-        
-        Args:
-            company_id: Required identifier of the company.
-            data: Required data associated with the push token.
-        
-        Returns:
-            JSON response from the server after successful unregistration.
-        
-        Raises:
-            ValueError: Raised if the 'company_id' or 'data' parameter is missing.
-        
-        Tags:
-            unregister, push-token, management
-        """
-        if company_id is None:
-            raise ValueError("Missing required parameter 'company_id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/client/push-token-unregister/"
-        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def create_client_event(self, company_id, data) -> Any:
-        """
-        Creates a client event by sending a POST request with provided data and company ID.
-        
-        Args:
-            company_id: Unique identifier for the company associated with the event.
-            data: Event data payload to be sent in the request body.
-        
-        Returns:
-            Parsed JSON response from the API containing event details or operation results.
-        
-        Raises:
-            ValueError: Raised when 'company_id' or 'data' parameters are None.
-            requests.exceptions.HTTPError: Raised for non-2xx HTTP responses from the API.
-        
-        Tags:
-            client, event, post, api
-        """
-        if company_id is None:
-            raise ValueError("Missing required parameter 'company_id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/client/events/"
-        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def create_client_profile(self, company_id, data) -> Any:
-        """
-        Creates a client profile by sending a POST request with the provided data and company ID.
-        
-        Args:
-            company_id: The ID of the company for which the client profile is created.
-            data: Dictionary containing data for the client profile.
-        
-        Returns:
-            JSON response from the server after successfully creating the client profile.
-        
-        Raises:
-            ValueError: Raised if either 'company_id' or 'data' is None.
-        
-        Tags:
-            create, client, profile, management
-        """
-        if company_id is None:
-            raise ValueError("Missing required parameter 'company_id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/client/profiles/"
-        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def bulk_create_client_events(self, company_id, data) -> Any:
-        """
-        Bulk creates client events for a specified company by sending data to the API endpoint.
-        
-        Args:
-            company_id: The ID of the company for which events are being created.
-            data: The event data to be created, typically a list or dictionary of event details.
-        
-        Returns:
-            Parsed JSON response from the API containing the results of the bulk creation operation.
-        
-        Raises:
-            ValueError: Raised when either 'company_id' or 'data' is None.
-            HTTPError: Raised if the API request fails, typically due to invalid data or server errors.
-        
-        Tags:
-            client-events, bulk-create, api, async_job, management
-        """
-        if company_id is None:
-            raise ValueError("Missing required parameter 'company_id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/client/event-bulk-create/"
-        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
-    def create_client_back_in_stock_subscription(self, company_id, data) -> Any:
-        """
-        Creates a subscription for back-in-stock notifications by sending a POST request to the server.
-        
-        Args:
-            company_id: The ID of the company for which the subscription is being created.
-            data: The data required for creating the back-in-stock subscription.
-        
-        Returns:
-            A JSON object containing the response from the server.
-        
-        Raises:
-            ValueError: Raised if either 'company_id' or 'data' is missing.
-        
-        Tags:
-            subscription, back-in-stock, client
-        """
-        if company_id is None:
-            raise ValueError("Missing required parameter 'company_id'")
-        if data is None:
-            raise ValueError("Missing required parameter 'data'")
-        request_body = {
-            'data': data,
-        }
-        request_body = {k: v for k, v in request_body.items() if v is not None}
-        url = f"{self.base_url}/client/back-in-stock-subscriptions/"
-        query_params = {k: v for k, v in [('company_id', company_id)] if v is not None}
-        response = self._post(url, data=request_body, params=query_params)
-        response.raise_for_status()
-        return response.json()
-
     def list_tools(self):
         return [
+            self.create_client_review,
             self.get_accounts,
             self.get_account,
             self.get_campaigns,
             self.create_campaign,
             self.get_campaign,
-            self.update_campaign,
             self.delete_campaign,
-            self.get_campaign_message,
-            self.update_campaign_message,
-            self.get_campaign_send_job,
-            self.update_campaign_send_job,
-            self.get_campaign_recipient_estimation_job,
+            self.update_campaign,
             self.get_campaign_recipient_estimation,
             self.create_campaign_clone,
-            self.create_campaign_message_assign_template,
-            self.create_campaign_send_job,
-            self.create_campaign_recipient_estimation_job,
-            self.get_campaign_message_relationships_campaign,
-            self.get_campaign_message_campaign,
-            self.get_campaign_message_relationships_template,
-            self.get_campaign_message_template,
-            self.get_campaign_relationships_tags,
-            self.get_campaign_tags,
-            self.get_campaign_relationships_campaign_messages,
-            self.get_campaign_campaign_messages,
+            self.get_tags_for_campaign,
+            self.get_tag_ids_for_campaign,
+            self.get_messages_for_campaign,
+            self.get_message_ids_for_campaign,
+            self.get_campaign_message,
+            self.update_campaign_message,
+            self.assign_template_to_campaign_message,
+            self.get_campaign_for_campaign_message,
+            self.get_campaign_id_for_campaign_message,
+            self.get_template_for_campaign_message,
+            self.get_template_id_for_campaign_message,
+            self.get_image_for_campaign_message,
+            self.get_image_id_for_campaign_message,
+            self.update_image_for_campaign_message,
+            self.get_campaign_send_job,
+            self.cancel_campaign_send,
+            self.get_campaign_recipient_estimation_job,
+            self.send_campaign,
+            self.refresh_campaign_recipient_estimation,
             self.get_catalog_items,
             self.create_catalog_item,
             self.get_catalog_item,
-            self.update_catalog_item,
             self.delete_catalog_item,
+            self.update_catalog_item,
+            self.get_bulk_create_catalog_items_jobs,
+            self.bulk_create_catalog_items,
+            self.get_bulk_create_catalog_items_job,
+            self.get_bulk_update_catalog_items_jobs,
+            self.bulk_update_catalog_items,
+            self.get_bulk_update_catalog_items_job,
+            self.get_bulk_delete_catalog_items_jobs,
+            self.bulk_delete_catalog_items,
+            self.get_bulk_delete_catalog_items_job,
+            self.get_items_for_catalog_category,
+            self.get_category_ids_for_catalog_item,
+            self.add_categories_to_catalog_item,
+            self.remove_categories_from_catalog_item,
+            self.update_categories_for_catalog_item,
             self.get_catalog_variants,
             self.create_catalog_variant,
             self.get_catalog_variant,
-            self.update_catalog_variant,
             self.delete_catalog_variant,
+            self.update_catalog_variant,
+            self.get_create_variants_jobs,
+            self.bulk_create_catalog_variants,
+            self.get_create_variants_job,
+            self.get_update_variants_jobs,
+            self.bulk_update_catalog_variants,
+            self.get_update_variants_job,
+            self.get_delete_variants_jobs,
+            self.bulk_delete_catalog_variants,
+            self.get_delete_variants_job,
+            self.get_variants_for_catalog_item,
+            self.get_variant_ids_for_catalog_item,
             self.get_catalog_categories,
             self.create_catalog_category,
             self.get_catalog_category,
-            self.update_catalog_category,
             self.delete_catalog_category,
-            self.get_create_items_jobs,
-            self.spawn_create_items_job,
-            self.get_create_items_job,
-            self.get_update_items_jobs,
-            self.spawn_update_items_job,
-            self.get_update_items_job,
-            self.get_delete_items_jobs,
-            self.spawn_delete_items_job,
-            self.get_delete_items_job,
-            self.get_create_variants_jobs,
-            self.spawn_create_variants_job,
-            self.get_create_variants_job,
-            self.get_update_variants_jobs,
-            self.spawn_update_variants_job,
-            self.get_update_variants_job,
-            self.get_delete_variants_jobs,
-            self.spawn_delete_variants_job,
-            self.get_delete_variants_job,
+            self.update_catalog_category,
             self.get_create_categories_jobs,
-            self.spawn_create_categories_job,
+            self.bulk_create_catalog_categories,
             self.get_create_categories_job,
             self.get_update_categories_jobs,
-            self.spawn_update_categories_job,
+            self.bulk_update_catalog_categories,
             self.get_update_categories_job,
             self.get_delete_categories_jobs,
-            self.spawn_delete_categories_job,
+            self.bulk_delete_catalog_categories,
             self.get_delete_categories_job,
+            self.get_item_ids_for_catalog_category,
+            self.add_items_to_catalog_category,
+            self.remove_items_from_catalog_category,
+            self.update_items_for_catalog_category,
+            self.get_categories_for_catalog_item,
             self.create_back_in_stock_subscription,
-            self.get_catalog_category_items,
-            self.get_catalog_item_variants,
-            self.get_catalog_item_categories,
-            self.get_catalog_category_relationships_items,
-            self.create_catalog_category_relationships_items,
-            self.update_catalog_category_relationships_items,
-            self.delete_catalog_category_relationships_items,
-            self.get_catalog_item_relationships_categories,
-            self.create_catalog_item_relationships_categories,
-            self.update_catalog_item_relationships_categories,
-            self.delete_catalog_item_relationships_categories,
+            self.create_client_subscription,
+            self.create_or_update_client_push_token,
+            self.unregister_client_push_token,
+            self.create_client_event,
+            self.create_or_update_client_profile,
+            self.bulk_create_client_events,
+            self.create_client_back_in_stock_subscription,
             self.get_coupons,
             self.create_coupon,
             self.get_coupon,
-            self.update_coupon,
             self.delete_coupon,
+            self.update_coupon,
             self.get_coupon_codes,
             self.create_coupon_code,
             self.get_coupon_code,
-            self.update_coupon_code,
             self.delete_coupon_code,
-            self.get_coupon_code_bulk_create_jobs,
-            self.spawn_coupon_code_bulk_create_job,
-            self.get_coupon_code_bulk_create_job,
+            self.update_coupon_code,
+            self.get_bulk_create_coupon_code_jobs,
+            self.bulk_create_coupon_codes,
+            self.get_bulk_create_coupon_codes_job,
             self.get_coupon_for_coupon_code,
-            self.get_coupon_relationships_coupon_codes,
+            self.get_coupon_id_for_coupon_code,
             self.get_coupon_codes_for_coupon,
-            self.get_coupon_code_relationships_coupon,
+            self.get_coupon_code_ids_for_coupon,
             self.request_profile_deletion,
             self.get_events,
             self.create_event,
             self.get_event,
             self.bulk_create_events,
-            self.get_event_metric,
-            self.get_event_profile,
-            self.get_event_relationships_metric,
-            self.get_event_relationships_profile,
+            self.get_metric_for_event,
+            self.get_metric_id_for_event,
+            self.get_profile_for_event,
+            self.get_profile_id_for_event,
             self.get_flows,
+            self.create_flow,
             self.get_flow,
-            self.update_flow,
             self.delete_flow,
+            self.update_flow_status,
             self.get_flow_action,
             self.get_flow_message,
-            self.get_flow_flow_actions,
-            self.get_flow_relationships_flow_actions,
-            self.get_flow_relationships_tags,
-            self.get_flow_tags,
-            self.get_flow_action_flow,
-            self.get_flow_action_relationships_flow,
-            self.get_flow_action_messages,
-            self.get_flow_action_relationships_messages,
-            self.get_flow_message_action,
-            self.get_flow_message_relationships_action,
-            self.get_flow_message_relationships_template,
-            self.get_flow_message_template,
+            self.get_actions_for_flow,
+            self.get_action_ids_for_flow,
+            self.get_tags_for_flow,
+            self.get_tag_ids_for_flow,
+            self.get_flow_for_flow_action,
+            self.get_flow_id_for_flow_action,
+            self.get_messages_for_flow_action,
+            self.get_message_ids_for_flow_action,
+            self.get_action_for_flow_message,
+            self.get_action_id_for_flow_message,
+            self.get_template_for_flow_message,
+            self.get_template_id_for_flow_message,
             self.get_forms,
             self.get_form,
             self.get_form_version,
             self.get_versions_for_form,
             self.get_version_ids_for_form,
-            self.get_form_id_for_form_version,
             self.get_form_for_form_version,
+            self.get_form_id_for_form_version,
             self.get_images,
+            self.upload_image_from_url,
             self.get_image,
             self.update_image,
+            self.upload_image_from_file,
             self.get_lists,
             self.create_list,
             self.get_list,
-            self.update_list,
             self.delete_list,
-            self.get_list_relationships_tags,
-            self.get_list_tags,
-            self.get_list_relationships_profiles,
-            self.create_list_relationships,
-            self.delete_list_relationships,
-            self.get_list_profiles,
+            self.update_list,
+            self.get_tags_for_list,
+            self.get_tag_ids_for_list,
+            self.get_profiles_for_list,
+            self.get_profile_ids_for_list,
+            self.add_profiles_to_list,
+            self.remove_profiles_from_list,
+            self.get_flows_triggered_by_list,
+            self.get_ids_for_flows_triggered_by_list,
             self.get_metrics,
             self.get_metric,
+            self.get_metric_property,
             self.query_metric_aggregates,
+            self.get_flows_triggered_by_metric,
+            self.get_ids_for_flows_triggered_by_metric,
+            self.get_properties_for_metric,
+            self.get_property_ids_for_metric,
+            self.get_metric_for_metric_property,
+            self.get_metric_id_for_metric_property,
             self.get_profiles,
             self.create_profile,
             self.get_profile,
             self.update_profile,
-            self.get_bulk_profile_import_jobs,
-            self.spawn_bulk_profile_import_job,
-            self.get_bulk_profile_import_job,
+            self.get_bulk_suppress_profiles_jobs,
+            self.bulk_suppress_profiles,
+            self.get_bulk_suppress_profiles_job,
+            self.get_bulk_unsuppress_profiles_jobs,
+            self.bulk_unsuppress_profiles,
+            self.get_bulk_unsuppress_profiles_job,
             self.create_or_update_profile,
             self.merge_profiles,
-            self.suppress_profiles,
-            self.unsuppress_profiles,
-            self.subscribe_profiles,
-            self.unsubscribe_profiles,
-            self.create_push_token,
-            self.get_profile_lists,
-            self.get_profile_relationships_lists,
-            self.get_profile_segments,
-            self.get_profile_relationships_segments,
-            self.get_bulk_profile_import_job_lists,
-            self.get_bulk_profile_import_job_relationships_lists,
-            self.get_bulk_profile_import_job_profiles,
-            self.get_bulk_profile_import_job_relationships_profiles,
-            self.get_bulk_profile_import_job_import_errors,
+            self.create_or_update_push_token,
+            self.get_lists_for_profile,
+            self.get_list_ids_for_profile,
+            self.get_segments_for_profile,
+            self.get_segment_ids_for_profile,
+            self.get_bulk_import_profiles_jobs,
+            self.bulk_import_profiles,
+            self.get_bulk_import_profiles_job,
+            self.get_list_for_bulk_import_profiles_job,
+            self.get_list_ids_for_bulk_import_profiles_job,
+            self.get_profiles_for_bulk_import_profiles_job,
+            self.get_profile_ids_for_bulk_import_profiles_job,
+            self.get_errors_for_bulk_import_profiles_job,
+            self.bulk_subscribe_profiles,
+            self.bulk_unsubscribe_profiles,
             self.query_campaign_values,
             self.query_flow_values,
             self.query_flow_series,
+            self.query_form_values,
+            self.query_form_series,
+            self.query_segment_values,
+            self.query_segment_series,
+            self.get_reviews,
+            self.get_review,
+            self.update_review,
             self.get_segments,
             self.create_segment,
             self.get_segment,
-            self.update_segment,
             self.delete_segment,
-            self.get_segment_relationships_tags,
-            self.get_segment_tags,
-            self.get_segment_relationships_profiles,
-            self.get_segment_profiles,
+            self.update_segment,
+            self.get_tags_for_segment,
+            self.get_tag_ids_for_segment,
+            self.get_profiles_for_segment,
+            self.get_profile_ids_for_segment,
+            self.get_flows_triggered_by_segment,
+            self.get_ids_for_flows_triggered_by_segment,
             self.get_tags,
             self.create_tag,
             self.get_tag,
-            self.update_tag,
             self.delete_tag,
+            self.update_tag,
+            self.get_flow_ids_for_tag,
+            self.tag_flows,
+            self.remove_tag_from_flows,
+            self.get_campaign_ids_for_tag,
+            self.tag_campaigns,
+            self.remove_tag_from_campaigns,
+            self.get_list_ids_for_tag,
+            self.tag_lists,
+            self.remove_tag_from_lists,
+            self.get_segment_ids_for_tag,
+            self.tag_segments,
+            self.remove_tag_from_segments,
+            self.get_tag_group_for_tag,
+            self.get_tag_group_id_for_tag,
             self.get_tag_groups,
             self.create_tag_group,
             self.get_tag_group,
-            self.update_tag_group,
             self.delete_tag_group,
-            self.get_tag_relationships_flows,
-            self.create_tag_relationships_flows,
-            self.delete_tag_relationships_flows,
-            self.get_tag_relationships_campaigns,
-            self.create_tag_relationships_campaigns,
-            self.delete_tag_relationships_campaigns,
-            self.get_tag_relationships_lists,
-            self.create_tag_relationships_lists,
-            self.delete_tag_relationships_lists,
-            self.get_tag_relationships_segments,
-            self.create_tag_relationships_segments,
-            self.delete_tag_relationships_segments,
-            self.get_tag_relationships_tag_group,
-            self.get_tag_group_relationships_tags,
-            self.get_tag_tag_group,
-            self.get_tag_group_tags,
+            self.update_tag_group,
+            self.get_tags_for_tag_group,
+            self.get_tag_ids_for_tag_group,
             self.get_templates,
             self.create_template,
             self.get_template,
-            self.update_template,
             self.delete_template,
-            self.create_template_render,
-            self.create_template_clone,
+            self.update_template,
+            self.render_template,
+            self.clone_template,
+            self.get_all_universal_content,
+            self.create_universal_content,
+            self.get_universal_content,
+            self.delete_universal_content,
+            self.update_universal_content,
+            self.get_tracking_settings,
+            self.get_tracking_setting,
+            self.update_tracking_setting,
             self.get_webhooks,
             self.create_webhook,
             self.get_webhook,
-            self.update_webhook,
             self.delete_webhook,
+            self.update_webhook,
             self.get_webhook_topics,
-            self.get_webhook_topic,
-            self.create_client_subscription,
-            self.create_client_push_token,
-            self.unregister_client_push_token,
-            self.create_client_event,
-            self.create_client_profile,
-            self.bulk_create_client_events,
-            self.create_client_back_in_stock_subscription
+            self.get_webhook_topic
         ]
