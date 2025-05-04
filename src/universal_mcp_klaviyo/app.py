@@ -4,7 +4,7 @@ from universal_mcp.integrations import Integration
 
 class KlaviyoApp(APIApplication):
     def __init__(self, integration: Integration = None, **kwargs) -> None:
-        super().__init__(name='klaviyoapp', integration=integration, **kwargs)
+        super().__init__(name='klaviyo', integration=integration, **kwargs)
         self.base_url = "https://a.klaviyo.com"
 
 
